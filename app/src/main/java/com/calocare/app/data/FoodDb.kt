@@ -1,0 +1,213 @@
+package com.calocare.app.data
+
+import com.calocare.app.data.Course.DESSERT
+import com.calocare.app.data.Course.DRINK
+import com.calocare.app.data.Course.FRUIT
+import com.calocare.app.data.Course.MAIN
+import com.calocare.app.data.Course.PROTEIN
+import com.calocare.app.data.Course.SNACK
+import com.calocare.app.data.Course.SOUP
+import com.calocare.app.data.Course.VEG
+
+/**
+ * Built-in foods. Values are per listed serving, rounded from common Vietnamese and USDA nutrition tables;
+ * they are estimates for everyday tracking, not lab measurements.
+ */
+object FoodDb {
+    private fun f(
+        id: String, name: String, emoji: String, serving: String, kcal: Int,
+        p: Double, c: Double, fat: Double, course: String, tags: String = "", region: String = Region.VN,
+    ) = Food(
+        id = id, name = name, emoji = emoji, serving = serving, kcal = kcal,
+        protein = p.toFloat(), carbs = c.toFloat(), fat = fat.toFloat(), course = course,
+        tags = tags.split(' ').filter { it.isNotBlank() }.toSet(), region = region,
+    )
+
+    private const val A = Region.ALL
+    private const val I = Region.INTL
+
+    val foods: List<Food> = listOf(
+        // --- fruit
+        f("chuoi", "Chuối", "🍌", "1 quả vừa", 105, 1.3, 27.0, 0.4, FRUIT, region = A),
+        f("tao", "Táo", "🍎", "1 quả", 95, 0.5, 25.0, 0.3, FRUIT, region = A),
+        f("cam", "Cam", "🍊", "1 quả", 62, 1.2, 15.0, 0.2, FRUIT, region = A),
+        f("xoai", "Xoài chín", "🥭", "1/2 quả (150g)", 99, 1.4, 25.0, 0.6, FRUIT, region = A),
+        f("dua_hau", "Dưa hấu", "🍉", "1 miếng (200g)", 60, 1.2, 15.0, 0.3, FRUIT, "high_gi", A),
+        f("nho", "Nho", "🍇", "1 chén (150g)", 104, 1.1, 27.0, 0.2, FRUIT, "high_sugar", A),
+        f("thanh_long", "Thanh long", "🍈", "1/2 quả (200g)", 120, 2.4, 26.0, 0.8, FRUIT),
+        f("bo", "Bơ", "🥑", "1/2 quả", 160, 2.0, 8.5, 14.7, FRUIT, region = A),
+        f("dau_tay", "Dâu tây", "🍓", "1 chén", 49, 1.0, 12.0, 0.5, FRUIT, region = A),
+        f("dua", "Thơm (dứa)", "🍍", "1 chén", 82, 0.9, 22.0, 0.2, FRUIT, region = A),
+        f("oi", "Ổi", "🍐", "1 quả", 68, 2.6, 14.0, 1.0, FRUIT),
+
+        // --- rice, noodles, one-dish meals
+        f("com_trang", "Cơm trắng", "🍚", "1 chén (150g)", 200, 4.0, 44.0, 0.4, MAIN, "high_gi high_carb", A),
+        f("com_gao_lut", "Cơm gạo lứt", "🍙", "1 chén (150g)", 165, 3.5, 35.0, 1.3, MAIN, "high_carb", A),
+        f("banh_mi", "Bánh mì không", "🥖", "1 ổ", 240, 8.0, 48.0, 2.0, MAIN, "gluten high_gi high_carb"),
+        f("banh_mi_thit", "Bánh mì thịt", "🥪", "1 ổ", 450, 18.0, 52.0, 18.0, MAIN, "gluten pork meat high_sodium high_carb"),
+        f("banh_mi_trung", "Bánh mì ốp la", "🥙", "1 ổ", 380, 15.0, 49.0, 13.0, MAIN, "gluten egg animal high_carb"),
+        f("pho_bo", "Phở bò", "🍜", "1 tô", 450, 25.0, 60.0, 12.0, MAIN, "meat high_sodium high_carb"),
+        f("pho_ga", "Phở gà", "🍲", "1 tô", 400, 24.0, 58.0, 8.0, MAIN, "meat high_sodium high_carb"),
+        f("bun_bo_hue", "Bún bò Huế", "🍜", "1 tô", 520, 28.0, 62.0, 16.0, MAIN, "meat pork shellfish high_sodium high_carb"),
+        f("bun_cha", "Bún chả", "🥢", "1 suất", 550, 26.0, 65.0, 20.0, MAIN, "meat pork fish high_sodium high_carb"),
+        f("bun_rieu", "Bún riêu cua", "🦀", "1 tô", 480, 22.0, 58.0, 16.0, MAIN, "shellfish egg high_sodium high_carb high_purine"),
+        f("hu_tieu", "Hủ tiếu Nam Vang", "🍜", "1 tô", 470, 24.0, 60.0, 14.0, MAIN, "meat pork shellfish high_sodium high_carb"),
+        f("mi_quang", "Mì Quảng", "🍝", "1 tô", 540, 26.0, 64.0, 18.0, MAIN, "meat pork shellfish peanut high_carb"),
+        f("com_tam", "Cơm tấm sườn bì chả", "🍛", "1 dĩa", 650, 30.0, 78.0, 24.0, MAIN, "meat pork egg fish high_sodium high_carb high_gi"),
+        f("com_ga", "Cơm gà", "🍗", "1 dĩa", 600, 32.0, 72.0, 18.0, MAIN, "meat high_carb"),
+        f("xoi_man", "Xôi mặn", "🍘", "1 gói", 500, 15.0, 72.0, 16.0, MAIN, "meat pork high_carb high_gi high_sodium"),
+        f("chao_ga", "Cháo gà", "🥣", "1 tô", 250, 14.0, 36.0, 5.0, MAIN, "meat high_gi"),
+        f("mi_goi", "Mì gói", "🍜", "1 gói", 350, 7.0, 50.0, 14.0, MAIN, "gluten high_sodium fried high_satfat high_carb", A),
+        f("banh_cuon", "Bánh cuốn", "🫔", "1 dĩa", 400, 14.0, 60.0, 11.0, MAIN, "meat pork fish high_carb"),
+        f("goi_cuon", "Gỏi cuốn", "🌯", "2 cuốn", 180, 10.0, 26.0, 4.0, SOUP, "shellfish meat pork peanut"),
+        f("cha_gio", "Chả giò", "🥟", "3 cuốn", 300, 9.0, 24.0, 19.0, SOUP, "fried meat pork shellfish high_satfat"),
+        f("banh_xeo", "Bánh xèo", "🥞", "1 cái", 350, 12.0, 30.0, 20.0, MAIN, "fried shellfish meat pork"),
+        f("banh_chung", "Bánh chưng", "🍱", "1/4 cái", 380, 11.0, 55.0, 13.0, MAIN, "pork meat high_carb"),
+        f("khoai_lang", "Khoai lang luộc", "🍠", "1 củ (150g)", 130, 2.4, 30.0, 0.2, MAIN, "", A),
+        f("bap", "Bắp luộc", "🌽", "1 trái", 130, 4.5, 28.0, 1.8, MAIN, "", A),
+        f("yen_mach", "Yến mạch nấu sữa", "🥣", "1 chén", 220, 9.0, 34.0, 6.0, MAIN, "gluten milk animal", A),
+
+        // --- protein dishes
+        f("trung_luoc", "Trứng luộc", "🥚", "1 quả", 78, 6.3, 0.6, 5.3, PROTEIN, "egg animal", A),
+        f("trung_chien", "Trứng chiên", "🍳", "1 quả", 110, 6.5, 0.6, 9.0, PROTEIN, "egg animal fried", A),
+        f("uc_ga", "Ức gà áp chảo", "🍗", "100g", 165, 31.0, 0.0, 3.6, PROTEIN, "meat", A),
+        f("ga_luoc", "Gà luộc", "🐔", "100g", 200, 25.0, 0.0, 11.0, PROTEIN, "meat"),
+        f("thit_kho", "Thịt kho trứng", "🥘", "1 phần", 320, 20.0, 8.0, 23.0, PROTEIN, "pork meat egg fish high_sodium high_satfat"),
+        f("thit_luoc", "Thịt heo luộc", "🥓", "100g", 240, 27.0, 0.0, 14.0, PROTEIN, "pork meat"),
+        f("bo_xao", "Bò xào rau", "🥩", "1 phần", 260, 24.0, 8.0, 15.0, PROTEIN, "meat high_purine"),
+        f("ca_kho", "Cá kho tộ", "🐟", "1 phần", 220, 22.0, 6.0, 12.0, PROTEIN, "fish high_sodium"),
+        f("ca_hoi", "Cá hồi áp chảo", "🍣", "100g", 208, 20.0, 0.0, 13.0, PROTEIN, "fish", A),
+        f("ca_hap", "Cá hấp", "🐠", "150g", 180, 30.0, 2.0, 5.0, PROTEIN, "fish", A),
+        f("tom_luoc", "Tôm luộc", "🦐", "100g", 99, 24.0, 0.2, 0.3, PROTEIN, "shellfish high_purine", A),
+        f("muc_xao", "Mực xào", "🦑", "1 phần", 180, 20.0, 8.0, 7.0, PROTEIN, "shellfish high_purine"),
+        f("dau_hu", "Đậu hũ sốt cà", "🍢", "1 phần", 180, 12.0, 8.0, 11.0, PROTEIN, "soy"),
+        f("dau_hu_chien", "Đậu hũ chiên", "🧆", "1 miếng lớn", 150, 9.0, 4.0, 11.0, PROTEIN, "soy fried"),
+        f("long_heo", "Lòng heo luộc", "🍖", "100g", 180, 17.0, 1.0, 12.0, PROTEIN, "pork meat high_purine high_satfat"),
+
+        // --- vegetables and soups
+        f("rau_luoc", "Rau luộc", "🥦", "1 dĩa", 50, 3.0, 8.0, 0.5, VEG, "", A),
+        f("rau_muong_xao", "Rau muống xào tỏi", "🥬", "1 dĩa", 110, 3.0, 6.0, 8.0, VEG),
+        f("salad", "Salad dầu giấm", "🥗", "1 dĩa", 90, 2.0, 8.0, 6.0, VEG, "", A),
+        f("dua_leo", "Dưa leo", "🥒", "1 quả", 16, 0.7, 3.6, 0.1, VEG, "", A),
+        f("ca_chua", "Cà chua", "🍅", "1 quả", 22, 1.1, 4.8, 0.2, VEG, "", A),
+        f("canh_rau", "Canh rau củ", "🥣", "1 chén", 40, 2.0, 6.0, 1.0, SOUP),
+        f("canh_chua", "Canh chua cá", "🍲", "1 chén", 90, 8.0, 8.0, 3.0, SOUP, "fish"),
+        f("canh_bi", "Canh bí đỏ thịt bằm", "🎃", "1 chén", 80, 5.0, 9.0, 3.0, SOUP, "meat pork"),
+
+        // --- drinks
+        f("sua_tuoi", "Sữa tươi không đường", "🥛", "1 hộp 180ml", 115, 6.0, 8.5, 6.3, DRINK, "milk animal", A),
+        f("sua_co_duong", "Sữa hộp có đường", "🧃", "1 hộp 180ml", 140, 5.5, 16.0, 6.0, DRINK, "milk animal high_sugar", A),
+        f("sua_chua", "Sữa chua", "🍦", "1 hũ 100g", 100, 3.5, 15.0, 3.0, DESSERT, "milk animal", A),
+        f("sua_dau_nanh", "Sữa đậu nành", "🫘", "1 ly 250ml", 110, 7.0, 10.0, 4.5, DRINK, "soy", A),
+        f("ca_phe_sua", "Cà phê sữa đá", "☕", "1 ly", 130, 2.0, 22.0, 4.0, DRINK, "milk animal high_sugar"),
+        f("ca_phe_den", "Cà phê đen không đường", "☕", "1 ly", 5, 0.3, 0.5, 0.0, DRINK, "", A),
+        f("tra_sua", "Trà sữa trân châu", "🧋", "1 ly 500ml", 360, 3.0, 68.0, 9.0, DRINK, "milk animal high_sugar high_gi", A),
+        f("nuoc_ngot", "Nước ngọt có ga", "🥤", "1 lon 330ml", 140, 0.0, 39.0, 0.0, DRINK, "high_sugar high_gi", A),
+        f("nuoc_cam", "Nước cam ép", "🍹", "1 ly", 110, 1.7, 26.0, 0.5, DRINK, "high_sugar", A),
+        f("nuoc_mia", "Nước mía", "🎋", "1 ly", 180, 0.0, 45.0, 0.0, DRINK, "high_sugar high_gi"),
+        f("nuoc_dua", "Nước dừa tươi", "🥥", "1 trái", 60, 0.5, 14.0, 0.2, DRINK),
+        f("tra_xanh", "Trà không đường", "🍵", "1 ly", 2, 0.0, 0.4, 0.0, DRINK, "", A),
+        f("sinh_to_bo", "Sinh tố bơ", "🥤", "1 ly", 300, 4.0, 35.0, 17.0, DRINK, "milk animal high_sugar"),
+        f("bia", "Bia", "🍺", "1 lon 330ml", 140, 1.0, 11.0, 0.0, DRINK, "alcohol high_purine gluten", A),
+        f("whey", "Whey protein", "💪", "1 muỗng (30g)", 120, 24.0, 3.0, 1.5, DRINK, "milk animal", A),
+
+        // --- snacks and desserts
+        f("che", "Chè đậu", "🍧", "1 ly", 300, 6.0, 60.0, 4.0, DESSERT, "high_sugar"),
+        f("banh_flan", "Bánh flan", "🍮", "1 cái", 130, 4.0, 18.0, 4.5, DESSERT, "egg milk animal high_sugar", A),
+        f("kem", "Kem", "🍨", "1 cây", 140, 2.0, 17.0, 7.0, DESSERT, "milk animal high_sugar", A),
+        f("socola", "Sô-cô-la", "🍫", "1 thanh nhỏ (30g)", 160, 2.0, 17.0, 9.0, SNACK, "milk animal high_sugar high_satfat", A),
+        f("banh_quy", "Bánh quy", "🍪", "3 cái", 150, 2.0, 20.0, 7.0, SNACK, "gluten milk egg animal high_sugar", A),
+        f("dau_phong", "Đậu phộng rang", "🥜", "1 nắm (30g)", 170, 7.0, 5.0, 14.0, SNACK, "peanut", A),
+        f("hat_dieu", "Hạt điều", "🌰", "1 nắm (30g)", 165, 5.0, 9.0, 13.0, SNACK, "nuts", A),
+        f("hanh_nhan", "Hạnh nhân", "🌰", "1 nắm (30g)", 174, 6.0, 6.0, 15.0, SNACK, "nuts", A),
+        f("khoai_tay_chien", "Khoai tây chiên", "🍟", "1 phần vừa", 320, 4.0, 42.0, 15.0, SNACK, "fried high_sodium high_gi", A),
+
+        // --- more Vietnamese dishes
+        f("bun_thit_nuong", "Bún thịt nướng", "🥗", "1 tô", 520, 24.0, 68.0, 16.0, MAIN, "meat pork fish peanut high_carb"),
+        f("bun_dau", "Bún đậu mắm tôm", "🍱", "1 mẹt nhỏ", 650, 30.0, 70.0, 28.0, MAIN, "soy fried shellfish pork meat high_sodium high_carb"),
+        f("bun_mam", "Bún mắm", "🍲", "1 tô", 520, 28.0, 60.0, 16.0, MAIN, "fish shellfish pork meat high_sodium high_carb"),
+        f("bun_moc", "Bún mọc", "🍜", "1 tô", 430, 24.0, 55.0, 12.0, MAIN, "pork meat high_sodium high_carb"),
+        f("bun_ca", "Bún cá", "🐟", "1 tô", 420, 24.0, 56.0, 10.0, MAIN, "fish high_sodium high_carb"),
+        f("mien_ga", "Miến gà", "🍜", "1 tô", 380, 22.0, 52.0, 8.0, MAIN, "meat high_carb"),
+        f("banh_canh", "Bánh canh cua", "🦀", "1 tô", 420, 20.0, 58.0, 11.0, MAIN, "shellfish pork meat high_sodium high_carb high_gi"),
+        f("cao_lau", "Cao lầu", "🍝", "1 tô", 480, 24.0, 60.0, 15.0, MAIN, "gluten pork meat high_carb"),
+        f("bo_kho", "Bò kho bánh mì", "🥘", "1 tô + 1 ổ", 600, 32.0, 62.0, 22.0, MAIN, "meat gluten high_carb high_sodium"),
+        f("bo_ne", "Bò né", "🍳", "1 phần + bánh mì", 620, 32.0, 50.0, 32.0, MAIN, "meat egg animal gluten high_satfat fried"),
+        f("com_chien", "Cơm chiên dương châu", "🍛", "1 dĩa", 620, 18.0, 82.0, 22.0, MAIN, "egg animal pork meat shellfish fried high_carb high_gi"),
+        f("com_suon", "Cơm sườn nướng", "🍖", "1 dĩa", 580, 26.0, 75.0, 18.0, MAIN, "pork meat fish high_carb high_gi"),
+        f("com_rang_dua_bo", "Cơm rang dưa bò", "🍚", "1 dĩa", 650, 26.0, 84.0, 22.0, MAIN, "meat fried high_sodium high_carb high_gi"),
+        f("xoi_ga", "Xôi gà", "🍗", "1 hộp", 550, 22.0, 75.0, 17.0, MAIN, "meat high_carb high_gi"),
+        f("xoi_dau", "Xôi đậu xanh", "🍘", "1 gói", 380, 10.0, 70.0, 6.0, MAIN, "high_carb high_gi"),
+        f("chao_long", "Cháo lòng", "🥣", "1 tô", 380, 20.0, 42.0, 14.0, MAIN, "pork meat high_purine high_gi high_sodium"),
+        f("banh_bao", "Bánh bao nhân thịt", "🥟", "1 cái", 330, 12.0, 45.0, 11.0, MAIN, "gluten pork meat egg high_carb"),
+        f("banh_gio", "Bánh giò", "🫔", "1 cái", 290, 9.0, 34.0, 13.0, MAIN, "pork meat"),
+        f("banh_bot_loc", "Bánh bột lọc", "🥟", "5 cái", 250, 8.0, 42.0, 6.0, SNACK, "shellfish pork meat high_gi"),
+        f("banh_trang_tron", "Bánh tráng trộn", "🌶️", "1 bịch", 330, 8.0, 48.0, 12.0, SNACK, "egg animal peanut shellfish high_sodium"),
+        f("pha_lau", "Phá lấu", "🍲", "1 chén", 300, 18.0, 10.0, 21.0, SNACK, "pork meat high_purine high_satfat milk"),
+        f("nem_nuong", "Nem nướng cuốn", "🌯", "3 cuốn", 330, 18.0, 36.0, 12.0, MAIN, "pork meat peanut"),
+        f("lau_thai", "Lẩu Thái hải sản", "🍲", "1 phần ăn", 550, 38.0, 45.0, 22.0, MAIN, "shellfish fish high_sodium high_purine"),
+        f("ga_kho_gung", "Gà kho gừng", "🍗", "1 phần", 260, 24.0, 6.0, 15.0, PROTEIN, "meat fish high_sodium"),
+        f("ga_nuong", "Gà nướng", "🍗", "1 đùi", 280, 28.0, 3.0, 17.0, PROTEIN, "meat"),
+        f("suon_xao_chua_ngot", "Sườn xào chua ngọt", "🍖", "1 phần", 350, 20.0, 16.0, 23.0, PROTEIN, "pork meat high_satfat high_sugar"),
+        f("thit_bam_ca_chua", "Thịt băm sốt cà chua", "🥫", "1 phần", 240, 17.0, 8.0, 16.0, PROTEIN, "pork meat"),
+        f("cha_lua", "Chả lụa", "🍥", "2 lát dày (50g)", 115, 10.0, 1.0, 8.0, PROTEIN, "pork meat fish high_sodium"),
+        f("ca_chien", "Cá chiên", "🐟", "1 con vừa", 280, 26.0, 4.0, 18.0, PROTEIN, "fish fried"),
+        f("ca_thu_sot_ca", "Cá thu sốt cà", "🐟", "1 khứa", 250, 24.0, 6.0, 14.0, PROTEIN, "fish high_purine"),
+        f("tom_rim", "Tôm rim", "🦐", "1 phần", 190, 22.0, 8.0, 7.0, PROTEIN, "shellfish fish high_purine high_sodium"),
+        f("trung_vit_lon", "Trứng vịt lộn", "🥚", "1 quả", 180, 13.0, 4.0, 12.0, PROTEIN, "egg animal high_purine"),
+        f("dau_hu_non", "Đậu hũ non hấp", "🍮", "1 hộp", 110, 10.0, 4.0, 6.0, PROTEIN, "soy"),
+        f("rau_cai_xao", "Cải xào nấm", "🥬", "1 dĩa", 100, 4.0, 8.0, 6.0, VEG),
+        f("dau_que_xao", "Đậu que xào", "🫛", "1 dĩa", 110, 3.0, 10.0, 7.0, VEG),
+        f("goi_ga", "Gỏi gà bắp cải", "🥗", "1 dĩa", 220, 20.0, 12.0, 10.0, VEG, "meat peanut fish"),
+        f("goi_du_du", "Gỏi đu đủ", "🥗", "1 dĩa", 180, 8.0, 22.0, 7.0, VEG, "peanut shellfish fish"),
+        f("canh_kho_qua", "Canh khổ qua nhồi thịt", "🥒", "1 chén", 120, 9.0, 6.0, 6.0, SOUP, "pork meat"),
+        f("canh_cai_thit", "Canh cải thịt bằm", "🥣", "1 chén", 70, 5.0, 4.0, 4.0, SOUP, "pork meat"),
+        f("canh_rong_bien", "Canh rong biển đậu hũ", "🥣", "1 chén", 60, 5.0, 4.0, 3.0, SOUP, "soy"),
+        f("du_du", "Đu đủ chín", "🍑", "1 miếng (200g)", 86, 1.0, 22.0, 0.3, FRUIT),
+        f("buoi", "Bưởi", "🍊", "3 múi", 60, 1.2, 15.0, 0.2, FRUIT),
+        f("mit", "Mít", "🍈", "4 múi", 95, 1.7, 23.0, 0.6, FRUIT, "high_sugar"),
+        f("sau_rieng", "Sầu riêng", "🍈", "2 múi (100g)", 147, 1.5, 27.0, 5.3, FRUIT, "high_sugar"),
+        f("vai", "Vải / nhãn", "🍒", "10 quả", 66, 0.8, 17.0, 0.4, FRUIT, "high_sugar high_gi"),
+        f("che_thai", "Chè Thái", "🍧", "1 ly", 350, 4.0, 62.0, 10.0, DESSERT, "milk animal high_sugar high_gi"),
+        f("tau_hu_nuoc_duong", "Tàu hũ nước đường", "🍮", "1 chén", 180, 7.0, 30.0, 4.0, DESSERT, "soy high_sugar"),
+        f("banh_chuoi", "Bánh chuối nướng", "🍌", "1 miếng", 230, 3.0, 42.0, 6.0, DESSERT, "gluten milk animal high_sugar"),
+        f("banh_trung_thu", "Bánh trung thu thập cẩm", "🥮", "1/4 cái", 200, 4.0, 28.0, 8.0, DESSERT, "gluten egg animal nuts pork meat high_sugar"),
+        f("tra_dao", "Trà đào", "🍑", "1 ly", 150, 0.5, 38.0, 0.0, DRINK, "high_sugar"),
+        f("tra_tac", "Trà tắc", "🍋", "1 ly", 110, 0.2, 28.0, 0.0, DRINK, "high_sugar"),
+        f("bac_xiu", "Bạc xỉu", "☕", "1 ly", 180, 4.0, 28.0, 6.0, DRINK, "milk animal high_sugar"),
+        f("sinh_to_xoai", "Sinh tố xoài", "🥭", "1 ly", 220, 3.0, 45.0, 4.0, DRINK, "milk animal high_sugar"),
+        f("sua_dau_xanh", "Sữa đậu xanh", "🥛", "1 ly", 150, 6.0, 26.0, 2.5, DRINK, "high_sugar"),
+        f("ruou_de", "Rượu trắng", "🍶", "1 ly nhỏ (30ml)", 70, 0.0, 0.0, 0.0, DRINK, "alcohol"),
+        f("nuoc_tang_luc", "Nước tăng lực", "⚡", "1 lon 250ml", 115, 0.0, 28.0, 0.0, DRINK, "high_sugar high_gi", A),
+
+        // --- international
+        f("pizza", "Pizza", "🍕", "1 miếng", 285, 12.0, 36.0, 10.0, MAIN, "gluten milk animal meat pork high_sodium", I),
+        f("burger", "Hamburger bò", "🍔", "1 cái", 500, 25.0, 40.0, 26.0, MAIN, "gluten meat milk animal sesame high_sodium high_satfat", I),
+        f("ga_ran", "Gà rán", "🍗", "1 miếng", 290, 18.0, 11.0, 19.0, PROTEIN, "fried meat gluten high_satfat high_sodium", I),
+        f("sandwich", "Sandwich gà", "🥪", "1 cái", 350, 24.0, 36.0, 11.0, MAIN, "gluten meat", I),
+        f("mi_y", "Mì Ý sốt bò bằm", "🍝", "1 dĩa", 480, 22.0, 60.0, 16.0, MAIN, "gluten meat high_carb", I),
+        f("sushi", "Sushi", "🍣", "6 miếng", 280, 12.0, 48.0, 4.0, MAIN, "fish soy high_carb", I),
+        f("steak", "Bít tết", "🥩", "150g", 380, 38.0, 0.0, 25.0, PROTEIN, "meat high_purine high_satfat", I),
+        f("sua_chua_hy_lap", "Sữa chua Hy Lạp", "🥛", "1 hũ 150g", 130, 15.0, 6.0, 5.0, DESSERT, "milk animal", I),
+        f("banh_mi_nuong", "Bánh mì sandwich nướng", "🍞", "2 lát", 160, 6.0, 28.0, 2.0, MAIN, "gluten", I),
+        f("bo_dau_phong", "Bơ đậu phộng", "🥜", "1 muỗng canh", 95, 4.0, 3.0, 8.0, SNACK, "peanut", I),
+    )
+
+    val byId: Map<String, Food> = foods.associateBy { it.id }
+
+    /** Shown first on the quick-add grid. */
+    val quickIds = listOf(
+        "com_trang", "chuoi", "tao", "sua_tuoi", "trung_luoc", "pho_bo", "banh_mi_thit", "uc_ga",
+        "rau_luoc", "canh_rau", "ca_kho", "com_tam", "sua_chua", "ca_phe_sua", "cam", "khoai_lang",
+    )
+
+    data class Activity(val name: String, val emoji: String, val met: Float)
+
+    /** MET values from the Compendium of Physical Activities. kcal = MET × kg × hours. */
+    val activities = listOf(
+        Activity("Đi bộ", "🚶", 3.5f), Activity("Chạy bộ", "🏃", 9.8f), Activity("Đạp xe", "🚴", 7.5f),
+        Activity("Bơi lội", "🏊", 7f), Activity("Tập tạ", "🏋️", 5f), Activity("HIIT", "⚡", 9f),
+        Activity("Yoga", "🧘", 2.8f), Activity("Cầu lông", "🏸", 5.5f), Activity("Bóng đá", "⚽", 8f),
+        Activity("Nhảy dây", "🤸", 11f), Activity("Leo cầu thang", "🪜", 8f), Activity("Việc nhà", "🧹", 3f),
+    )
+}

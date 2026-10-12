@@ -1,0 +1,2597 @@
+[
+{
+"id": "chuoi",
+"name": "Chuối",
+"emoji": "🍌",
+"serving": "1 quả vừa",
+"kcal": 105,
+"protein": 1.3,
+"carbs": 27.0,
+"fat": 0.4,
+"course": "fruit",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "tao",
+"name": "Táo",
+"emoji": "🍎",
+"serving": "1 quả",
+"kcal": 95,
+"protein": 0.5,
+"carbs": 25.0,
+"fat": 0.3,
+"course": "fruit",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "cam",
+"name": "Cam",
+"emoji": "🍊",
+"serving": "1 quả",
+"kcal": 62,
+"protein": 1.2,
+"carbs": 15.0,
+"fat": 0.2,
+"course": "fruit",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "xoai",
+"name": "Xoài chín",
+"emoji": "🥭",
+"serving": "1/2 quả (150g)",
+"kcal": 99,
+"protein": 1.4,
+"carbs": 25.0,
+"fat": 0.6,
+"course": "fruit",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "dua_hau",
+"name": "Dưa hấu",
+"emoji": "🍉",
+"serving": "1 miếng (200g)",
+"kcal": 60,
+"protein": 1.2,
+"carbs": 15.0,
+"fat": 0.3,
+"course": "fruit",
+"tags": [
+"high_gi"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "nho",
+"name": "Nho",
+"emoji": "🍇",
+"serving": "1 chén (150g)",
+"kcal": 104,
+"protein": 1.1,
+"carbs": 27.0,
+"fat": 0.2,
+"course": "fruit",
+"tags": [
+"high_sugar"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "thanh_long",
+"name": "Thanh long",
+"emoji": "🍈",
+"serving": "1/2 quả (200g)",
+"kcal": 120,
+"protein": 2.4,
+"carbs": 26.0,
+"fat": 0.8,
+"course": "fruit",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bo",
+"name": "Bơ",
+"emoji": "🥑",
+"serving": "1/2 quả",
+"kcal": 160,
+"protein": 2.0,
+"carbs": 8.5,
+"fat": 14.7,
+"course": "fruit",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "dau_tay",
+"name": "Dâu tây",
+"emoji": "🍓",
+"serving": "1 chén",
+"kcal": 49,
+"protein": 1.0,
+"carbs": 12.0,
+"fat": 0.5,
+"course": "fruit",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "dua",
+"name": "Thơm (dứa)",
+"emoji": "🍍",
+"serving": "1 chén",
+"kcal": 82,
+"protein": 0.9,
+"carbs": 22.0,
+"fat": 0.2,
+"course": "fruit",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "oi",
+"name": "Ổi",
+"emoji": "🍐",
+"serving": "1 quả",
+"kcal": 68,
+"protein": 2.6,
+"carbs": 14.0,
+"fat": 1.0,
+"course": "fruit",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "com_trang",
+"name": "Cơm trắng",
+"emoji": "🍚",
+"serving": "1 chén (150g)",
+"kcal": 200,
+"protein": 4.0,
+"carbs": 44.0,
+"fat": 0.4,
+"course": "main",
+"tags": [
+"high_gi",
+"high_carb"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "com_gao_lut",
+"name": "Cơm gạo lứt",
+"emoji": "🍙",
+"serving": "1 chén (150g)",
+"kcal": 165,
+"protein": 3.5,
+"carbs": 35.0,
+"fat": 1.3,
+"course": "main",
+"tags": [
+"high_carb"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "banh_mi",
+"name": "Bánh mì không",
+"emoji": "🥖",
+"serving": "1 ổ",
+"kcal": 240,
+"protein": 8.0,
+"carbs": 48.0,
+"fat": 2.0,
+"course": "main",
+"tags": [
+"gluten",
+"high_gi",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_mi_thit",
+"name": "Bánh mì thịt",
+"emoji": "🥪",
+"serving": "1 ổ",
+"kcal": 450,
+"protein": 18.0,
+"carbs": 52.0,
+"fat": 18.0,
+"course": "main",
+"tags": [
+"gluten",
+"pork",
+"meat",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_mi_trung",
+"name": "Bánh mì ốp la",
+"emoji": "🥙",
+"serving": "1 ổ",
+"kcal": 380,
+"protein": 15.0,
+"carbs": 49.0,
+"fat": 13.0,
+"course": "main",
+"tags": [
+"gluten",
+"egg",
+"animal",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "pho_bo",
+"name": "Phở bò",
+"emoji": "🍜",
+"serving": "1 tô",
+"kcal": 450,
+"protein": 25.0,
+"carbs": 60.0,
+"fat": 12.0,
+"course": "main",
+"tags": [
+"meat",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "pho_ga",
+"name": "Phở gà",
+"emoji": "🍲",
+"serving": "1 tô",
+"kcal": 400,
+"protein": 24.0,
+"carbs": 58.0,
+"fat": 8.0,
+"course": "main",
+"tags": [
+"meat",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bun_bo_hue",
+"name": "Bún bò Huế",
+"emoji": "🍜",
+"serving": "1 tô",
+"kcal": 520,
+"protein": 28.0,
+"carbs": 62.0,
+"fat": 16.0,
+"course": "main",
+"tags": [
+"meat",
+"pork",
+"shellfish",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bun_cha",
+"name": "Bún chả",
+"emoji": "🥢",
+"serving": "1 suất",
+"kcal": 550,
+"protein": 26.0,
+"carbs": 65.0,
+"fat": 20.0,
+"course": "main",
+"tags": [
+"meat",
+"pork",
+"fish",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bun_rieu",
+"name": "Bún riêu cua",
+"emoji": "🦀",
+"serving": "1 tô",
+"kcal": 480,
+"protein": 22.0,
+"carbs": 58.0,
+"fat": 16.0,
+"course": "main",
+"tags": [
+"shellfish",
+"egg",
+"high_sodium",
+"high_carb",
+"high_purine"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "hu_tieu",
+"name": "Hủ tiếu Nam Vang",
+"emoji": "🍜",
+"serving": "1 tô",
+"kcal": 470,
+"protein": 24.0,
+"carbs": 60.0,
+"fat": 14.0,
+"course": "main",
+"tags": [
+"meat",
+"pork",
+"shellfish",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "mi_quang",
+"name": "Mì Quảng",
+"emoji": "🍝",
+"serving": "1 tô",
+"kcal": 540,
+"protein": 26.0,
+"carbs": 64.0,
+"fat": 18.0,
+"course": "main",
+"tags": [
+"meat",
+"pork",
+"shellfish",
+"peanut",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "com_tam",
+"name": "Cơm tấm sườn bì chả",
+"emoji": "🍛",
+"serving": "1 dĩa",
+"kcal": 650,
+"protein": 30.0,
+"carbs": 78.0,
+"fat": 24.0,
+"course": "main",
+"tags": [
+"meat",
+"pork",
+"egg",
+"fish",
+"high_sodium",
+"high_carb",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "com_ga",
+"name": "Cơm gà",
+"emoji": "🍗",
+"serving": "1 dĩa",
+"kcal": 600,
+"protein": 32.0,
+"carbs": 72.0,
+"fat": 18.0,
+"course": "main",
+"tags": [
+"meat",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "xoi_man",
+"name": "Xôi mặn",
+"emoji": "🍘",
+"serving": "1 gói",
+"kcal": 500,
+"protein": 15.0,
+"carbs": 72.0,
+"fat": 16.0,
+"course": "main",
+"tags": [
+"meat",
+"pork",
+"high_carb",
+"high_gi",
+"high_sodium"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "chao_ga",
+"name": "Cháo gà",
+"emoji": "🥣",
+"serving": "1 tô",
+"kcal": 250,
+"protein": 14.0,
+"carbs": 36.0,
+"fat": 5.0,
+"course": "main",
+"tags": [
+"meat",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "mi_goi",
+"name": "Mì gói",
+"emoji": "🍜",
+"serving": "1 gói",
+"kcal": 350,
+"protein": 7.0,
+"carbs": 50.0,
+"fat": 14.0,
+"course": "main",
+"tags": [
+"gluten",
+"high_sodium",
+"fried",
+"high_satfat",
+"high_carb"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "banh_cuon",
+"name": "Bánh cuốn",
+"emoji": "🫔",
+"serving": "1 dĩa",
+"kcal": 400,
+"protein": 14.0,
+"carbs": 60.0,
+"fat": 11.0,
+"course": "main",
+"tags": [
+"meat",
+"pork",
+"fish",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "goi_cuon",
+"name": "Gỏi cuốn",
+"emoji": "🌯",
+"serving": "2 cuốn",
+"kcal": 180,
+"protein": 10.0,
+"carbs": 26.0,
+"fat": 4.0,
+"course": "soup",
+"tags": [
+"shellfish",
+"meat",
+"pork",
+"peanut"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "cha_gio",
+"name": "Chả giò",
+"emoji": "🥟",
+"serving": "3 cuốn",
+"kcal": 300,
+"protein": 9.0,
+"carbs": 24.0,
+"fat": 19.0,
+"course": "soup",
+"tags": [
+"fried",
+"meat",
+"pork",
+"shellfish",
+"high_satfat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_xeo",
+"name": "Bánh xèo",
+"emoji": "🥞",
+"serving": "1 cái",
+"kcal": 350,
+"protein": 12.0,
+"carbs": 30.0,
+"fat": 20.0,
+"course": "main",
+"tags": [
+"fried",
+"shellfish",
+"meat",
+"pork"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_chung",
+"name": "Bánh chưng",
+"emoji": "🍱",
+"serving": "1/4 cái",
+"kcal": 380,
+"protein": 11.0,
+"carbs": 55.0,
+"fat": 13.0,
+"course": "main",
+"tags": [
+"pork",
+"meat",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "khoai_lang",
+"name": "Khoai lang luộc",
+"emoji": "🍠",
+"serving": "1 củ (150g)",
+"kcal": 130,
+"protein": 2.4,
+"carbs": 30.0,
+"fat": 0.2,
+"course": "main",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "bap",
+"name": "Bắp luộc",
+"emoji": "🌽",
+"serving": "1 trái",
+"kcal": 130,
+"protein": 4.5,
+"carbs": 28.0,
+"fat": 1.8,
+"course": "main",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "yen_mach",
+"name": "Yến mạch nấu sữa",
+"emoji": "🥣",
+"serving": "1 chén",
+"kcal": 220,
+"protein": 9.0,
+"carbs": 34.0,
+"fat": 6.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"animal"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "trung_luoc",
+"name": "Trứng luộc",
+"emoji": "🥚",
+"serving": "1 quả",
+"kcal": 78,
+"protein": 6.3,
+"carbs": 0.6,
+"fat": 5.3,
+"course": "protein",
+"tags": [
+"egg",
+"animal"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "trung_chien",
+"name": "Trứng chiên",
+"emoji": "🍳",
+"serving": "1 quả",
+"kcal": 110,
+"protein": 6.5,
+"carbs": 0.6,
+"fat": 9.0,
+"course": "protein",
+"tags": [
+"egg",
+"animal",
+"fried"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "uc_ga",
+"name": "Ức gà áp chảo",
+"emoji": "🍗",
+"serving": "100g",
+"kcal": 165,
+"protein": 31.0,
+"carbs": 0.0,
+"fat": 3.6,
+"course": "protein",
+"tags": [
+"meat"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "ga_luoc",
+"name": "Gà luộc",
+"emoji": "🐔",
+"serving": "100g",
+"kcal": 200,
+"protein": 25.0,
+"carbs": 0.0,
+"fat": 11.0,
+"course": "protein",
+"tags": [
+"meat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "thit_kho",
+"name": "Thịt kho trứng",
+"emoji": "🥘",
+"serving": "1 phần",
+"kcal": 320,
+"protein": 20.0,
+"carbs": 8.0,
+"fat": 23.0,
+"course": "protein",
+"tags": [
+"pork",
+"meat",
+"egg",
+"fish",
+"high_sodium",
+"high_satfat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "thit_luoc",
+"name": "Thịt heo luộc",
+"emoji": "🥓",
+"serving": "100g",
+"kcal": 240,
+"protein": 27.0,
+"carbs": 0.0,
+"fat": 14.0,
+"course": "protein",
+"tags": [
+"pork",
+"meat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bo_xao",
+"name": "Bò xào rau",
+"emoji": "🥩",
+"serving": "1 phần",
+"kcal": 260,
+"protein": 24.0,
+"carbs": 8.0,
+"fat": 15.0,
+"course": "protein",
+"tags": [
+"meat",
+"high_purine"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "ca_kho",
+"name": "Cá kho tộ",
+"emoji": "🐟",
+"serving": "1 phần",
+"kcal": 220,
+"protein": 22.0,
+"carbs": 6.0,
+"fat": 12.0,
+"course": "protein",
+"tags": [
+"fish",
+"high_sodium"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "ca_hoi",
+"name": "Cá hồi áp chảo",
+"emoji": "🍣",
+"serving": "100g",
+"kcal": 208,
+"protein": 20.0,
+"carbs": 0.0,
+"fat": 13.0,
+"course": "protein",
+"tags": [
+"fish"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "ca_hap",
+"name": "Cá hấp",
+"emoji": "🐠",
+"serving": "150g",
+"kcal": 180,
+"protein": 30.0,
+"carbs": 2.0,
+"fat": 5.0,
+"course": "protein",
+"tags": [
+"fish"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "tom_luoc",
+"name": "Tôm luộc",
+"emoji": "🦐",
+"serving": "100g",
+"kcal": 99,
+"protein": 24.0,
+"carbs": 0.2,
+"fat": 0.3,
+"course": "protein",
+"tags": [
+"shellfish",
+"high_purine"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "muc_xao",
+"name": "Mực xào",
+"emoji": "🦑",
+"serving": "1 phần",
+"kcal": 180,
+"protein": 20.0,
+"carbs": 8.0,
+"fat": 7.0,
+"course": "protein",
+"tags": [
+"shellfish",
+"high_purine"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "dau_hu",
+"name": "Đậu hũ sốt cà",
+"emoji": "🍢",
+"serving": "1 phần",
+"kcal": 180,
+"protein": 12.0,
+"carbs": 8.0,
+"fat": 11.0,
+"course": "protein",
+"tags": [
+"soy"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "dau_hu_chien",
+"name": "Đậu hũ chiên",
+"emoji": "🧆",
+"serving": "1 miếng lớn",
+"kcal": 150,
+"protein": 9.0,
+"carbs": 4.0,
+"fat": 11.0,
+"course": "protein",
+"tags": [
+"soy",
+"fried"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "long_heo",
+"name": "Lòng heo luộc",
+"emoji": "🍖",
+"serving": "100g",
+"kcal": 180,
+"protein": 17.0,
+"carbs": 1.0,
+"fat": 12.0,
+"course": "protein",
+"tags": [
+"pork",
+"meat",
+"high_purine",
+"high_satfat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "rau_luoc",
+"name": "Rau luộc",
+"emoji": "🥦",
+"serving": "1 dĩa",
+"kcal": 50,
+"protein": 3.0,
+"carbs": 8.0,
+"fat": 0.5,
+"course": "veg",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "rau_muong_xao",
+"name": "Rau muống xào tỏi",
+"emoji": "🥬",
+"serving": "1 dĩa",
+"kcal": 110,
+"protein": 3.0,
+"carbs": 6.0,
+"fat": 8.0,
+"course": "veg",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "salad",
+"name": "Salad dầu giấm",
+"emoji": "🥗",
+"serving": "1 dĩa",
+"kcal": 90,
+"protein": 2.0,
+"carbs": 8.0,
+"fat": 6.0,
+"course": "veg",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "dua_leo",
+"name": "Dưa leo",
+"emoji": "🥒",
+"serving": "1 quả",
+"kcal": 16,
+"protein": 0.7,
+"carbs": 3.6,
+"fat": 0.1,
+"course": "veg",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "ca_chua",
+"name": "Cà chua",
+"emoji": "🍅",
+"serving": "1 quả",
+"kcal": 22,
+"protein": 1.1,
+"carbs": 4.8,
+"fat": 0.2,
+"course": "veg",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "canh_rau",
+"name": "Canh rau củ",
+"emoji": "🥣",
+"serving": "1 chén",
+"kcal": 40,
+"protein": 2.0,
+"carbs": 6.0,
+"fat": 1.0,
+"course": "soup",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "canh_chua",
+"name": "Canh chua cá",
+"emoji": "🍲",
+"serving": "1 chén",
+"kcal": 90,
+"protein": 8.0,
+"carbs": 8.0,
+"fat": 3.0,
+"course": "soup",
+"tags": [
+"fish"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "canh_bi",
+"name": "Canh bí đỏ thịt bằm",
+"emoji": "🎃",
+"serving": "1 chén",
+"kcal": 80,
+"protein": 5.0,
+"carbs": 9.0,
+"fat": 3.0,
+"course": "soup",
+"tags": [
+"meat",
+"pork"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "sua_tuoi",
+"name": "Sữa tươi không đường",
+"emoji": "🥛",
+"serving": "1 hộp 180ml",
+"kcal": 115,
+"protein": 6.0,
+"carbs": 8.5,
+"fat": 6.3,
+"course": "drink",
+"tags": [
+"milk",
+"animal"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "sua_co_duong",
+"name": "Sữa hộp có đường",
+"emoji": "🧃",
+"serving": "1 hộp 180ml",
+"kcal": 140,
+"protein": 5.5,
+"carbs": 16.0,
+"fat": 6.0,
+"course": "drink",
+"tags": [
+"milk",
+"animal",
+"high_sugar"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "sua_chua",
+"name": "Sữa chua",
+"emoji": "🍦",
+"serving": "1 hũ 100g",
+"kcal": 100,
+"protein": 3.5,
+"carbs": 15.0,
+"fat": 3.0,
+"course": "dessert",
+"tags": [
+"milk",
+"animal"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "sua_dau_nanh",
+"name": "Sữa đậu nành",
+"emoji": "🫘",
+"serving": "1 ly 250ml",
+"kcal": 110,
+"protein": 7.0,
+"carbs": 10.0,
+"fat": 4.5,
+"course": "drink",
+"tags": [
+"soy"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "ca_phe_sua",
+"name": "Cà phê sữa đá",
+"emoji": "☕",
+"serving": "1 ly",
+"kcal": 130,
+"protein": 2.0,
+"carbs": 22.0,
+"fat": 4.0,
+"course": "drink",
+"tags": [
+"milk",
+"animal",
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "ca_phe_den",
+"name": "Cà phê đen không đường",
+"emoji": "☕",
+"serving": "1 ly",
+"kcal": 5,
+"protein": 0.3,
+"carbs": 0.5,
+"fat": 0.0,
+"course": "drink",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "tra_sua",
+"name": "Trà sữa trân châu",
+"emoji": "🧋",
+"serving": "1 ly 500ml",
+"kcal": 360,
+"protein": 3.0,
+"carbs": 68.0,
+"fat": 9.0,
+"course": "drink",
+"tags": [
+"milk",
+"animal",
+"high_sugar",
+"high_gi"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "nuoc_ngot",
+"name": "Nước ngọt có ga",
+"emoji": "🥤",
+"serving": "1 lon 330ml",
+"kcal": 140,
+"protein": 0.0,
+"carbs": 39.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"high_sugar",
+"high_gi"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "nuoc_cam",
+"name": "Nước cam ép",
+"emoji": "🍹",
+"serving": "1 ly",
+"kcal": 110,
+"protein": 1.7,
+"carbs": 26.0,
+"fat": 0.5,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "nuoc_mia",
+"name": "Nước mía",
+"emoji": "🎋",
+"serving": "1 ly",
+"kcal": 180,
+"protein": 0.0,
+"carbs": 45.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"high_sugar",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "nuoc_dua",
+"name": "Nước dừa tươi",
+"emoji": "🥥",
+"serving": "1 trái",
+"kcal": 60,
+"protein": 0.5,
+"carbs": 14.0,
+"fat": 0.2,
+"course": "drink",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "tra_xanh",
+"name": "Trà không đường",
+"emoji": "🍵",
+"serving": "1 ly",
+"kcal": 2,
+"protein": 0.0,
+"carbs": 0.4,
+"fat": 0.0,
+"course": "drink",
+"tags": [],
+"region": "all",
+"custom": false
+},
+{
+"id": "sinh_to_bo",
+"name": "Sinh tố bơ",
+"emoji": "🥤",
+"serving": "1 ly",
+"kcal": 300,
+"protein": 4.0,
+"carbs": 35.0,
+"fat": 17.0,
+"course": "drink",
+"tags": [
+"milk",
+"animal",
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bia",
+"name": "Bia",
+"emoji": "🍺",
+"serving": "1 lon 330ml",
+"kcal": 140,
+"protein": 1.0,
+"carbs": 11.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"alcohol",
+"high_purine",
+"gluten"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "whey",
+"name": "Whey protein",
+"emoji": "💪",
+"serving": "1 muỗng (30g)",
+"kcal": 120,
+"protein": 24.0,
+"carbs": 3.0,
+"fat": 1.5,
+"course": "drink",
+"tags": [
+"milk",
+"animal"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "che",
+"name": "Chè đậu",
+"emoji": "🍧",
+"serving": "1 ly",
+"kcal": 300,
+"protein": 6.0,
+"carbs": 60.0,
+"fat": 4.0,
+"course": "dessert",
+"tags": [
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_flan",
+"name": "Bánh flan",
+"emoji": "🍮",
+"serving": "1 cái",
+"kcal": 130,
+"protein": 4.0,
+"carbs": 18.0,
+"fat": 4.5,
+"course": "dessert",
+"tags": [
+"egg",
+"milk",
+"animal",
+"high_sugar"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "kem",
+"name": "Kem",
+"emoji": "🍨",
+"serving": "1 cây",
+"kcal": 140,
+"protein": 2.0,
+"carbs": 17.0,
+"fat": 7.0,
+"course": "dessert",
+"tags": [
+"milk",
+"animal",
+"high_sugar"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "socola",
+"name": "Sô-cô-la",
+"emoji": "🍫",
+"serving": "1 thanh nhỏ (30g)",
+"kcal": 160,
+"protein": 2.0,
+"carbs": 17.0,
+"fat": 9.0,
+"course": "snack",
+"tags": [
+"milk",
+"animal",
+"high_sugar",
+"high_satfat"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "banh_quy",
+"name": "Bánh quy",
+"emoji": "🍪",
+"serving": "3 cái",
+"kcal": 150,
+"protein": 2.0,
+"carbs": 20.0,
+"fat": 7.0,
+"course": "snack",
+"tags": [
+"gluten",
+"milk",
+"egg",
+"animal",
+"high_sugar"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "dau_phong",
+"name": "Đậu phộng rang",
+"emoji": "🥜",
+"serving": "1 nắm (30g)",
+"kcal": 170,
+"protein": 7.0,
+"carbs": 5.0,
+"fat": 14.0,
+"course": "snack",
+"tags": [
+"peanut"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "hat_dieu",
+"name": "Hạt điều",
+"emoji": "🌰",
+"serving": "1 nắm (30g)",
+"kcal": 165,
+"protein": 5.0,
+"carbs": 9.0,
+"fat": 13.0,
+"course": "snack",
+"tags": [
+"nuts"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "hanh_nhan",
+"name": "Hạnh nhân",
+"emoji": "🌰",
+"serving": "1 nắm (30g)",
+"kcal": 174,
+"protein": 6.0,
+"carbs": 6.0,
+"fat": 15.0,
+"course": "snack",
+"tags": [
+"nuts"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "khoai_tay_chien",
+"name": "Khoai tây chiên",
+"emoji": "🍟",
+"serving": "1 phần vừa",
+"kcal": 320,
+"protein": 4.0,
+"carbs": 42.0,
+"fat": 15.0,
+"course": "snack",
+"tags": [
+"fried",
+"high_sodium",
+"high_gi"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "bun_thit_nuong",
+"name": "Bún thịt nướng",
+"emoji": "🥗",
+"serving": "1 tô",
+"kcal": 520,
+"protein": 24.0,
+"carbs": 68.0,
+"fat": 16.0,
+"course": "main",
+"tags": [
+"meat",
+"pork",
+"fish",
+"peanut",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bun_dau",
+"name": "Bún đậu mắm tôm",
+"emoji": "🍱",
+"serving": "1 mẹt nhỏ",
+"kcal": 650,
+"protein": 30.0,
+"carbs": 70.0,
+"fat": 28.0,
+"course": "main",
+"tags": [
+"soy",
+"fried",
+"shellfish",
+"pork",
+"meat",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bun_mam",
+"name": "Bún mắm",
+"emoji": "🍲",
+"serving": "1 tô",
+"kcal": 520,
+"protein": 28.0,
+"carbs": 60.0,
+"fat": 16.0,
+"course": "main",
+"tags": [
+"fish",
+"shellfish",
+"pork",
+"meat",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bun_moc",
+"name": "Bún mọc",
+"emoji": "🍜",
+"serving": "1 tô",
+"kcal": 430,
+"protein": 24.0,
+"carbs": 55.0,
+"fat": 12.0,
+"course": "main",
+"tags": [
+"pork",
+"meat",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bun_ca",
+"name": "Bún cá",
+"emoji": "🐟",
+"serving": "1 tô",
+"kcal": 420,
+"protein": 24.0,
+"carbs": 56.0,
+"fat": 10.0,
+"course": "main",
+"tags": [
+"fish",
+"high_sodium",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "mien_ga",
+"name": "Miến gà",
+"emoji": "🍜",
+"serving": "1 tô",
+"kcal": 380,
+"protein": 22.0,
+"carbs": 52.0,
+"fat": 8.0,
+"course": "main",
+"tags": [
+"meat",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_canh",
+"name": "Bánh canh cua",
+"emoji": "🦀",
+"serving": "1 tô",
+"kcal": 420,
+"protein": 20.0,
+"carbs": 58.0,
+"fat": 11.0,
+"course": "main",
+"tags": [
+"shellfish",
+"pork",
+"meat",
+"high_sodium",
+"high_carb",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "cao_lau",
+"name": "Cao lầu",
+"emoji": "🍝",
+"serving": "1 tô",
+"kcal": 480,
+"protein": 24.0,
+"carbs": 60.0,
+"fat": 15.0,
+"course": "main",
+"tags": [
+"gluten",
+"pork",
+"meat",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bo_kho",
+"name": "Bò kho bánh mì",
+"emoji": "🥘",
+"serving": "1 tô + 1 ổ",
+"kcal": 600,
+"protein": 32.0,
+"carbs": 62.0,
+"fat": 22.0,
+"course": "main",
+"tags": [
+"meat",
+"gluten",
+"high_carb",
+"high_sodium"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bo_ne",
+"name": "Bò né",
+"emoji": "🍳",
+"serving": "1 phần + bánh mì",
+"kcal": 620,
+"protein": 32.0,
+"carbs": 50.0,
+"fat": 32.0,
+"course": "main",
+"tags": [
+"meat",
+"egg",
+"animal",
+"gluten",
+"high_satfat",
+"fried"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "com_chien",
+"name": "Cơm chiên dương châu",
+"emoji": "🍛",
+"serving": "1 dĩa",
+"kcal": 620,
+"protein": 18.0,
+"carbs": 82.0,
+"fat": 22.0,
+"course": "main",
+"tags": [
+"egg",
+"animal",
+"pork",
+"meat",
+"shellfish",
+"fried",
+"high_carb",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "com_suon",
+"name": "Cơm sườn nướng",
+"emoji": "🍖",
+"serving": "1 dĩa",
+"kcal": 580,
+"protein": 26.0,
+"carbs": 75.0,
+"fat": 18.0,
+"course": "main",
+"tags": [
+"pork",
+"meat",
+"fish",
+"high_carb",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "com_rang_dua_bo",
+"name": "Cơm rang dưa bò",
+"emoji": "🍚",
+"serving": "1 dĩa",
+"kcal": 650,
+"protein": 26.0,
+"carbs": 84.0,
+"fat": 22.0,
+"course": "main",
+"tags": [
+"meat",
+"fried",
+"high_sodium",
+"high_carb",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "xoi_ga",
+"name": "Xôi gà",
+"emoji": "🍗",
+"serving": "1 hộp",
+"kcal": 550,
+"protein": 22.0,
+"carbs": 75.0,
+"fat": 17.0,
+"course": "main",
+"tags": [
+"meat",
+"high_carb",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "xoi_dau",
+"name": "Xôi đậu xanh",
+"emoji": "🍘",
+"serving": "1 gói",
+"kcal": 380,
+"protein": 10.0,
+"carbs": 70.0,
+"fat": 6.0,
+"course": "main",
+"tags": [
+"high_carb",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "chao_long",
+"name": "Cháo lòng",
+"emoji": "🥣",
+"serving": "1 tô",
+"kcal": 380,
+"protein": 20.0,
+"carbs": 42.0,
+"fat": 14.0,
+"course": "main",
+"tags": [
+"pork",
+"meat",
+"high_purine",
+"high_gi",
+"high_sodium"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_bao",
+"name": "Bánh bao nhân thịt",
+"emoji": "🥟",
+"serving": "1 cái",
+"kcal": 330,
+"protein": 12.0,
+"carbs": 45.0,
+"fat": 11.0,
+"course": "main",
+"tags": [
+"gluten",
+"pork",
+"meat",
+"egg",
+"high_carb"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_gio",
+"name": "Bánh giò",
+"emoji": "🫔",
+"serving": "1 cái",
+"kcal": 290,
+"protein": 9.0,
+"carbs": 34.0,
+"fat": 13.0,
+"course": "main",
+"tags": [
+"pork",
+"meat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_bot_loc",
+"name": "Bánh bột lọc",
+"emoji": "🥟",
+"serving": "5 cái",
+"kcal": 250,
+"protein": 8.0,
+"carbs": 42.0,
+"fat": 6.0,
+"course": "snack",
+"tags": [
+"shellfish",
+"pork",
+"meat",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_trang_tron",
+"name": "Bánh tráng trộn",
+"emoji": "🌶️",
+"serving": "1 bịch",
+"kcal": 330,
+"protein": 8.0,
+"carbs": 48.0,
+"fat": 12.0,
+"course": "snack",
+"tags": [
+"egg",
+"animal",
+"peanut",
+"shellfish",
+"high_sodium"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "pha_lau",
+"name": "Phá lấu",
+"emoji": "🍲",
+"serving": "1 chén",
+"kcal": 300,
+"protein": 18.0,
+"carbs": 10.0,
+"fat": 21.0,
+"course": "snack",
+"tags": [
+"pork",
+"meat",
+"high_purine",
+"high_satfat",
+"milk"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "nem_nuong",
+"name": "Nem nướng cuốn",
+"emoji": "🌯",
+"serving": "3 cuốn",
+"kcal": 330,
+"protein": 18.0,
+"carbs": 36.0,
+"fat": 12.0,
+"course": "main",
+"tags": [
+"pork",
+"meat",
+"peanut"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "lau_thai",
+"name": "Lẩu Thái hải sản",
+"emoji": "🍲",
+"serving": "1 phần ăn",
+"kcal": 550,
+"protein": 38.0,
+"carbs": 45.0,
+"fat": 22.0,
+"course": "main",
+"tags": [
+"shellfish",
+"fish",
+"high_sodium",
+"high_purine"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "ga_kho_gung",
+"name": "Gà kho gừng",
+"emoji": "🍗",
+"serving": "1 phần",
+"kcal": 260,
+"protein": 24.0,
+"carbs": 6.0,
+"fat": 15.0,
+"course": "protein",
+"tags": [
+"meat",
+"fish",
+"high_sodium"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "ga_nuong",
+"name": "Gà nướng",
+"emoji": "🍗",
+"serving": "1 đùi",
+"kcal": 280,
+"protein": 28.0,
+"carbs": 3.0,
+"fat": 17.0,
+"course": "protein",
+"tags": [
+"meat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "suon_xao_chua_ngot",
+"name": "Sườn xào chua ngọt",
+"emoji": "🍖",
+"serving": "1 phần",
+"kcal": 350,
+"protein": 20.0,
+"carbs": 16.0,
+"fat": 23.0,
+"course": "protein",
+"tags": [
+"pork",
+"meat",
+"high_satfat",
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "thit_bam_ca_chua",
+"name": "Thịt băm sốt cà chua",
+"emoji": "🥫",
+"serving": "1 phần",
+"kcal": 240,
+"protein": 17.0,
+"carbs": 8.0,
+"fat": 16.0,
+"course": "protein",
+"tags": [
+"pork",
+"meat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "cha_lua",
+"name": "Chả lụa",
+"emoji": "🍥",
+"serving": "2 lát dày (50g)",
+"kcal": 115,
+"protein": 10.0,
+"carbs": 1.0,
+"fat": 8.0,
+"course": "protein",
+"tags": [
+"pork",
+"meat",
+"fish",
+"high_sodium"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "ca_chien",
+"name": "Cá chiên",
+"emoji": "🐟",
+"serving": "1 con vừa",
+"kcal": 280,
+"protein": 26.0,
+"carbs": 4.0,
+"fat": 18.0,
+"course": "protein",
+"tags": [
+"fish",
+"fried"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "ca_thu_sot_ca",
+"name": "Cá thu sốt cà",
+"emoji": "🐟",
+"serving": "1 khứa",
+"kcal": 250,
+"protein": 24.0,
+"carbs": 6.0,
+"fat": 14.0,
+"course": "protein",
+"tags": [
+"fish",
+"high_purine"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "tom_rim",
+"name": "Tôm rim",
+"emoji": "🦐",
+"serving": "1 phần",
+"kcal": 190,
+"protein": 22.0,
+"carbs": 8.0,
+"fat": 7.0,
+"course": "protein",
+"tags": [
+"shellfish",
+"fish",
+"high_purine",
+"high_sodium"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "trung_vit_lon",
+"name": "Trứng vịt lộn",
+"emoji": "🥚",
+"serving": "1 quả",
+"kcal": 180,
+"protein": 13.0,
+"carbs": 4.0,
+"fat": 12.0,
+"course": "protein",
+"tags": [
+"egg",
+"animal",
+"high_purine"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "dau_hu_non",
+"name": "Đậu hũ non hấp",
+"emoji": "🍮",
+"serving": "1 hộp",
+"kcal": 110,
+"protein": 10.0,
+"carbs": 4.0,
+"fat": 6.0,
+"course": "protein",
+"tags": [
+"soy"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "rau_cai_xao",
+"name": "Cải xào nấm",
+"emoji": "🥬",
+"serving": "1 dĩa",
+"kcal": 100,
+"protein": 4.0,
+"carbs": 8.0,
+"fat": 6.0,
+"course": "veg",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "dau_que_xao",
+"name": "Đậu que xào",
+"emoji": "🫛",
+"serving": "1 dĩa",
+"kcal": 110,
+"protein": 3.0,
+"carbs": 10.0,
+"fat": 7.0,
+"course": "veg",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "goi_ga",
+"name": "Gỏi gà bắp cải",
+"emoji": "🥗",
+"serving": "1 dĩa",
+"kcal": 220,
+"protein": 20.0,
+"carbs": 12.0,
+"fat": 10.0,
+"course": "veg",
+"tags": [
+"meat",
+"peanut",
+"fish"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "goi_du_du",
+"name": "Gỏi đu đủ",
+"emoji": "🥗",
+"serving": "1 dĩa",
+"kcal": 180,
+"protein": 8.0,
+"carbs": 22.0,
+"fat": 7.0,
+"course": "veg",
+"tags": [
+"peanut",
+"shellfish",
+"fish"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "canh_kho_qua",
+"name": "Canh khổ qua nhồi thịt",
+"emoji": "🥒",
+"serving": "1 chén",
+"kcal": 120,
+"protein": 9.0,
+"carbs": 6.0,
+"fat": 6.0,
+"course": "soup",
+"tags": [
+"pork",
+"meat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "canh_cai_thit",
+"name": "Canh cải thịt bằm",
+"emoji": "🥣",
+"serving": "1 chén",
+"kcal": 70,
+"protein": 5.0,
+"carbs": 4.0,
+"fat": 4.0,
+"course": "soup",
+"tags": [
+"pork",
+"meat"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "canh_rong_bien",
+"name": "Canh rong biển đậu hũ",
+"emoji": "🥣",
+"serving": "1 chén",
+"kcal": 60,
+"protein": 5.0,
+"carbs": 4.0,
+"fat": 3.0,
+"course": "soup",
+"tags": [
+"soy"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "du_du",
+"name": "Đu đủ chín",
+"emoji": "🍑",
+"serving": "1 miếng (200g)",
+"kcal": 86,
+"protein": 1.0,
+"carbs": 22.0,
+"fat": 0.3,
+"course": "fruit",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "buoi",
+"name": "Bưởi",
+"emoji": "🍊",
+"serving": "3 múi",
+"kcal": 60,
+"protein": 1.2,
+"carbs": 15.0,
+"fat": 0.2,
+"course": "fruit",
+"tags": [],
+"region": "vn",
+"custom": false
+},
+{
+"id": "mit",
+"name": "Mít",
+"emoji": "🍈",
+"serving": "4 múi",
+"kcal": 95,
+"protein": 1.7,
+"carbs": 23.0,
+"fat": 0.6,
+"course": "fruit",
+"tags": [
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "sau_rieng",
+"name": "Sầu riêng",
+"emoji": "🍈",
+"serving": "2 múi (100g)",
+"kcal": 147,
+"protein": 1.5,
+"carbs": 27.0,
+"fat": 5.3,
+"course": "fruit",
+"tags": [
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "vai",
+"name": "Vải / nhãn",
+"emoji": "🍒",
+"serving": "10 quả",
+"kcal": 66,
+"protein": 0.8,
+"carbs": 17.0,
+"fat": 0.4,
+"course": "fruit",
+"tags": [
+"high_sugar",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "che_thai",
+"name": "Chè Thái",
+"emoji": "🍧",
+"serving": "1 ly",
+"kcal": 350,
+"protein": 4.0,
+"carbs": 62.0,
+"fat": 10.0,
+"course": "dessert",
+"tags": [
+"milk",
+"animal",
+"high_sugar",
+"high_gi"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "tau_hu_nuoc_duong",
+"name": "Tàu hũ nước đường",
+"emoji": "🍮",
+"serving": "1 chén",
+"kcal": 180,
+"protein": 7.0,
+"carbs": 30.0,
+"fat": 4.0,
+"course": "dessert",
+"tags": [
+"soy",
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_chuoi",
+"name": "Bánh chuối nướng",
+"emoji": "🍌",
+"serving": "1 miếng",
+"kcal": 230,
+"protein": 3.0,
+"carbs": 42.0,
+"fat": 6.0,
+"course": "dessert",
+"tags": [
+"gluten",
+"milk",
+"animal",
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "banh_trung_thu",
+"name": "Bánh trung thu thập cẩm",
+"emoji": "🥮",
+"serving": "1/4 cái",
+"kcal": 200,
+"protein": 4.0,
+"carbs": 28.0,
+"fat": 8.0,
+"course": "dessert",
+"tags": [
+"gluten",
+"egg",
+"animal",
+"nuts",
+"pork",
+"meat",
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "tra_dao",
+"name": "Trà đào",
+"emoji": "🍑",
+"serving": "1 ly",
+"kcal": 150,
+"protein": 0.5,
+"carbs": 38.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "tra_tac",
+"name": "Trà tắc",
+"emoji": "🍋",
+"serving": "1 ly",
+"kcal": 110,
+"protein": 0.2,
+"carbs": 28.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "bac_xiu",
+"name": "Bạc xỉu",
+"emoji": "☕",
+"serving": "1 ly",
+"kcal": 180,
+"protein": 4.0,
+"carbs": 28.0,
+"fat": 6.0,
+"course": "drink",
+"tags": [
+"milk",
+"animal",
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "sinh_to_xoai",
+"name": "Sinh tố xoài",
+"emoji": "🥭",
+"serving": "1 ly",
+"kcal": 220,
+"protein": 3.0,
+"carbs": 45.0,
+"fat": 4.0,
+"course": "drink",
+"tags": [
+"milk",
+"animal",
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "sua_dau_xanh",
+"name": "Sữa đậu xanh",
+"emoji": "🥛",
+"serving": "1 ly",
+"kcal": 150,
+"protein": 6.0,
+"carbs": 26.0,
+"fat": 2.5,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "ruou_de",
+"name": "Rượu trắng",
+"emoji": "🍶",
+"serving": "1 ly nhỏ (30ml)",
+"kcal": 70,
+"protein": 0.0,
+"carbs": 0.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"alcohol"
+],
+"region": "vn",
+"custom": false
+},
+{
+"id": "nuoc_tang_luc",
+"name": "Nước tăng lực",
+"emoji": "⚡",
+"serving": "1 lon 250ml",
+"kcal": 115,
+"protein": 0.0,
+"carbs": 28.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"high_sugar",
+"high_gi"
+],
+"region": "all",
+"custom": false
+},
+{
+"id": "pizza",
+"name": "Pizza",
+"emoji": "🍕",
+"serving": "1 miếng",
+"kcal": 285,
+"protein": 12.0,
+"carbs": 36.0,
+"fat": 10.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"animal",
+"meat",
+"pork",
+"high_sodium"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "burger",
+"name": "Hamburger bò",
+"emoji": "🍔",
+"serving": "1 cái",
+"kcal": 500,
+"protein": 25.0,
+"carbs": 40.0,
+"fat": 26.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat",
+"milk",
+"animal",
+"sesame",
+"high_sodium",
+"high_satfat"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "ga_ran",
+"name": "Gà rán",
+"emoji": "🍗",
+"serving": "1 miếng",
+"kcal": 290,
+"protein": 18.0,
+"carbs": 11.0,
+"fat": 19.0,
+"course": "protein",
+"tags": [
+"fried",
+"meat",
+"gluten",
+"high_satfat",
+"high_sodium"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "sandwich",
+"name": "Sandwich gà",
+"emoji": "🥪",
+"serving": "1 cái",
+"kcal": 350,
+"protein": 24.0,
+"carbs": 36.0,
+"fat": 11.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "mi_y",
+"name": "Mì Ý sốt bò bằm",
+"emoji": "🍝",
+"serving": "1 dĩa",
+"kcal": 480,
+"protein": 22.0,
+"carbs": 60.0,
+"fat": 16.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat",
+"high_carb"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "sushi",
+"name": "Sushi",
+"emoji": "🍣",
+"serving": "6 miếng",
+"kcal": 280,
+"protein": 12.0,
+"carbs": 48.0,
+"fat": 4.0,
+"course": "main",
+"tags": [
+"fish",
+"soy",
+"high_carb"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "steak",
+"name": "Bít tết",
+"emoji": "🥩",
+"serving": "150g",
+"kcal": 380,
+"protein": 38.0,
+"carbs": 0.0,
+"fat": 25.0,
+"course": "protein",
+"tags": [
+"meat",
+"high_purine",
+"high_satfat"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "sua_chua_hy_lap",
+"name": "Sữa chua Hy Lạp",
+"emoji": "🥛",
+"serving": "1 hũ 150g",
+"kcal": 130,
+"protein": 15.0,
+"carbs": 6.0,
+"fat": 5.0,
+"course": "dessert",
+"tags": [
+"milk",
+"animal"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "banh_mi_nuong",
+"name": "Bánh mì sandwich nướng",
+"emoji": "🍞",
+"serving": "2 lát",
+"kcal": 160,
+"protein": 6.0,
+"carbs": 28.0,
+"fat": 2.0,
+"course": "main",
+"tags": [
+"gluten"
+],
+"region": "intl",
+"custom": false
+},
+{
+"id": "bo_dau_phong",
+"name": "Bơ đậu phộng",
+"emoji": "🥜",
+"serving": "1 muỗng canh",
+"kcal": 95,
+"protein": 4.0,
+"carbs": 3.0,
+"fat": 8.0,
+"course": "snack",
+"tags": [
+"peanut"
+],
+"region": "intl",
+"custom": false
+}
+]

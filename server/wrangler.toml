@@ -1,0 +1,26 @@
+name = "calocare-api"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+# Run next to a region Anthropic serves. From Vietnam the nearest Cloudflare site is Hong Kong,
+# and Anthropic rejects requests that originate there.
+[placement]
+region = "aws:ap-northeast-1"
+
+[vars]
+MODEL = "claude-haiku-5-5"
+GLOBAL_DAILY_LIMIT = "5000"
+# Photos the fast model is unsure about are read again by this stronger model (about 14x the price
+# per photo). ESCALATE_BELOW is the confidence under which that happens; "0" turns it off.
+ESCALATE_MODEL = "claude-sonnet-5-5"
+ESCALATE_BELOW = "0"
+
+# Secrets (never put them in this file):
+#   npx wrangler secret put ANTHROPIC_API_KEY
+#   npx wrangler secret put APP_KEY
+
+[[d1_databases]]
+binding = "DB"
+database_name = "calocare"
+# Replace with the id printed by: npx wrangler d1 create calocare
+database_id = "19475e03-f398-40d2-abc5-452d454b327b"

@@ -1,0 +1,6 @@
+# Keep Unix line endings in the repository: shell scripts and the Gradle wrapper break with CRLF.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.jar binary

@@ -1,0 +1,68 @@
+"""Generates the Play Store files that are derived from the app: the 512 px icon and the hosted privacy policy.
+
+    python tools/store_assets.py
+"""
+import html
+import io
+import math
+import os
+import re
+
+from PIL import Image, ImageDraw
+
+ROOT = os.path.join(os.path.dirname(__file__), '..')
+OUT = os.path.join(ROOT, 'play-store')
+os.makedirs(OUT, exist_ok=True)
+
+
+def icon(size=512, scale=4):
+    """Same drawing as res/drawable/ic_launcher_fg.xml on the launcher gradient, supersampled."""
+    n = size * scale
+    img = Image.new('RGB', (n, n))
+    px = img.load()
+    a, b = (0x1F, 0x9D, 0x61), (0x7B, 0xC9, 0x6F)
+    for y in range(n):
+        for x in range(n):
+            t = (x + y) / (2 * n)
+            px[x, y] = tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
+    d = ImageDraw.Draw(img, 'RGBA')
+    c, r, w = n / 2, n * 0.30, n * 0.075
+    box = [c - r, c - r, c + r, c + r]
+    d.arc(box, 0, 360, fill=(255, 255, 255, 85), width=round(w))
+    d.arc(box, -90, 160, fill=(255, 255, 255, 255), width=round(w))
+    for ang in (-90, 160):  # round caps
+        ex, ey = c + (r - w / 2) * math.cos(math.radians(ang)), c + (r - w / 2) * math.sin(math.radians(ang))
+        d.ellipse([ex - w / 2, ey - w / 2, ex + w / 2, ey + w / 2], fill=(255, 255, 255, 255))
+    # flame
+    k = n / 108 * 1.25
+    pts = [(54, 40), (59, 46), (63, 51), (63, 58), (60, 64), (54, 67), (48, 64), (45, 58), (46, 53), (49.5, 49), (51, 52.5), (52.5, 52), (52.3, 46)]
+    d.polygon([(c + (x - 54) * k, c + (y - 54) * k) for x, y in pts], fill=(255, 183, 77, 255))
+    img.resize((size, size), Image.LANCZOS).save(os.path.join(OUT, 'icon-512.png'))
+
+
+def privacy():
+    """Renders the in-app policy text (ui/PrivacyScreen.kt) as a page to host at the listing's privacy URL."""
+    src = io.open(os.path.join(ROOT, 'app/src/main/java/com/calocare/app/ui/PrivacyScreen.kt'), encoding='utf-8').read()
+    body = src[src.index('val sections'):src.index('@Composable')]
+    parts = []
+    for title, chunk in re.findall(r'"([^"]+)" to\n((?:\s+"(?:[^"\\]|\\.)*"(?: \+)?,?\n)+)', body):
+        text = ''.join(re.findall(r'"((?:[^"\\]|\\.)*)"', chunk)).replace('\\n', '\n')
+        paragraphs = ''.join('<p>%s</p>' % html.escape(line) for line in text.split('\n'))
+        parts.append('<h2>%s</h2>%s' % (html.escape(title), paragraphs))
+    page = '''<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CaloCare – Chính sách quyền riêng tư</title>
+<style>body{font:16px/1.6 system-ui,sans-serif;max-width:720px;margin:0 auto;padding:24px 16px;color:#1b1f1c}
+h1{color:#1f9d61}h2{font-size:1.1rem;margin-top:1.6em}</style></head><body>
+<h1>CaloCare – Chính sách quyền riêng tư</h1>
+<p>Cập nhật: 10/10/2026</p>
+%s
+<h2>Liên hệ</h2><p>[ĐIỀN EMAIL HỖ TRỢ CỦA BẠN]</p>
+</body></html>
+''' % '\n'.join(parts)
+    io.open(os.path.join(OUT, 'privacy-policy.html'), 'w', encoding='utf-8', newline='\n').write(page)
+    return len(parts)
+
+
+icon()
+print('sections:', privacy())

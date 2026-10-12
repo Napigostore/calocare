@@ -1,0 +1,5 @@
+// Copy to Backend.xcconfig (which is not kept in git) and fill in. The cloud build writes this file from its secrets.
+// Host only, without "https://": in an xcconfig file, "//" starts a comment.
+BACKEND_HOST = calocare-api.example.workers.dev
+// Same value as appKey in backend.properties at the root of the repository.
+BACKEND_APP_KEY =

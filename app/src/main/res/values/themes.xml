@@ -1,0 +1,5 @@
+<resources>
+    <style name="Theme.CaloCare" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#F6F8F4</item>
+    </style>
+</resources>
