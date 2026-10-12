@@ -45,7 +45,13 @@ jobs:
           set -o pipefail
           xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Debug \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO build | tee build.log | grep -E "error:|warning: unre|BUILD|\*\*" || true
+            CODE_SIGNING_ALLOWED=NO build > build.log 2>&1 || true
+          # Compiler errors, once each, as one annotation on the run so they can be read without opening the log.
+          grep -E "error:" build.log | sed "s#$GITHUB_WORKSPACE/##" | sort -u | head -80 > errors.txt || true
+          if [ -s errors.txt ]; then
+            cat errors.txt
+            echo "::error title=Swift errors::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' errors.txt)"
+          fi
           grep -q "BUILD SUCCEEDED" build.log
       - name: Keep the build log
         if: always()
