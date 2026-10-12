@@ -27,6 +27,9 @@ on:
 jobs:
   build:
     runs-on: macos-15
+    # Publishing the .ipa as a release needs write access to the repository's releases.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Install XcodeGen
@@ -53,6 +56,34 @@ jobs:
             echo "::error title=Swift errors::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' errors.txt)"
           fi
           grep -q "BUILD SUCCEEDED" build.log
+      # An unsigned .ipa for trying the app on one's own iPhone without the App Store: a sideloading
+      # tool (Sideloadly, AltStore) signs it with a free Apple ID and installs it over USB.
+      - name: Build the unsigned .ipa
+        if: github.ref == 'refs/heads/main'
+        working-directory: ios
+        run: |
+          xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath device \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build > device.log 2>&1 || true
+          grep -E "error:" device.log | sed "s#$GITHUB_WORKSPACE/##" | sort -u | head -40 > device-errors.txt || true
+          if [ -s device-errors.txt ]; then
+            echo "::error title=Swift errors::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' device-errors.txt)"
+          fi
+          grep -q "BUILD SUCCEEDED" device.log
+          mkdir Payload
+          cp -R device/Build/Products/Release-iphoneos/CaloCare.app Payload/
+          zip -qry CaloCare-unsigned.ipa Payload
+          ls -la CaloCare-unsigned.ipa
+      - name: Publish the .ipa as the "ios-latest" release
+        if: github.ref == 'refs/heads/main'
+        working-directory: ios
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete ios-latest --yes --cleanup-tag || true
+          gh release create ios-latest CaloCare-unsigned.ipa --prerelease --target "$GITHUB_SHA" \
+            --title "CaloCare iOS – bản thử nghiệm mới nhất" \
+            --notes "File .ipa chưa ký, build từ commit $GITHUB_SHA. Cài lên iPhone bằng Sideloadly hoặc AltStore với Apple ID của bạn; bản cài bằng Apple ID miễn phí hết hạn sau 7 ngày."
       - name: Keep the build log
         if: always()
         uses: actions/upload-artifact@v4
