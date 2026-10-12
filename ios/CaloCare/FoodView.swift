@@ -256,11 +256,16 @@ struct FoodEditor: View {
 
     /// Energy is 4 kcal per gram of protein and carbohydrate and 9 per gram of fat, so a changed macro updates the calories.
     private func macro(_ path: WritableKeyPath<Food, Double>) -> Binding<Double> {
-        Binding(get: { food[keyPath: path] }, set: { value in
+        let read: () -> Double = { food[keyPath: path] }
+        let write: (Double) -> Void = { value in
             food[keyPath: path] = value
-            let total = Int((4 * food.protein + 4 * food.carbs + 9 * food.fat).rounded())
+            let fromProtein: Double = 4.0 * food.protein
+            let fromCarbs: Double = 4.0 * food.carbs
+            let fromFat: Double = 9.0 * food.fat
+            let total: Int = Int((fromProtein + fromCarbs + fromFat).rounded())
             if total > 0 && !food.tags.contains("alcohol") { food.kcal = total }
-        })
+        }
+        return Binding<Double>(get: read, set: write)
     }
 
     private func number(_ label: String, _ value: Binding<Double>) -> some View {
