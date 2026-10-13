@@ -121,13 +121,18 @@ private fun MainScreen(vm: AppViewModel, data: AppData, showPrivacy: Boolean) {
                 }
             }
         },
-    ) { padding ->
-        when (tab) {
-            0 -> DashboardScreen(vm, data, padding, onCoach = openCoach, onAddFood = { tab = 1 }, onProfile = { profile = true })
-            1 -> FoodScreen(vm, data, padding, onNeedAiKey = { needKey = true })
-            2 -> MenuScreen(vm, data, padding, onCoach = openCoach)
-            3 -> ProgressScreen(vm, data, padding)
-            else -> CoachScreen(vm, data, padding, onNeedAiKey = { needKey = true })
+    ) { scaffold ->
+        // The status bar inset is applied to the container, so scrolling content is clipped below the
+        // clock and battery icons instead of sliding underneath them.
+        val padding = PaddingValues(bottom = scaffold.calculateBottomPadding())
+        Box(Modifier.padding(top = scaffold.calculateTopPadding())) {
+            when (tab) {
+                0 -> DashboardScreen(vm, data, padding, onCoach = openCoach, onAddFood = { tab = 1 }, onProfile = { profile = true })
+                1 -> FoodScreen(vm, data, padding, onNeedAiKey = { needKey = true })
+                2 -> MenuScreen(vm, data, padding, onCoach = openCoach)
+                3 -> ProgressScreen(vm, data, padding)
+                else -> CoachScreen(vm, data, padding, onNeedAiKey = { needKey = true })
+            }
         }
     }
 

@@ -100,3 +100,52 @@ def feature_graphic():
 
 
 feature_graphic()
+
+
+# Captions for the store screenshots, by the number the raw file name starts with.
+CAPTIONS = {
+    '01': 'Biết ngay hôm nay\nnạp và tiêu bao nhiêu calo',
+    '02': 'Chạm một lần\nlà ghi xong món ăn',
+    '03': 'Đưa món vào vòng tròn,\nAI tính calo giúp bạn',
+    '04': 'Tổng kết bữa ăn:\ncalo, đạm, đường, muối',
+    '05': 'Kết nối đồng hồ,\ntheo dõi vận động',
+}
+
+
+def screenshots():
+    """Turns phone screenshots in play-store/raw-screenshots/ into 1080x1920 store images with a caption.
+
+    Google Play refuses screenshots more than twice as tall as they are wide, which is what modern
+    phones produce; framing them on a 9:16 canvas fixes that. The status bar and the system
+    navigation bar are cropped away.
+    """
+    from PIL import ImageFont
+    raw = os.path.join(OUT, 'raw-screenshots')
+    if not os.path.isdir(raw):
+        return 0
+    done = os.path.join(OUT, 'screenshots')
+    os.makedirs(done, exist_ok=True)
+    font = ImageFont.truetype(os.path.join(os.environ.get('WINDIR', 'C:/Windows'), 'Fonts', 'segoeuib.ttf'), 58)
+    w, h = 1080, 1920
+    names = sorted(n for n in os.listdir(raw) if n.lower().endswith(('.jpg', '.jpeg', '.png')))
+    for name in names:
+        canvas = Image.new('RGB', (w, h))
+        d = ImageDraw.Draw(canvas)
+        a, b = (0x1F, 0x9D, 0x61), (0x7B, 0xC9, 0x6F)
+        for y in range(h):
+            d.line([(0, y), (w, y)], fill=tuple(round(a[i] + (b[i] - a[i]) * y / h) for i in range(3)))
+        shot = Image.open(os.path.join(raw, name)).convert('RGB')
+        sw, sh = shot.size
+        shot = shot.crop((0, round(sh * 0.036), sw, round(sh * 0.945)))
+        k = min(880 / shot.width, 1580 / shot.height)
+        shot = shot.resize((round(shot.width * k), round(shot.height * k)), Image.LANCZOS)
+        mask = Image.new('L', shot.size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle([0, 0, shot.width - 1, shot.height - 1], radius=40, fill=255)
+        canvas.paste(shot, ((w - shot.width) // 2, h - shot.height - 50), mask)
+        caption = CAPTIONS.get(name[:2], '')
+        d.multiline_text((w // 2, 145), caption, font=font, fill='white', anchor='mm', align='center', spacing=14)
+        canvas.save(os.path.join(done, os.path.splitext(name)[0] + '.png'))
+    return len(names)
+
+
+print('screenshots:', screenshots())

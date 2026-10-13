@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -149,24 +150,31 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
 
     Column(Modifier.padding(top = padding.calculateTopPadding())) {
         Row(Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("Nhật ký ăn uống", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Text("Ăn uống", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.weight(1f))
             DateSwitcher(vm)
         }
         Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Meal.all.forEach { m ->
                 val kcal = todays.filter { it.meal == m }.totals().kcal.roundToInt()
-                FilterChip(
-                    selected = vm.meal == m, onClick = { vm.meal = m },
-                    label = { Text("${Meal.emoji[m]} ${Meal.labels[m]}" + if (kcal > 0) " $kcal" else "", maxLines = 1) },
-                    modifier = Modifier.weight(1f),
-                )
+                // Four equal tabs with the name always readable; the meal's calories sit underneath.
+                val selected = vm.meal == m
+                Column(
+                    Modifier.weight(1f).clip(RoundedCornerShape(14.dp))
+                        .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
+                        .clickable { vm.meal = m }.padding(vertical = 6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    val tint = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                    Text(Meal.labels[m] ?: m, color = tint, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false, style = MaterialTheme.typography.labelLarge)
+                    Text(if (kcal > 0) "$kcal kcal" else "—", color = tint.copy(alpha = 0.75f), maxLines = 1, softWrap = false, style = MaterialTheme.typography.labelSmall)
+                }
             }
         }
         Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it; vm.clearOnline() },
-                placeholder = { Text("Tìm hoặc nói tên món…") },
+                placeholder = { Text("Tìm món…", maxLines = 1) },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
                 trailingIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {

@@ -114,8 +114,8 @@ fun DashboardScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onC
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "${Goal.emoji[p.goal]} Mục tiêu: ${Goal.labels[p.goal]}", color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f),
+                    "${Goal.emoji[p.goal]} ${Goal.labels[p.goal]}", color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium, maxLines = 1, modifier = Modifier.weight(1f),
                 )
                 DateSwitcher(vm)
             }

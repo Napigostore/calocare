@@ -242,6 +242,7 @@ object Nutrition {
             (p.goal == Goal.GAIN || p.goal == Goal.GYM) && ratio < 0.6f && LocalTime.now().hour >= 18 && date == LocalDate.now() ->
                 "🍚" to "Còn thiếu ${(target - eaten).roundToInt()} kcal để tăng cân. Thêm một bữa phụ giàu đạm trước khi ngủ nhé."
             onTarget(data, date) && streak >= 7 -> "🏆" to "Tuyệt vời! $streak ngày liên tiếp và hôm nay đúng mục tiêu. Giữ phong độ này nhé $who!"
+            onTarget(data, date) && ratio > 1.02f -> "⚖️" to "Vượt mục tiêu ${(eaten - target).roundToInt()} kcal — vẫn trong mức cho phép. Bữa sau ăn nhẹ hơn một chút là cân bằng."
             onTarget(data, date) -> "🎯" to "Đúng mục tiêu rồi! Bạn đang làm rất tốt."
             ratio < 0.5f -> "🌱" to "Khởi đầu tốt — còn ${(target - eaten).roundToInt()} kcal cho hôm nay."
             ratio <= 1f -> "🔥" to "Đã đi được ${(ratio * 100).roundToInt()}% chặng đường hôm nay. Cố lên $who!"
