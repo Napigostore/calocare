@@ -29,3 +29,4 @@ play-store/*.aab
 # Screenshots the owner supplied; the framed versions in play-store/screenshots are generated from them
 play-store/raw-screenshots/
 play-store/screenshots/
+play-store/*.apk
