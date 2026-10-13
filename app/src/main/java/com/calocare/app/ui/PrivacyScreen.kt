@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 /** Shown from the profile and when Health Connect asks the app to explain its data use. */
 object Privacy {
     /** Support address shown in the policy. Must match the one on the Play Store listing. */
-    const val CONTACT_EMAIL = ""
+    const val CONTACT_EMAIL = "truongtumoc@gmail.com"
 
     val sections: List<Pair<String, String>> = listOf(
         "Tóm tắt" to

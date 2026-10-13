@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ADMIN_PAGE } from "./admin";
+import { PRIVACY_PAGE } from "./privacy";
 import { adminAsked, adminList, adminSave, changesSince, loadLibrary, nameKey, physicallyPossible, submitDish, type Dish, type Nutrition } from "./library";
 
 /**
@@ -538,6 +539,8 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     try {
+      // Public privacy policy: the address given to Google Play and the App Store.
+      if (url.pathname === "/privacy") return new Response(PRIVACY_PAGE, { headers: { "content-type": "text/html; charset=utf-8" } });
       // The owner's library page. The page itself holds nothing; its data needs the admin key.
       if (url.pathname === "/admin") return new Response(ADMIN_PAGE, { headers: { "content-type": "text/html; charset=utf-8" } });
       if (url.pathname.startsWith("/admin/api/")) {
