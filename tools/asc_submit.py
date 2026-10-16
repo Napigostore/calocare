@@ -40,6 +40,20 @@ def main(version_string):
     call('PATCH', f'/v1/appStoreVersions/{version["id"]}/relationships/build', {'data': {'type': 'builds', 'id': build['id']}})
     print('build', build['attributes']['version'], 'attached')
 
+    # App Review details: CaloCare has no accounts, so no demo login; notes tell the reviewer where things are.
+    detail = call('GET', f'/v1/appStoreVersions/{version["id"]}/appStoreReviewDetail').get('data')
+    notes = ('No account or sign-in is needed. Meal photo analysis: Food tab, camera button. CaloCare Pro subscriptions: '
+             'Profile tab, "Upgrade to Pro" (also shown when the free daily AI allowance is used up). Apple Health is optional: '
+             'Profile tab, "Connect Apple Health"; it is read only and never leaves the device. The app is in English or Vietnamese '
+             'following the device language.')
+    attributes = {'demoAccountRequired': False, 'notes': notes}
+    if detail:
+        call('PATCH', f'/v1/appStoreReviewDetails/{detail["id"]}', {'data': {'type': 'appStoreReviewDetails', 'id': detail['id'], 'attributes': attributes}})
+    else:
+        call('POST', '/v1/appStoreReviewDetails', {'data': {'type': 'appStoreReviewDetails', 'attributes': attributes,
+             'relationships': {'appStoreVersion': {'data': {'type': 'appStoreVersions', 'id': version['id']}}}}})
+    print('review details: no sign-in required, notes set')
+
     # Subscriptions: the group and each subscription go in with the version.
     for group in call('GET', f'/v1/apps/{app_id}/subscriptionGroups')['data']:
         subs = call('GET', f'/v1/subscriptionGroups/{group["id"]}/subscriptions')['data']
