@@ -284,6 +284,7 @@ jobs:
             exit 1
           }
           tail -5 deliver.log
+          echo "::notice title=TestFlight::App Store listing and screenshots uploaded for vi and en-US."
       - name: Keep the deliver log
         if: always()
         uses: actions/upload-artifact@v4
