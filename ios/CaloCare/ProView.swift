@@ -37,22 +37,20 @@ struct ProView: View {
     @ViewBuilder private var offer: some View {
         Text(L("Chụp mọi bữa ăn, AI tính calo cho bạn", "Snap every meal and let AI count the calories")).font(.title2.bold())
         comparison
-        if pro.products.isEmpty {
+        let plans = pro.plans
+        if plans.isEmpty {
             HStack { ProgressView(); Text(L("Đang tải giá từ App Store…", "Loading prices from the App Store…")) }
         }
-        let monthly = pro.products.first { $0.id == "calocare.pro.monthly" }
-        ForEach(pro.products, id: \.id) { product in
-            planCard(product, monthly: monthly)
-        }
-        let product = pro.products.first { $0.id == picked } ?? pro.products.first
-        let trial = product.flatMap { trialDays($0) } ?? 0
+        let monthly = plans.first { !$0.yearly }
+        ForEach(plans) { plan in planCard(plan, monthly: monthly) }
+        let plan = plans.first { $0.id == picked } ?? plans.first
         Button {
-            if let product { Task { await pro.buy(product) } }
+            if let plan { Task { await pro.buy(plan) } }
         } label: {
-            Text(trial > 0 ? L("Dùng thử miễn phí", "Start free trial") : L("Nâng cấp Pro", "Upgrade to Pro")).font(.headline).frame(maxWidth: .infinity).padding(.vertical, 6)
+            Text((plan?.trialDays ?? 0) > 0 ? L("Dùng thử miễn phí", "Start free trial") : L("Nâng cấp Pro", "Upgrade to Pro")).font(.headline).frame(maxWidth: .infinity).padding(.vertical, 6)
         }
         .buttonStyle(.borderedProminent)
-        .disabled(product == nil || pro.busy)
+        .disabled(plan == nil || pro.busy)
         if let note = pro.note { Text(note).foregroundColor(Palette.green).font(.subheadline.weight(.medium)) }
         Text(L("Gói tự gia hạn cho tới khi bạn hủy. Hủy bất cứ lúc nào trong Cài đặt → Apple ID → Đăng ký, ít nhất 24 giờ trước kỳ gia hạn. Ghi món bằng tay, thực đơn, biểu đồ và Apple Health luôn miễn phí.",
                "Renews automatically until you cancel. Cancel any time in Settings → Apple ID → Subscriptions, at least 24 hours before renewal. Manual logging, menus, charts and Apple Health always stay free."))
@@ -66,41 +64,26 @@ struct ProView: View {
         .font(.footnote)
     }
 
-    private func planCard(_ product: Product, monthly: Product?) -> some View {
-        let yearly = product.id == "calocare.pro.yearly"
+    private func planCard(_ plan: ProStore.Plan, monthly: ProStore.Plan?) -> some View {
         let saving: Int = {
-            guard yearly, let monthly, monthly.price > 0 else { return 0 }
-            let ratio = (product.price as NSDecimalNumber).doubleValue / ((monthly.price as NSDecimalNumber).doubleValue * 12)
-            return Int((100 - ratio * 100).rounded())
+            guard plan.yearly, let monthly, monthly.price > 0 else { return 0 }
+            return Int((100 - plan.price / (monthly.price * 12) * 100).rounded())
         }()
-        let selected = picked == product.id
-        let trial = trialDays(product) ?? 0
+        let selected = picked == plan.id
         return VStack(alignment: .leading, spacing: 2) {
             HStack {
-                Text(yearly ? L("Theo năm", "Yearly") : L("Theo tháng", "Monthly")).font(.headline)
+                Text(plan.yearly ? L("Theo năm", "Yearly") : L("Theo tháng", "Monthly")).font(.headline)
                 Spacer()
                 if saving > 0 { Text(L("Tiết kiệm \(saving)%", "Save \(saving)%")).font(.subheadline.bold()).foregroundColor(Palette.green) }
             }
-            Text(product.displayPrice + (yearly ? L(" / năm", " / year") : L(" / tháng", " / month"))).font(.title3)
-            if trial > 0 { Text(L("Dùng thử miễn phí \(trial) ngày", "\(trial)-day free trial")).foregroundColor(Palette.green) }
+            Text(plan.displayPrice + (plan.yearly ? L(" / năm", " / year") : L(" / tháng", " / month"))).font(.title3)
+            if plan.trialDays > 0 { Text(L("Dùng thử miễn phí \(plan.trialDays) ngày", "\(plan.trialDays)-day free trial")).foregroundColor(Palette.green) }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(selected ? Palette.green.opacity(0.12) : Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(selected ? Palette.green : Color(.separator), lineWidth: selected ? 2 : 1))
-        .onTapGesture { picked = product.id }
-    }
-
-    private func trialDays(_ product: Product) -> Int? {
-        guard let offer = product.subscription?.introductoryOffer, offer.paymentMode == .freeTrial else { return nil }
-        let p = offer.period
-        switch p.unit {
-        case .day: return p.value
-        case .week: return p.value * 7
-        case .month: return p.value * 30
-        case .year: return p.value * 365
-        @unknown default: return nil
-        }
+        .onTapGesture { picked = plan.id }
     }
 
     private var comparison: some View {

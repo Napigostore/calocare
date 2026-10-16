@@ -232,7 +232,7 @@ jobs:
           for lang in vi en; do
             prefix=$([ "$lang" = en ] && echo "en-" || echo "")
             n=1
-            for screen in home food scan coach profile; do
+            for screen in home food scan coach profile pro; do
               xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
               xcrun simctl launch "$DEVICE" com.calocare.app -AppleLanguages "($lang)" -AppleLocale "$([ "$lang" = en ] && echo en_US || echo vi_VN)" -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg"
               sleep 6

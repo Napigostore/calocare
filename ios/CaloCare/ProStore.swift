@@ -14,6 +14,40 @@ final class ProStore: ObservableObject {
     static let productIds = ["calocare.pro.yearly", "calocare.pro.monthly"]
 
     @Published var products: [Product] = []
+
+    /// One plan as the paywall shows it.
+    struct Plan: Identifiable {
+        var id: String
+        var yearly: Bool
+        var displayPrice: String
+        var price: Double
+        var trialDays: Int
+    }
+
+    var plans: [Plan] {
+        if Demo.active {
+            return [Plan(id: "calocare.pro.yearly", yearly: true, displayPrice: Lang.en ? "$19.99" : "199.000 ₫", price: 19.99, trialDays: 7),
+                    Plan(id: "calocare.pro.monthly", yearly: false, displayPrice: Lang.en ? "$2.99" : "29.000 ₫", price: 2.99, trialDays: 0)]
+        }
+        return products.map { p in
+            Plan(id: p.id, yearly: p.id == "calocare.pro.yearly", displayPrice: p.displayPrice, price: (p.price as NSDecimalNumber).doubleValue, trialDays: Self.trialDays(p))
+        }
+    }
+
+    private static func trialDays(_ product: Product) -> Int {
+        guard let offer = product.subscription?.introductoryOffer, offer.paymentMode == .freeTrial else { return 0 }
+        switch offer.period.unit {
+        case .day: return offer.period.value
+        case .week: return offer.period.value * 7
+        case .month: return offer.period.value * 30
+        case .year: return offer.period.value * 365
+        @unknown default: return 0
+        }
+    }
+
+    func buy(_ plan: Plan) async {
+        if let product = products.first(where: { $0.id == plan.id }) { await buy(product) }
+    }
     @Published var quota: Quota?
     @Published var showPaywall = false
     @Published var busy = false
@@ -30,6 +64,7 @@ final class ProStore: ObservableObject {
                 if case .verified(let tx) = result { await self?.send(result.jwsRepresentation); await tx.finish() }
             }
         }
+        if Demo.screen == "pro" { showPaywall = true }
         NotificationCenter.default.addObserver(forName: .proRequired, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in self?.showPaywall = true }
         }
@@ -39,6 +74,7 @@ final class ProStore: ObservableObject {
 
     /// Loads the prices and re-sends active subscriptions, so the server knows about renewals and reinstalls.
     func refresh() async {
+        guard !Demo.active else { return }
         if products.isEmpty, let loaded = try? await Product.products(for: Self.productIds) {
             products = loaded.sorted { Self.productIds.firstIndex(of: $0.id) ?? 0 < Self.productIds.firstIndex(of: $1.id) ?? 0 }
         }

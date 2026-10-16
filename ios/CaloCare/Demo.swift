@@ -11,7 +11,7 @@ enum Demo {
         switch screen {
         case "food", "scan": return 1
         case "coach": return 2
-        case "profile": return 3
+        case "profile", "pro": return 3
         default: return 0
         }
     }
