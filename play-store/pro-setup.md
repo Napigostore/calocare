@@ -68,11 +68,11 @@ Bạn có thể đổi các con số này bất cứ lúc nào trong `server/src
 1. **Ký hợp đồng ứng dụng trả phí:** App Store Connect → Business (Thỏa thuận, Thuế, Ngân hàng) → ký **Paid Apps Agreement**, điền ngân hàng và thuế. Chưa ký thì không bán được.
 2. **Tạo nhóm và gói thuê bao:** CaloCare → Monetization → Subscriptions → tạo nhóm **CaloCare Pro**, rồi thêm 2 gói.
    - **Gói năm:**
-     - Product ID: `calocare.pro.yearly` (phải đúng chính xác).
+     - Product ID: `com.napigo.calocare.pro.yearly` (đã tạo; app dùng đúng mã này).
      - Thời hạn 1 năm, giá $19.99.
      - Việt Nam để Apple tự quy đổi.
    - **Gói tháng:**
-     - Product ID: `calocare.pro.monthly`.
+     - Product ID: `com.napigo.calocare.pro.Monthly` (đã tạo, chữ M viết hoa).
      - Thời hạn 1 tháng, giá $1.99.
      - Việt Nam để Apple tự quy đổi.
    - **Với mỗi gói:**

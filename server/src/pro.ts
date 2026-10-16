@@ -17,7 +17,8 @@ export const PACKAGE = "com.calocare.app";
 export const BUNDLE_ID = "com.calocare.app";
 /** Play: one subscription with a monthly and a yearly base plan. App Store: two products in one group. */
 export const PLAY_SUBSCRIPTION = "calocare_pro";
-export const APPLE_PRODUCTS = ["calocare.pro.monthly", "calocare.pro.yearly"];
+// As created in App Store Connect, where product ids cannot be renamed.
+export const APPLE_PRODUCTS = ["com.napigo.calocare.pro.Monthly", "com.napigo.calocare.pro.yearly"];
 /** One purchase can unlock a few devices of the same person (phone, tablet, reinstall), not a whole group chat. */
 export const MAX_DEVICES_PER_PURCHASE = 5;
 

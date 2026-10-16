@@ -5,7 +5,7 @@ import SwiftUI
 struct ProView: View {
     @EnvironmentObject var pro: ProStore
     @Environment(\.dismiss) private var dismiss
-    @State private var picked = "calocare.pro.yearly"
+    @State private var picked = ProStore.yearlyId
 
     var body: some View {
         NavigationStack {

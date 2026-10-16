@@ -163,7 +163,7 @@ try {
   check("an English app is told about its limit in English", r.status === 402 && r.body.message.startsWith("You've used today's"), JSON.stringify(r));
 
   // CaloCare Pro bought on an iPhone: the signed transaction is checked against the root certificate.
-  const appleTx = { bundleId: "com.calocare.app", productId: "calocare.pro.yearly", originalTransactionId: `orig-${Date.now()}`, transactionId: "t1", expiresDate: Date.now() + 365 * 864e5, environment: "Sandbox" };
+  const appleTx = { bundleId: "com.calocare.app", productId: "com.napigo.calocare.pro.yearly", originalTransactionId: `orig-${Date.now()}`, transactionId: "t1", expiresDate: Date.now() + 365 * 864e5, environment: "Sandbox" };
   r = await call("/v1/pro", c, { platform: "ios", transaction: appleTransaction(appleTx, { tamper: true }) });
   check("a tampered App Store transaction is refused", r.status === 400 && r.body.error === "bad_purchase", JSON.stringify(r));
   r = await call("/v1/pro", c, { platform: "ios", transaction: appleTransaction({ ...appleTx, bundleId: "com.other.app" }) });
@@ -177,6 +177,8 @@ try {
   check("an expired subscription does not give Pro", r.status === 200 && r.body.quota.pro === false, JSON.stringify(r));
 
   // CaloCare Pro bought on Android: the token is checked with Google Play, and acknowledged.
+  // Devices linked by earlier runs would count against the per-purchase device limit.
+  await sql("DELETE FROM pro WHERE platform = 'android'");
   const g = device();
   r = await call("/v1/pro", g, { platform: "android", token: "play-active" });
   check("an active Play subscription turns on Pro and is acknowledged", r.status === 200 && r.body.quota.pro === true && acknowledged.includes("play-active"), JSON.stringify(r));

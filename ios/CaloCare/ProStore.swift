@@ -11,7 +11,10 @@ extension Notification.Name {
 /// on the larger AI allowance for this device.
 @MainActor
 final class ProStore: ObservableObject {
-    static let productIds = ["calocare.pro.yearly", "calocare.pro.monthly"]
+    // The product ids as created in App Store Connect (they cannot be renamed there; note the capital M).
+    static let yearlyId = "com.napigo.calocare.pro.yearly"
+    static let monthlyId = "com.napigo.calocare.pro.Monthly"
+    static let productIds = [yearlyId, monthlyId]
 
     @Published var products: [Product] = []
 
@@ -27,11 +30,11 @@ final class ProStore: ObservableObject {
     var plans: [Plan] {
         if Demo.active {
             // The prices set in App Store Connect (U.S. storefront).
-            return [Plan(id: "calocare.pro.yearly", yearly: true, displayPrice: "$19.99", price: 19.99, trialDays: 7),
-                    Plan(id: "calocare.pro.monthly", yearly: false, displayPrice: "$1.99", price: 1.99, trialDays: 0)]
+            return [Plan(id: Self.yearlyId, yearly: true, displayPrice: "$19.99", price: 19.99, trialDays: 7),
+                    Plan(id: Self.monthlyId, yearly: false, displayPrice: "$1.99", price: 1.99, trialDays: 0)]
         }
         return products.map { p in
-            Plan(id: p.id, yearly: p.id == "calocare.pro.yearly", displayPrice: p.displayPrice, price: (p.price as NSDecimalNumber).doubleValue, trialDays: Self.trialDays(p))
+            Plan(id: p.id, yearly: p.id == Self.yearlyId, displayPrice: p.displayPrice, price: (p.price as NSDecimalNumber).doubleValue, trialDays: Self.trialDays(p))
         }
     }
 
