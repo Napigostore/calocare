@@ -1,5 +1,5 @@
 """Writes the App Store listing in fastlane's format (ios/fastlane/metadata, ios/fastlane/screenshots) for
-the "App Store listing" job in .github/workflows/ios.yml, which uploads it with the App Store Connect API.
+the "listing" job in .github/workflows/ios.yml, which uploads it with tools/asc_listing.py.
 
     python tools/store_assets.py      # frames the simulator screenshots first
     python tools/export_appstore.py
