@@ -131,10 +131,14 @@ jobs:
           printf '%s\n' "$KEY_P8" > "$KEY_PATH"
           AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER")
           # Each upload needs a build number higher than the last; the run number provides one.
+          # The archive is built unsigned: signing it here would need a development profile, which Apple only
+          # issues to teams with a registered iPhone. The export below signs it for App Store distribution,
+          # which needs no device.
           xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/CaloCare.xcarchive" \
-            DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            "${AUTH[@]}" archive > archive.log 2>&1 || report archive.log
+            DEVELOPMENT_TEAM="$TEAM" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            archive > archive.log 2>&1 || report archive.log
           grep -q "ARCHIVE SUCCEEDED" archive.log || report archive.log
 
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
