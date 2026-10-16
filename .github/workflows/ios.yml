@@ -33,6 +33,11 @@ on:
         type: boolean
         default: false
 
+# One run at a time: two runs finishing out of order would publish the older screenshots last.
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: macos-15
