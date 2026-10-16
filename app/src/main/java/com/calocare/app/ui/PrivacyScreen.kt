@@ -54,19 +54,60 @@ object Privacy {
         "Không phải tư vấn y khoa" to
             "CaloCare cung cấp ước tính và gợi ý tham khảo về dinh dưỡng và vận động. Ứng dụng không chẩn đoán, điều trị hay thay thế ý kiến của bác sĩ.",
     )
+
+    val sectionsEn: List<Pair<String, String>> = listOf(
+        "Summary" to
+            "CaloCare keeps your profile and log on your phone. The app needs no account, shows no ads and sells no data. " +
+            "Data leaves the device only when you choose to use an AI feature or search for food online, as described below.",
+        "Data the app stores on your phone" to
+            "• Profile: name, sex, birth year, height, weight, activity level, goal.\n" +
+            "• Health details you enter: conditions to watch, allergies, diet.\n" +
+            "• Food log, workouts, weight history and foods you create.\n" +
+            "This data sits in the app's private storage and is not backed up anywhere else.",
+        "Data from watches and fitness bands (Health Connect, Apple Health)" to
+            "When you connect and grant permission, CaloCare only READS: active calories, total calories burned, steps, sleep, weight and height. " +
+            "This data is used only to work out calories burned, draw progress charts and give advice inside the app. " +
+            "CaloCare never writes to Health Connect or Apple Health, never sends this data off the device and never uses it for advertising. " +
+            "You can withdraw permission at any time in Health Connect (Android) or Settings → Health (iPhone).",
+        "AI features" to
+            "When you use an AI feature, the following is sent through CaloCare's server to the AI provider Anthropic for processing:\n" +
+            "• Meal photos: the photo and a profile summary (sex, age, height, weight, goal, conditions, allergies, diet).\n" +
+            "• Coach chat: the conversation, a profile summary and your log for the last 7 days.\n" +
+            "• Food estimates: the food name you typed.\n" +
+            "CaloCare's server only forwards these requests and does not store your photos, conversations or profile. " +
+            "To count usage, the server keeps an anonymous device code (a hash containing no name, phone number or email) with the number of requests used.\n" +
+            "When you correct a dish the AI got wrong, the two names (the AI's and the one you chose) are sent to CaloCare's server, without the photo or your profile, " +
+            "so the AI recognises that dish correctly for everyone next time.\n" +
+            "When you create a new food, or adjust one by its ingredients, its name and nutrition figures (without photos, your profile or your log) " +
+            "are sent to CaloCare's server as a suggestion for the shared food library. A food reaches other users only after the CaloCare team has reviewed it.\n" +
+            "If you enter your own API key (Anthropic or DeepSeek) under Advanced, data goes straight to that provider and is handled under its policy.",
+        "Searching for food online" to
+            "When you tap “Find product”, your search words are sent to Open Food Facts (openfoodfacts.org), with no personal information.",
+        "Camera and photos" to
+            "The app uses the camera (Camera permission) or your photo library only when you choose to photograph a meal. Only the part of the picture inside the guide circle is sent for analysis; the photo is not saved to your log or gallery.",
+        "Deleting your data" to
+            "Go to Profile → “Delete all data” to remove your profile, log and API key from the device. Uninstalling the app also deletes all its data.",
+        "Children" to
+            "CaloCare is not meant for children under 13. Its calorie targets are calculated for adults.",
+        "Not medical advice" to
+            "CaloCare provides estimates and general suggestions about nutrition and exercise. It does not diagnose or treat any condition, and it does not replace your doctor's advice.",
+    )
+
+    /** The policy in the app's language. */
+    val shown get() = if (com.calocare.app.Lang.en) sectionsEn else sections
 }
 
 @Composable
 fun PrivacyContent() {
     Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Privacy.sections.forEach { (title, body) ->
+        Privacy.shown.forEach { (title, body) ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Text(body, style = MaterialTheme.typography.bodyMedium)
             }
         }
         if (Privacy.CONTACT_EMAIL.isNotBlank()) {
-            Text("Liên hệ: ${Privacy.CONTACT_EMAIL}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+            Text(com.calocare.app.L("Liên hệ: ", "Contact: ") + Privacy.CONTACT_EMAIL, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
         }
     }
 }

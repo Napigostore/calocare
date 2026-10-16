@@ -1,5 +1,6 @@
 package com.calocare.app.data
 
+import com.calocare.app.L
 import kotlinx.serialization.Serializable
 
 /** Where a dish sits in a meal; drives the suggested eating order. */
@@ -15,9 +16,9 @@ object Course {
 
     val all = listOf(SOUP, VEG, PROTEIN, MAIN, FRUIT, DESSERT, DRINK, SNACK)
 
-    val labels = mapOf(
-        SOUP to "Canh / khai vị", VEG to "Rau", PROTEIN to "Đạm", MAIN to "Món chính",
-        FRUIT to "Trái cây", DESSERT to "Tráng miệng", DRINK to "Đồ uống", SNACK to "Ăn vặt",
+    val labels get() = mapOf(
+        SOUP to L("Canh / khai vị", "Soups & starters"), VEG to L("Rau", "Vegetables"), PROTEIN to L("Đạm", "Protein"), MAIN to L("Món chính", "Mains"),
+        FRUIT to L("Trái cây", "Fruit"), DESSERT to L("Tráng miệng", "Desserts"), DRINK to L("Đồ uống", "Drinks"), SNACK to L("Ăn vặt", "Snacks"),
     )
 }
 
@@ -47,10 +48,10 @@ object Tag {
     const val ANIMAL = "animal" // animal-derived but not meat (egg, dairy, honey)
     const val ALCOHOL = "alcohol"
 
-    val allergens = linkedMapOf(
-        PEANUT to "Đậu phộng", NUTS to "Hạt cây (điều, hạnh nhân…)", SHELLFISH to "Tôm cua, hải sản có vỏ",
-        FISH to "Cá", MILK to "Sữa / lactose", EGG to "Trứng", GLUTEN to "Gluten (lúa mì)",
-        SOY to "Đậu nành", SESAME to "Mè (vừng)",
+    val allergens get() = linkedMapOf(
+        PEANUT to L("Đậu phộng", "Peanuts"), NUTS to L("Hạt cây (điều, hạnh nhân…)", "Tree nuts (cashew, almond…)"), SHELLFISH to L("Tôm cua, hải sản có vỏ", "Shellfish"),
+        FISH to L("Cá", "Fish"), MILK to L("Sữa / lactose", "Milk / lactose"), EGG to L("Trứng", "Eggs"), GLUTEN to L("Gluten (lúa mì)", "Gluten (wheat)"),
+        SOY to L("Đậu nành", "Soy"), SESAME to L("Mè (vừng)", "Sesame"),
     )
 
     val all = allergens.keys + listOf(
@@ -64,8 +65,8 @@ object Condition {
     const val GOUT = "gout"
     const val CHOLESTEROL = "cholesterol"
 
-    val labels = linkedMapOf(
-        DIABETES to "Tiểu đường", HYPERTENSION to "Cao huyết áp", GOUT to "Gout", CHOLESTEROL to "Mỡ máu cao",
+    val labels get() = linkedMapOf(
+        DIABETES to L("Tiểu đường", "Diabetes"), HYPERTENSION to L("Cao huyết áp", "High blood pressure"), GOUT to "Gout", CHOLESTEROL to L("Mỡ máu cao", "High cholesterol"),
     )
 }
 
@@ -76,9 +77,9 @@ object Diet {
     const val KETO = "keto"
     const val HALAL = "halal"
 
-    val labels = linkedMapOf(
-        NONE to "Không kiêng", VEGETARIAN to "Ăn chay (có trứng sữa)", VEGAN to "Thuần chay",
-        KETO to "Keto / ít tinh bột", HALAL to "Halal",
+    val labels get() = linkedMapOf(
+        NONE to L("Không kiêng", "No restrictions"), VEGETARIAN to L("Ăn chay (có trứng sữa)", "Vegetarian (eggs & dairy)"), VEGAN to L("Thuần chay", "Vegan"),
+        KETO to L("Keto / ít tinh bột", "Keto / low-carb"), HALAL to "Halal",
     )
 }
 
@@ -89,8 +90,8 @@ object Goal {
     const val GYM = "gym"
     const val RUN = "run"
 
-    val labels = linkedMapOf(
-        LOSE to "Giảm cân", MAINTAIN to "Giữ cân", GAIN to "Tăng cân", GYM to "Gym · tăng cơ", RUN to "Chạy bộ",
+    val labels get() = linkedMapOf(
+        LOSE to L("Giảm cân", "Lose weight"), MAINTAIN to L("Giữ cân", "Maintain"), GAIN to L("Tăng cân", "Gain weight"), GYM to L("Gym · tăng cơ", "Gym · build muscle"), RUN to L("Chạy bộ", "Running"),
     )
     val emoji = mapOf(LOSE to "🔥", MAINTAIN to "⚖️", GAIN to "🍚", GYM to "🏋️", RUN to "🏃")
 }
@@ -102,7 +103,7 @@ object Meal {
     const val SNACK = "snack"
 
     val all = listOf(BREAKFAST, LUNCH, DINNER, SNACK)
-    val labels = mapOf(BREAKFAST to "Sáng", LUNCH to "Trưa", DINNER to "Tối", SNACK to "Ăn vặt")
+    val labels get() = mapOf(BREAKFAST to L("Sáng", "Breakfast"), LUNCH to L("Trưa", "Lunch"), DINNER to L("Tối", "Dinner"), SNACK to L("Ăn vặt", "Snack"))
     val emoji = mapOf(BREAKFAST to "🌅", LUNCH to "☀️", DINNER to "🌙", SNACK to "🍪")
 
     fun forHour(hour: Int) = when (hour) {
@@ -117,7 +118,7 @@ object Region {
     const val VN = "vn"
     const val INTL = "intl"
     const val ALL = "all"
-    val labels = linkedMapOf(VN to "Việt Nam", INTL to "Quốc tế / Âu Mỹ")
+    val labels get() = linkedMapOf(VN to L("Việt Nam", "Vietnamese"), INTL to L("Quốc tế / Âu Mỹ", "International / Western"))
 }
 
 @Serializable
@@ -191,7 +192,8 @@ data class Profile(
     val conditions: Set<String> = emptySet(),
     val allergies: Set<String> = emptySet(),
     val diet: String = Diet.NONE,
-    val region: String = Region.VN,
+    // Which cuisine menus and the quick-add grid favour: international dishes for English-speaking users.
+    val region: String = if (com.calocare.app.Lang.en) Region.INTL else Region.VN,
     val wearableLinked: Boolean = false,
     /** Correction learned from the real weight trend, added on top of the formula target. */
     val kcalAdjust: Int = 0,

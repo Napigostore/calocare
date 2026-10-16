@@ -31,14 +31,14 @@ struct RootView: View {
         ZStack(alignment: .bottom) {
             if store.data.profile.onboarded {
                 TabView(selection: $tab) {
-                    HomeView().tabItem { Label("Hôm nay", systemImage: "house.fill") }.tag(0)
-                    FoodView().tabItem { Label("Ăn uống", systemImage: "fork.knife") }.tag(1)
+                    HomeView().tabItem { Label(L("Hôm nay", "Today"), systemImage: "house.fill") }.tag(0)
+                    FoodView().tabItem { Label(L("Ăn uống", "Food"), systemImage: "fork.knife") }.tag(1)
                     CoachView().tabItem { Label("Coach", systemImage: "bubble.left.and.bubble.right.fill") }.tag(2)
-                    ProfileView().tabItem { Label("Hồ sơ", systemImage: "person.fill") }.tag(3)
+                    ProfileView().tabItem { Label(L("Hồ sơ", "Profile"), systemImage: "person.fill") }.tag(3)
                 }
             } else {
                 NavigationStack {
-                    ProfileForm(title: "🥗 CaloCare", saveLabel: "Bắt đầu")
+                    ProfileForm(title: "🥗 CaloCare", saveLabel: L("Bắt đầu", "Get started"))
                 }
             }
             if let toast = store.toast {

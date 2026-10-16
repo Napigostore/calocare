@@ -15,6 +15,10 @@ ROOT = os.path.join(os.path.dirname(__file__), '..')
 SRC = os.path.join(ROOT, 'app/src/main/java/com/calocare/app/data/FoodDb.kt')
 OUT = os.path.join(ROOT, 'server/src/dishes.ts')
 
+FULL = re.compile(
+    r'f\("(?P<id>[^"]+)", "(?P<name>[^"]+)", "(?P<emoji>[^"]*)", "(?P<serving>[^"]+)", (?P<kcal>\d+), (?P<p>[\d.]+), (?P<c>[\d.]+), (?P<f>[\d.]+), '
+    r'(?P<course>[A-Z]+)(?:, "(?P<tags>[^"]*)")?(?:, (?:region = )?(?P<region>[AI]))?\)'
+)
 LINE = re.compile(
     r'f\("[^"]+", "(?P<name>[^"]+)", "[^"]*", "[^"]+", (?P<kcal>\d+), (?P<p>[\d.]+), (?P<c>[\d.]+), (?P<f>[\d.]+), [A-Z]+(?:, "(?P<tags>[^"]*)")?'
 )
@@ -35,3 +39,20 @@ body += 'export const FOODS: TableFood[] = [\n' + ''.join('  ' + json.dumps(f, e
 body += 'export const DISHES: string[] = FOODS.map((f) => f.name);\n'
 io.open(OUT, 'w', encoding='utf-8', newline='\n').write(body)
 print(f'{len(foods)} foods -> {os.path.relpath(OUT, ROOT)}')
+
+# server/seed.sql: INSERT OR IGNORE keeps rows already in the database (and any edits made in the admin page).
+# New rows carry this export's time as their version, so apps that already synchronised pick them up.
+import time
+version = int(time.time() * 1000)
+q = lambda s: "'" + s.replace("'", "''") + "'"
+rows = []
+for line in lines:
+    m = FULL.search(line)
+    rows.append('(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, \'published\', \'seed\', 0, %d)' % (
+        q(m['id']), q(m['name']), q(m['emoji']), q(m['serving']), m['kcal'], m['p'], m['c'], m['f'], q(m['course'].lower()),
+        q(m['tags'] or ''), q({'A': 'all', 'I': 'intl', None: 'vn'}[m['region']]), version))
+seed = ("-- Generated from the app's FoodDb.kt by tools/export_dishes.py. INSERT OR IGNORE: dishes edited in the admin page are never overwritten.\n"
+        "INSERT OR IGNORE INTO dishes (id, name, emoji, serving, kcal, protein_g, carbs_g, fat_g, course, tags, region, status, source, devices, updated) VALUES\n"
+        + ',\n'.join(rows) + ';\n')
+io.open(os.path.join(ROOT, 'server/seed.sql'), 'w', encoding='utf-8', newline='\n').write(seed)
+print(f'{len(rows)} dishes -> server/seed.sql')

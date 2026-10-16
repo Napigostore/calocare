@@ -18,6 +18,8 @@ if (!existsSync(".dev.vars")) {
 }
 
 let failNext = false;
+/** The last request the worker sent to the fake API, to check what the model was asked. */
+let lastRequest = null;
 const fake = createServer((req, res) => {
   let raw = "";
   req.on("data", (c) => (raw += c));
@@ -28,6 +30,7 @@ const fake = createServer((req, res) => {
       return res.end(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "boom" } }));
     }
     const body = JSON.parse(raw);
+    lastRequest = body;
     const structured = !!body.output_config?.format;
     const text = structured
       ? JSON.stringify({ items: [{ name: "Phở bò", alternatives: [], emoji: "🍜", portion: "1 tô", size: "medium", qty: 1, kcal: 450, protein_g: 25, carbs_g: 60, fat_g: 12, course: "main", tags: ["meat"], confidence: 0.8 }], advice: "ok" })
@@ -44,10 +47,10 @@ worker.stderr.on("data", (d) => (log += d));
 
 const base = `http://127.0.0.1:${PORT}`;
 const device = () => randomBytes(32).toString("hex");
-const call = (path, dev, body, key = APP_KEY) =>
+const call = (path, dev, body, key = APP_KEY, lang = "vi") =>
   fetch(base + path, {
     method: body ? "POST" : "GET",
-    headers: { "x-app-key": key, "x-device": dev, "content-type": "application/json" },
+    headers: { "x-app-key": key, "x-device": dev, "content-type": "application/json", "x-lang": lang },
     body: body ? JSON.stringify(body) : undefined,
   }).then(async (r) => ({ status: r.status, body: await r.json() }));
 
@@ -122,6 +125,21 @@ try {
   for (let i = 0; i < 10; i++) ok += (await call("/v1/chat", c, chat)).status === 200 ? 1 : 0;
   r = await call("/v1/chat", c, chat);
   check("11th chat of the day is refused after the trial", ok === 10 && r.status === 429, `ok=${ok} ${JSON.stringify(r)}`);
+  r = await call("/v1/chat", c, chat, APP_KEY, "en");
+  check("an English app is told about its limit in English", r.status === 429 && r.body.message.startsWith("You've used all"), JSON.stringify(r));
+
+  // The language of the answer: one line in the request; the cached system prompt is the same for both languages.
+  const e = device();
+  await call("/v1/photo", e, photo, APP_KEY, "en");
+  const enPhoto = lastRequest;
+  await call("/v1/photo", e, photo);
+  const viPhoto = lastRequest;
+  check("an English photo request asks for English answers", JSON.stringify(enPhoto.messages).includes("LANGUAGE: the user reads English") && !JSON.stringify(viPhoto.messages).includes("LANGUAGE:"), "");
+  check("the cached photo prompt is the same in both languages", JSON.stringify(enPhoto.system[0]) === JSON.stringify(viPhoto.system[0]), "");
+  await call("/v1/chat", e, chat, APP_KEY, "en");
+  check("the English coach replies in English", lastRequest.system.includes("Reply in English"), lastRequest.system.slice(0, 200));
+  const page = await fetch(base + "/privacy?lang=en").then((x) => x.text());
+  check("the privacy policy is published in English too", page.includes("CaloCare – Privacy Policy"), page.slice(0, 120));
 
   // A new day restores the daily allowance but not the trial.
   await sql(`UPDATE usage SET day = '2000-01-01' WHERE device = '${c}'`);

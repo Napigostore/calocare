@@ -1,5 +1,6 @@
 package com.calocare.app.ui
 
+import com.calocare.app.L
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -86,33 +87,36 @@ fun LazyListScope.progressCharts(vm: AppViewModel, data: AppData, range: Int, on
 
     item {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(7 to "7 ngày", 30 to "30 ngày").forEach { (n, label) -> FilterChip(range == n, { onRange(n) }, label = { Text(label) }) }
+            listOf(7 to L("7 ngày", "7 days"), 30 to L("30 ngày", "30 days")).forEach { (n, label) -> FilterChip(range == n, { onRange(n) }, label = { Text(label) }) }
         }
     }
 
     Nutrition.adaptive(data)?.let { a ->
         item {
-            SectionCard(title = "🧠 Mục tiêu calo thích nghi") {
+            SectionCard(title = L("🧠 Mục tiêu calo thích nghi", "🧠 Adaptive calorie target")) {
                 Text(
-                    "Trong ${a.days} ngày qua cân nặng của bạn thay đổi ${signed(a.actualPerWeek)} kg/tuần, trong khi kế hoạch là ${signed(a.plannedPerWeek)} kg/tuần. " +
+                    L("Trong ${a.days} ngày qua cân nặng của bạn thay đổi ${signed(a.actualPerWeek)} kg/tuần, trong khi kế hoạch là ${signed(a.plannedPerWeek)} kg/tuần. " +
                         "Cơ thể bạn tiêu hao ${if (a.delta > 0) "nhiều" else "ít"} hơn công thức ước tính.",
+                        "Over the last ${a.days} days your weight changed ${signed(a.actualPerWeek)} kg/week against a plan of ${signed(a.plannedPerWeek)} kg/week. " +
+                        "Your body burns ${if (a.delta > 0) "more" else "less"} than the formula estimates."),
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                Button(onClick = { vm.applyAdaptive(a.delta) }) { Text("Điều chỉnh mục tiêu ${if (a.delta > 0) "+" else ""}${a.delta} kcal/ngày") }
+                Button(onClick = { vm.applyAdaptive(a.delta) }) { Text(L("Điều chỉnh mục tiêu ${if (a.delta > 0) "+" else ""}${a.delta} kcal/ngày", "Adjust target by ${if (a.delta > 0) "+" else ""}${a.delta} kcal/day")) }
             }
         }
     }
 
     item {
-        SectionCard(title = "Calo nạp vào / tiêu hao") {
+        SectionCard(title = L("Calo nạp vào / tiêu hao", "Calories in / out")) {
             val outs = days.map { Nutrition.kcalOut(data, it).total.toFloat() }
             BarChart(days, listOf(totals.map { it.kcal }, outs), listOf(Palette.In, Palette.Out.copy(alpha = 0.75f)), target.toFloat())
-            if (logged.isEmpty()) Text("Chưa có nhật ký trong khoảng này.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (logged.isEmpty()) Text(L("Chưa có nhật ký trong khoảng này.", "Nothing logged in this period."), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             else {
                 val balance = logged.sumOf { (totals[it].kcal - outs[it]).toDouble() }
-                Text("Trung bình nạp ${logged.map { totals[it].kcal }.average().roundToInt()} · tiêu ${logged.map { outs[it] }.average().roundToInt()} kcal/ngày", style = MaterialTheme.typography.bodyMedium)
+                Text(L("Trung bình nạp ${logged.map { totals[it].kcal }.average().roundToInt()} · tiêu ${logged.map { outs[it] }.average().roundToInt()} kcal/ngày", "Average in ${logged.map { totals[it].kcal }.average().roundToInt()} · out ${logged.map { outs[it] }.average().roundToInt()} kcal/day"), style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    "${logged.size}/$range ngày có ghi · ${if (balance <= 0) "thâm hụt" else "dư"} ${abs(balance).roundToInt()} kcal ≈ ${signed((balance / 7700.0).toFloat())} kg · đạt mục tiêu ${days.count { Nutrition.onTarget(data, it) }} ngày",
+                    L("${logged.size}/$range ngày có ghi · ${if (balance <= 0) "thâm hụt" else "dư"} ${abs(balance).roundToInt()} kcal ≈ ${signed((balance / 7700.0).toFloat())} kg · đạt mục tiêu ${days.count { Nutrition.onTarget(data, it) }} ngày",
+                        "${logged.size}/$range days logged · ${if (balance <= 0) "deficit" else "surplus"} ${abs(balance).roundToInt()} kcal ≈ ${signed((balance / 7700.0).toFloat())} kg · on target ${days.count { Nutrition.onTarget(data, it) }} days"),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -120,7 +124,7 @@ fun LazyListScope.progressCharts(vm: AppViewModel, data: AppData, range: Int, on
     }
 
     item {
-        SectionCard(title = "Cân nặng") {
+        SectionCard(title = L("Cân nặng", "Weight")) {
             val from = days.first().toString()
             val points = data.weights.filter { it.date >= from }
             if (points.size >= 2) {
@@ -128,17 +132,17 @@ fun LazyListScope.progressCharts(vm: AppViewModel, data: AppData, range: Int, on
                 Text("${"%.1f".format(points.first().kg)} → ${"%.1f".format(points.last().kg)} kg (${signed(points.last().kg - points.first().kg)} kg)", fontWeight = FontWeight.SemiBold)
             } else {
                 Text("${"%.1f".format(p.weightKg)} kg · BMI ${"%.1f".format(Nutrition.bmi(p))} (${Nutrition.bmiLabel(Nutrition.bmi(p))})", fontWeight = FontWeight.SemiBold)
-                Text("Cân mỗi tuần vào cùng một buổi sáng để thấy đường xu hướng.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(L("Cân mỗi tuần vào cùng một buổi sáng để thấy đường xu hướng.", "Weigh yourself weekly on the same morning to see the trend line."), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 
     if (logged.isNotEmpty()) item {
-        SectionCard(title = "Đa lượng trung bình mỗi ngày") {
+        SectionCard(title = L("Đa lượng trung bình mỗi ngày", "Average daily macros")) {
             val macros = Nutrition.macroTargets(p, target)
-            MacroBar("Đạm", logged.map { totals[it].protein }.average().toFloat(), macros.protein, Palette.Protein)
-            MacroBar("Tinh bột", logged.map { totals[it].carbs }.average().toFloat(), macros.carbs, Palette.Carbs)
-            MacroBar("Chất béo", logged.map { totals[it].fat }.average().toFloat(), macros.fat, Palette.Fat)
+            MacroBar(L("Đạm", "Protein"), logged.map { totals[it].protein }.average().toFloat(), macros.protein, Palette.Protein)
+            MacroBar(L("Tinh bột", "Carbs"), logged.map { totals[it].carbs }.average().toFloat(), macros.carbs, Palette.Carbs)
+            MacroBar(L("Chất béo", "Fat"), logged.map { totals[it].fat }.average().toFloat(), macros.fat, Palette.Fat)
         }
     }
 
@@ -148,17 +152,17 @@ fun LazyListScope.progressCharts(vm: AppViewModel, data: AppData, range: Int, on
         val sleep = wear.mapNotNull { it?.sleepMin?.takeIf { m -> m > 0 } }
         val from = days.first().toString()
         val workouts = data.exercises.filter { it.date >= from }
-        SectionCard(title = "Vận động & phục hồi") {
+        SectionCard(title = L("Vận động & phục hồi", "Activity & recovery")) {
             if (steps.any { it > 0f }) {
                 BarChart(days, listOf(steps), listOf(MaterialTheme.colorScheme.tertiary), 8000f)
-                Text("👟 Trung bình ${steps.filter { it > 0f }.average().roundToInt()} bước/ngày (đường kẻ: 8.000 bước)", style = MaterialTheme.typography.bodyMedium)
+                Text(L("👟 Trung bình ${steps.filter { it > 0f }.average().roundToInt()} bước/ngày (đường kẻ: 8.000 bước)", "👟 Average ${steps.filter { it > 0f }.average().roundToInt()} steps/day (line: 8,000 steps)"), style = MaterialTheme.typography.bodyMedium)
             } else {
-                Text("👟 Chưa có dữ liệu bước chân — kết nối đồng hồ ở bên dưới.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(L("👟 Chưa có dữ liệu bước chân — kết nối đồng hồ ở bên dưới.", "👟 No step data yet — connect a watch below."), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text("🏋️ ${workouts.size} buổi tập tự ghi · ${workouts.sumOf { it.minutes }} phút · ${workouts.sumOf { it.kcal }} kcal", style = MaterialTheme.typography.bodyMedium)
+            Text(L("🏋️ ${workouts.size} buổi tập tự ghi · ${workouts.sumOf { it.minutes }} phút · ${workouts.sumOf { it.kcal }} kcal", "🏋️ ${workouts.size} logged workouts · ${workouts.sumOf { it.minutes }} min · ${workouts.sumOf { it.kcal }} kcal"), style = MaterialTheme.typography.bodyMedium)
             if (sleep.isNotEmpty()) {
                 val avg = sleep.average().roundToInt()
-                Text("😴 Ngủ trung bình ${avg / 60}h${"%02d".format(avg % 60)} mỗi đêm" + if (avg < 390) " — dưới mức 7 giờ khuyến nghị" else "", style = MaterialTheme.typography.bodyMedium)
+                Text(L("😴 Ngủ trung bình ${avg / 60}h${"%02d".format(avg % 60)} mỗi đêm", "😴 Average sleep ${avg / 60}h${"%02d".format(avg % 60)} a night") + if (avg < 390) L(" — dưới mức 7 giờ khuyến nghị", " — below the recommended 7 hours") else "", style = MaterialTheme.typography.bodyMedium)
             }
         }
     }

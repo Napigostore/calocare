@@ -1,5 +1,7 @@
 package com.calocare.app.ui
 
+import com.calocare.app.label
+import com.calocare.app.L
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -72,8 +74,8 @@ import kotlin.math.roundToInt
 private val dayFormat = DateTimeFormatter.ofPattern("EEEE, d/M", Locale("vi"))
 
 fun dateLabel(date: LocalDate): String = when (date) {
-    LocalDate.now() -> "Hôm nay"
-    LocalDate.now().minusDays(1) -> "Hôm qua"
+    LocalDate.now() -> L("Hôm nay", "Today")
+    LocalDate.now().minusDays(1) -> L("Hôm qua", "Yesterday")
     else -> date.format(dayFormat).replaceFirstChar { it.uppercase() }
 }
 
@@ -81,11 +83,11 @@ fun dateLabel(date: LocalDate): String = when (date) {
 fun DateSwitcher(vm: AppViewModel, modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { vm.date = vm.date.minusDays(1) }) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Ngày trước")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = L("Ngày trước", "Previous day"))
         }
         Text(dateLabel(vm.date), fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, modifier = Modifier.width(110.dp))
         IconButton(onClick = { vm.date = vm.date.plusDays(1) }, enabled = vm.date.isBefore(LocalDate.now())) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Ngày sau")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = L("Ngày sau", "Next day"))
         }
     }
 }
@@ -107,10 +109,10 @@ fun DashboardScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onC
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Xin chào${if (p.name.isNotBlank()) ", ${p.name}" else ""} 👋", style = MaterialTheme.typography.titleLarge,
+                    L("Xin chào", "Hi") + (if (p.name.isNotBlank()) ", ${p.name}" else "") + " 👋", style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
                 )
-                FilledTonalIconButton(onClick = onProfile) { Icon(Icons.Default.Person, contentDescription = "Hồ sơ") }
+                FilledTonalIconButton(onClick = onProfile) { Icon(Icons.Default.Person, contentDescription = L("Hồ sơ", "Profile")) }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -128,14 +130,15 @@ fun DashboardScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onC
                     CalorieRing(eaten.kcal, target.toFloat(), Modifier.size(150.dp))
                     Spacer(Modifier.width(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Stat("Nạp vào", "${eaten.kcal.roundToInt()}", Palette.In)
-                        Stat("Tiêu hao" + if (out.fromWearable) " ⌚" else "", "${out.total}", Palette.Out)
+                        Stat(L("Nạp vào", "Eaten"), "${eaten.kcal.roundToInt()}", Palette.In)
+                        Stat(L("Tiêu hao", "Burned") + if (out.fromWearable) " ⌚" else "", "${out.total}", Palette.Out)
                         val net = eaten.kcal.roundToInt() - out.total
-                        Stat(if (net <= 0) "Thâm hụt" else "Dư thừa", "${abs(net)}", if (net <= 0) Palette.Fat else Palette.Danger)
+                        Stat(if (net <= 0) L("Thâm hụt", "Deficit") else L("Dư thừa", "Surplus"), "${abs(net)}", if (net <= 0) Palette.Fat else Palette.Danger)
                     }
                 }
                 Text(
-                    "Tiêu hao = trao đổi chất cơ bản ${out.bmr} + vận động ${out.active}" + (if (out.exercise > 0) " + tập luyện ${out.exercise}" else "") + " kcal",
+                    L("Tiêu hao = trao đổi chất cơ bản ${out.bmr} + vận động ${out.active}", "Burned = basal metabolism ${out.bmr} + activity ${out.active}") +
+                        (if (out.exercise > 0) L(" + tập luyện ${out.exercise}", " + workouts ${out.exercise}") else "") + " kcal",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -154,26 +157,26 @@ fun DashboardScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onC
                 Column(Modifier.weight(1f)) {
                     Text(text, color = MaterialTheme.colorScheme.onPrimaryContainer, fontWeight = FontWeight.Medium)
                     val streak = Nutrition.streak(data)
-                    if (streak >= 2) Text("🔥 Chuỗi $streak ngày ghi nhật ký", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    if (streak >= 2) Text(L("🔥 Chuỗi $streak ngày ghi nhật ký", "🔥 $streak-day logging streak"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
-                if (entries.isEmpty()) Button(onClick = onAddFood) { Text("Thêm món") }
+                if (entries.isEmpty()) Button(onClick = onAddFood) { Text(L("Thêm món", "Add food")) }
             }
         }
 
         if (date == LocalDate.now()) item { NextMealCard(vm, data) }
 
         item {
-            SectionCard(title = "Dinh dưỡng đa lượng") {
-                MacroBar("Đạm", eaten.protein, macros.protein, Palette.Protein)
-                MacroBar("Tinh bột", eaten.carbs, macros.carbs, Palette.Carbs)
-                MacroBar("Chất béo", eaten.fat, macros.fat, Palette.Fat)
+            SectionCard(title = L("Dinh dưỡng đa lượng", "Macronutrients")) {
+                MacroBar(L("Đạm", "Protein"), eaten.protein, macros.protein, Palette.Protein)
+                MacroBar(L("Tinh bột", "Carbs"), eaten.carbs, macros.carbs, Palette.Carbs)
+                MacroBar(L("Chất béo", "Fat"), eaten.fat, macros.fat, Palette.Fat)
             }
         }
 
         item { WeekCard(data, target) }
 
         item {
-            SectionCard(title = "🩺 Chuyên gia khuyên", trailing = { FilledTonalButton(onClick = onCoach) { Text("Hỏi AI") } }) {
+            SectionCard(title = L("🩺 Chuyên gia khuyên", "🩺 Expert tips"), trailing = { FilledTonalButton(onClick = onCoach) { Text(L("Hỏi AI", "Ask AI")) } }) {
                 // Health conflicts in what was eaten today come first, then the general coaching tips.
                 val flagged = entries.flatMap { e -> Nutrition.warnings(e.tags, p).map { e.name to it } }.distinct()
                 flagged.take(4).forEach { (name, w) -> WarningLine(w.copy(text = "$name: ${w.text}")) }
@@ -194,20 +197,20 @@ fun NextMealCard(vm: AppViewModel, data: AppData) {
     val next = remember(data.entries, data.profile, seed) { MenuPlanner.nextMeal(data, LocalTime.now().hour, seed) }
     if (next.meal.items.isEmpty()) return
     SectionCard(
-        title = "🍽️ Bữa tiếp theo nên ăn · ${Meal.labels[next.meal.meal]}",
-        trailing = { TextButton(onClick = { seed++ }) { Text("Đổi món") } },
+        title = L("🍽️ Bữa tiếp theo nên ăn · ${Meal.labels[next.meal.meal]}", "🍽️ What to eat next · ${Meal.labels[next.meal.meal]}"),
+        trailing = { TextButton(onClick = { seed++ }) { Text(L("Đổi món", "Shuffle")) } },
     ) {
         Text(next.note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         next.meal.items.forEach { item ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 FoodImage(item.food.emoji, item.food.imageUrl, 32.dp)
                 Spacer(Modifier.width(10.dp))
-                Text("${item.food.name} × ${AppViewModel.fmtQty(item.qty)}", modifier = Modifier.weight(1f))
+                Text("${item.food.label} × ${AppViewModel.fmtQty(item.qty)}", modifier = Modifier.weight(1f))
                 Text("${(item.food.kcal * item.qty).roundToInt()} kcal", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         FilledTonalButton(onClick = { vm.addMeal(next.meal.items.map { it.food to it.qty }, next.meal.meal) }) {
-            Text("Tôi ăn bữa này · ${next.meal.kcal} kcal")
+            Text(L("Tôi ăn bữa này · ${next.meal.kcal} kcal", "I'll eat this · ${next.meal.kcal} kcal"))
         }
     }
 }
@@ -244,7 +247,7 @@ fun CalorieRing(eaten: Float, target: Float, modifier: Modifier = Modifier) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val left = (target - eaten).roundToInt()
             Text("${abs(left)}", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = if (left < 0) Palette.Danger else MaterialTheme.colorScheme.onSurface)
-            Text(if (left >= 0) "kcal còn lại" else "kcal vượt", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(if (left >= 0) L("kcal còn lại", "kcal left") else L("kcal vượt", "kcal over"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("/ ${target.roundToInt()}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
@@ -276,11 +279,11 @@ private fun WeekCard(data: AppData, target: Int) {
     val scaleMax = max(max(ins.max(), outs.max()), target.toFloat()) * 1.1f
     val targetColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-    SectionCard(title = "Xu hướng 7 ngày") {
+    SectionCard(title = L("Xu hướng 7 ngày", "7-day trend")) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Legend("Nạp vào", Palette.In)
-            Legend("Tiêu hao", Palette.Out)
-            Legend("Mục tiêu", targetColor)
+            Legend(L("Nạp vào", "Eaten"), Palette.In)
+            Legend(L("Tiêu hao", "Burned"), Palette.Out)
+            Legend(L("Mục tiêu", "Target"), targetColor)
         }
         Canvas(Modifier.fillMaxWidth().height(150.dp)) {
             val slot = size.width / days.size
@@ -303,7 +306,7 @@ private fun WeekCard(data: AppData, target: Int) {
             }
         }
         if (logged.isEmpty()) {
-            Text("Ghi nhật ký vài ngày để thấy xu hướng của bạn.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(L("Ghi nhật ký vài ngày để thấy xu hướng của bạn.", "Log a few days to see your trend."), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             val avgIn = logged.map { ins[it] }.average().roundToInt()
             val avgOut = logged.map { outs[it] }.average().roundToInt()
@@ -311,9 +314,10 @@ private fun WeekCard(data: AppData, target: Int) {
             val hits = days.count { Nutrition.onTarget(data, it) }
             // 7700 kcal is the usual estimate for one kilogram of body fat.
             val kg = balance / 7700.0
-            Text("Trung bình nạp $avgIn · tiêu $avgOut kcal/ngày (${logged.size} ngày có ghi)", style = MaterialTheme.typography.bodyMedium)
+            Text(L("Trung bình nạp $avgIn · tiêu $avgOut kcal/ngày (${logged.size} ngày có ghi)", "Average in $avgIn · out $avgOut kcal/day (${logged.size} days logged)"), style = MaterialTheme.typography.bodyMedium)
             Text(
-                "Cân bằng: ${if (balance <= 0) "thâm hụt" else "dư"} ${abs(balance).roundToInt()} kcal ≈ ${if (kg <= 0) "−" else "+"}${"%.2f".format(abs(kg))} kg · Đạt mục tiêu $hits/7 ngày",
+                L("Cân bằng: ${if (balance <= 0) "thâm hụt" else "dư"} ${abs(balance).roundToInt()} kcal ≈ ${if (kg <= 0) "−" else "+"}${"%.2f".format(abs(kg))} kg · Đạt mục tiêu $hits/7 ngày",
+                    "Balance: ${if (balance <= 0) "deficit" else "surplus"} of ${abs(balance).roundToInt()} kcal ≈ ${if (kg <= 0) "−" else "+"}${"%.2f".format(abs(kg))} kg · On target $hits/7 days"),
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -333,7 +337,7 @@ private fun Legend(label: String, color: Color) {
 fun WeightCard(data: AppData) {
     val p = data.profile
     val bmi = Nutrition.bmi(p)
-    SectionCard(title = "Cân nặng") {
+    SectionCard(title = L("Cân nặng", "Weight")) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("${"%.1f".format(p.weightKg)} kg", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -341,7 +345,8 @@ fun WeightCard(data: AppData) {
                 if (p.goal == Goal.LOSE || p.goal == Goal.GAIN) {
                     val diff = p.targetWeightKg - p.weightKg
                     Text(
-                        if (abs(diff) < 0.1f) "🏆 Đã chạm cân nặng mục tiêu!" else "Còn ${"%.1f".format(abs(diff))} kg tới mục tiêu ${"%.1f".format(p.targetWeightKg)} kg",
+                        if (abs(diff) < 0.1f) L("🏆 Đã chạm cân nặng mục tiêu!", "🏆 You've reached your target weight!")
+                        else L("Còn ${"%.1f".format(abs(diff))} kg tới mục tiêu ${"%.1f".format(p.targetWeightKg)} kg", "${"%.1f".format(abs(diff))} kg to go to your ${"%.1f".format(p.targetWeightKg)} kg target"),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

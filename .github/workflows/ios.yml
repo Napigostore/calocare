@@ -224,13 +224,17 @@ jobs:
           xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Debug -sdk iphonesimulator             -destination "id=$DEVICE" -derivedDataPath sim CODE_SIGNING_ALLOWED=NO build > sim.log 2>&1 || { tail -40 sim.log; exit 1; }
           xcrun simctl install "$DEVICE" sim/Build/Products/Debug-iphonesimulator/CaloCare.app
           mkdir -p shots
-          n=1
-          for screen in home food scan coach profile; do
-            xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
-            xcrun simctl launch "$DEVICE" com.calocare.app -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg"
-            sleep 6
-            xcrun simctl io "$DEVICE" screenshot "shots/0$n-$screen.png"
-            n=$((n+1))
+          # Vietnamese shots are 01-home.png …, English ones en-01-home.png …; -AppleLanguages picks the app's language per launch.
+          for lang in vi en; do
+            prefix=$([ "$lang" = en ] && echo "en-" || echo "")
+            n=1
+            for screen in home food scan coach profile; do
+              xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
+              xcrun simctl launch "$DEVICE" com.calocare.app -AppleLanguages "($lang)" -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg"
+              sleep 6
+              xcrun simctl io "$DEVICE" screenshot "shots/${prefix}0$n-$screen.png"
+              n=$((n+1))
+            done
           done
           ls -la shots
       - name: Publish as the "ios-screenshots" release

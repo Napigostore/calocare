@@ -74,7 +74,13 @@ final class AppStore: ObservableObject {
     /// The user's own dishes first, then the shared library.
     var foods: [Food] {
         let own = Set(data.customFoods.map { $0.id })
-        return data.customFoods + library.filter { !own.contains($0.id) }
+        let shared = library.filter { !own.contains($0.id) }
+        guard Lang.en else { return data.customFoods + shared }
+        let order = ["intl": 0, "all": 1]
+        return data.customFoods + shared.enumerated().sorted { a, b in
+            let ra = order[a.element.region] ?? 2, rb = order[b.element.region] ?? 2
+            return ra != rb ? ra < rb : a.offset < b.offset
+        }.map { $0.element }
     }
 
     /// Picks up dishes added or corrected in the library since the last sync; no app update needed.
@@ -97,12 +103,12 @@ final class AppStore: ObservableObject {
     // MARK: Apple Health
 
     func linkHealth() async {
-        guard HealthService.shared.available else { say("Thiết bị này không có Apple Health"); return }
-        guard await HealthService.shared.requestAccess() else { say("Chưa kết nối được Apple Health"); return }
+        guard HealthService.shared.available else { say(L("Thiết bị này không có Apple Health", "This device doesn't have Apple Health")); return }
+        guard await HealthService.shared.requestAccess() else { say(L("Chưa kết nối được Apple Health", "Couldn't connect to Apple Health")); return }
         healthLinked = true
         UserDefaults.standard.set(true, forKey: "healthLinked")
         await refreshHealth()
-        say("Đã kết nối Apple Health")
+        say(L("Đã kết nối Apple Health", "Apple Health connected"))
     }
 
     func unlinkHealth() {
@@ -147,7 +153,7 @@ final class AppStore: ObservableObject {
         }
         if !quiet {
             let warning = Nutrition.warnings(tags: food.tags, profile: data.profile).first.map { "\n⚠️ \($0.text)" } ?? ""
-            say("+\(formatQty(qty)) \(food.name) · \(Int((Double(food.kcal) * qty).rounded())) kcal\(warning)")
+            say("+\(formatQty(qty)) \(food.label) · \(Int((Double(food.kcal) * qty).rounded())) kcal\(warning)")
         }
     }
 
@@ -192,7 +198,7 @@ final class AppStore: ObservableObject {
     /// Who is eating, which meal it is, and what this person usually eats: helps tell look-alike dishes apart.
     var photoContext: String {
         var counts: [String: Int] = [:]
-        for entry in data.entries.suffix(300) { counts[entry.name, default: 0] += 1 }
+        for entry in data.entries.suffix(300) { counts[entry.label, default: 0] += 1 }
         let usual = counts.filter { $0.value >= 2 }.sorted { $0.value > $1.value }.prefix(10).map { $0.key }.joined(separator: ", ")
         return profileSummary + "; meal: \(Meal.label(meal))" + (usual.isEmpty ? "" : "; often eats: \(usual)")
     }
@@ -202,7 +208,7 @@ final class AppStore: ObservableObject {
         let p = data.profile
         let macros = Nutrition.macroTargets(p)
         var lines = [
-            "User: \(p.name.isEmpty ? "(no name)" : p.name), lives in Việt Nam (suggest local dishes).",
+            "User: \(p.name.isEmpty ? "(no name)" : p.name), " + (Lang.en ? "prefers international / Western food" : "lives in Việt Nam") + " (suggest dishes they can easily find).",
             "Profile: \(profileSummary); BMI \(String(format: "%.1f", Nutrition.bmi(p))).",
             "Daily macro targets: P \(macros.protein)g, C \(macros.carbs)g, F \(macros.fat)g.",
             "Last 7 days (date: kcal eaten, protein/carbs/fat g); days with nothing logged are omitted:",
@@ -216,7 +222,7 @@ final class AppStore: ObservableObject {
         let today = data.entries.filter { $0.date == dayKey(Date()) }
         let eaten = Int(totals(today).kcal)
         lines.append("Today so far: \(eaten) kcal eaten, \(Nutrition.targetKcal(p) - eaten) kcal left of the target.")
-        lines.append("Eaten today: " + (today.isEmpty ? "nothing logged yet" : today.map { "\($0.name) x\(formatQty($0.qty)) (\(Meal.label($0.meal)))" }.joined(separator: ", ")))
+        lines.append("Eaten today: " + (today.isEmpty ? "nothing logged yet" : today.map { "\($0.label) x\(formatQty($0.qty)) (\(Meal.label($0.meal)))" }.joined(separator: ", ")))
         return lines.joined(separator: "\n")
     }
 }

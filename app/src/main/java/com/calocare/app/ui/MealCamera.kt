@@ -1,5 +1,6 @@
 package com.calocare.app.ui
 
+import com.calocare.app.L
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.Size
@@ -114,7 +115,7 @@ fun MealCamera(onCaptured: (Bitmap) -> Unit, onGallery: () -> Unit, onClose: () 
                                     viewPort?.let { group.setViewPort(it) }
                                     provider.unbindAll()
                                     provider.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, group.build())
-                                }.onFailure { onError("Không mở được camera.") }
+                                }.onFailure { onError(L("Không mở được camera.", "Couldn't open the camera.")) }
                             }, ContextCompat.getMainExecutor(ctx))
                         }
                     }
@@ -132,18 +133,18 @@ fun MealCamera(onCaptured: (Bitmap) -> Unit, onGallery: () -> Unit, onClose: () 
 
             Column(Modifier.fillMaxSize().systemBarsPadding().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    IconButton(onClick = onClose) { Icon(Icons.Default.Close, "Đóng", tint = Color.White) }
+                    IconButton(onClick = onClose) { Icon(Icons.Default.Close, L("Đóng", "Close"), tint = Color.White) }
                 }
-                Text("Đưa món ăn vào trong vòng tròn xanh", color = Color.White, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleMedium)
-                Text("Chỉ phần trong vòng tròn được phân tích", color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodySmall)
+                Text(L("Đưa món ăn vào trong vòng tròn xanh", "Fit the food inside the green circle"), color = Color.White, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleMedium)
+                Text(L("Chỉ phần trong vòng tròn được phân tích", "Only the area inside the circle is analysed"), color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodySmall)
                 Box(Modifier.weight(1f))
                 Text(
-                    "Ảnh trong vòng tròn và tóm tắt hồ sơ sức khỏe của bạn sẽ được gửi tới AI để phân tích.",
+                    L("Ảnh trong vòng tròn và tóm tắt hồ sơ sức khỏe của bạn sẽ được gửi tới AI để phân tích.", "The picture inside the circle and a summary of your health profile are sent to the AI for analysis."),
                     color = Color.White.copy(alpha = 0.75f), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = 12.dp),
                 )
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {
-                    IconButton(onClick = onGallery, enabled = !busy) { Icon(Icons.Default.PhotoLibrary, "Chọn từ thư viện", tint = Color.White, modifier = Modifier.size(30.dp)) }
+                    IconButton(onClick = onGallery, enabled = !busy) { Icon(Icons.Default.PhotoLibrary, L("Chọn từ thư viện", "Choose from gallery"), tint = Color.White, modifier = Modifier.size(30.dp)) }
                     Box(
                         Modifier.size(76.dp).clip(CircleShape).border(4.dp, Guide, CircleShape).padding(7.dp).clip(CircleShape).background(Color.White)
                             .clickable(enabled = !busy) {
@@ -153,12 +154,12 @@ fun MealCamera(onCaptured: (Bitmap) -> Unit, onGallery: () -> Unit, onClose: () 
                                         val result = runCatching { image.use { circleCrop(it) } }
                                         ContextCompat.getMainExecutor(context).execute {
                                             busy = false
-                                            result.onSuccess(onCaptured).onFailure { onError("Không xử lý được ảnh vừa chụp.") }
+                                            result.onSuccess(onCaptured).onFailure { onError(L("Không xử lý được ảnh vừa chụp.", "Couldn't process the photo.")) }
                                         }
                                     }
 
                                     override fun onError(exception: ImageCaptureException) {
-                                        ContextCompat.getMainExecutor(context).execute { busy = false; onError("Chụp ảnh thất bại. Hãy thử lại.") }
+                                        ContextCompat.getMainExecutor(context).execute { busy = false; onError(L("Chụp ảnh thất bại. Hãy thử lại.", "Taking the photo failed. Please try again.")) }
                                     }
                                 })
                             },

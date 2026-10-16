@@ -20,26 +20,26 @@ struct HomeView: View {
                         HStack(spacing: 20) {
                             CalorieRing(eaten: eaten.kcal, target: target).frame(width: 150, height: 150)
                             VStack(alignment: .leading, spacing: 10) {
-                                Stat(label: "Nạp vào", value: Int(eaten.kcal), color: Palette.green)
-                                Stat(label: "Mục tiêu", value: Int(target), color: .secondary)
-                                Stat(label: out.measured ? "Tiêu hao (đồng hồ)" : "Tiêu hao ước tính", value: out.total, color: Palette.orange)
+                                Stat(label: L("Nạp vào", "Eaten"), value: Int(eaten.kcal), color: Palette.green)
+                                Stat(label: L("Mục tiêu", "Target"), value: Int(target), color: .secondary)
+                                Stat(label: out.measured ? L("Tiêu hao (đồng hồ)", "Burned (watch)") : L("Tiêu hao ước tính", "Burned (estimate)"), value: out.total, color: Palette.orange)
                             }
                         }
                     }
 
                     ActivityCard(eaten: eaten.kcal, out: out)
 
-                    Card("Dinh dưỡng đa lượng") {
-                        MacroBar(label: "Đạm", value: eaten.protein, target: macros.protein, color: Palette.protein)
-                        MacroBar(label: "Tinh bột", value: eaten.carbs, target: macros.carbs, color: Palette.carbs)
-                        MacroBar(label: "Chất béo", value: eaten.fat, target: macros.fat, color: Palette.fat)
+                    Card(L("Dinh dưỡng đa lượng", "Macronutrients")) {
+                        MacroBar(label: L("Đạm", "Protein"), value: eaten.protein, target: macros.protein, color: Palette.protein)
+                        MacroBar(label: L("Tinh bột", "Carbs"), value: eaten.carbs, target: macros.carbs, color: Palette.carbs)
+                        MacroBar(label: L("Chất béo", "Fat"), value: eaten.fat, target: macros.fat, color: Palette.fat)
                     }
 
-                    Card("7 ngày gần đây") { WeekBars(target: target) }
+                    Card(L("7 ngày gần đây", "Last 7 days")) { WeekBars(target: target) }
 
-                    let flagged = entries.flatMap { e in Nutrition.warnings(tags: e.tags, profile: profile).map { HealthWarning(danger: $0.danger, text: "\(e.name): \($0.text)") } }
+                    let flagged = entries.flatMap { e in Nutrition.warnings(tags: e.tags, profile: profile).map { HealthWarning(danger: $0.danger, text: "\(e.label): \($0.text)") } }
                     if !flagged.isEmpty {
-                        Card("🩺 Lưu ý sức khỏe hôm nay") {
+                        Card(L("🩺 Lưu ý sức khỏe hôm nay", "🩺 Health notes today")) {
                             ForEach(Array(Set(flagged)).prefix(5), id: \.self) { WarningLine(warning: $0) }
                         }
                     }
@@ -52,7 +52,7 @@ struct HomeView: View {
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
                 Task { await store.refreshHealth() }
             }
-            .navigationTitle(profile.name.isEmpty ? "Xin chào 👋" : "Xin chào, \(profile.name) 👋")
+            .navigationTitle(profile.name.isEmpty ? L("Xin chào 👋", "Hi 👋") : L("Xin chào, \(profile.name) 👋", "Hi, \(profile.name) 👋"))
         }
     }
 }
@@ -67,24 +67,24 @@ private struct ActivityCard: View {
         if store.healthLinked {
             let a = store.activity ?? DayActivity()
             let balance = Int(eaten.rounded()) - out.total
-            Card("⌚ Vận động hôm nay") {
+            Card(L("⌚ Vận động hôm nay", "⌚ Today's activity")) {
                 HStack(spacing: 0) {
-                    tile("🔥", "\(Int(a.activeKcal))", "kcal vận động")
-                    tile("👟", a.steps.formatted(), "bước")
-                    tile("⏱️", "\(a.exerciseMinutes)", "phút tập")
-                    tile("😴", a.sleepHours.map { String(format: "%.1f", $0) } ?? "–", "giờ ngủ")
+                    tile("🔥", "\(Int(a.activeKcal))", L("kcal vận động", "active kcal"))
+                    tile("👟", a.steps.formatted(), L("bước", "steps"))
+                    tile("⏱️", "\(a.exerciseMinutes)", L("phút tập", "exercise min"))
+                    tile("😴", a.sleepHours.map { String(format: "%.1f", $0) } ?? "–", L("giờ ngủ", "hours slept"))
                 }
-                Text(balance <= 0 ? "Cân bằng: thâm hụt \(-balance) kcal so với tiêu hao" : "Cân bằng: dư \(balance) kcal so với tiêu hao")
+                Text(balance <= 0 ? L("Cân bằng: thâm hụt \(-balance) kcal so với tiêu hao", "Balance: \(-balance) kcal deficit") : L("Cân bằng: dư \(balance) kcal so với tiêu hao", "Balance: \(balance) kcal surplus"))
                     .font(.subheadline.weight(.medium)).foregroundColor(balance <= 0 ? Palette.green : Palette.orange)
                 if let sleep = a.sleepHours, sleep < 6 {
-                    Text("Ngủ chưa đủ 6 tiếng: dễ thèm ngọt hơn. Ưu tiên đạm và rau, tập nhẹ hôm nay.").font(.caption).foregroundColor(.secondary)
+                    Text(L("Ngủ chưa đủ 6 tiếng: dễ thèm ngọt hơn. Ưu tiên đạm và rau, tập nhẹ hôm nay.", "Less than 6 hours of sleep makes sugar cravings stronger. Favour protein and vegetables, and train lightly today.")).font(.caption).foregroundColor(.secondary)
                 }
             }
         } else {
-            Card("⌚ Kết nối đồng hồ") {
-                Text("Đọc calo vận động, bước chân, giấc ngủ và cân nặng từ Apple Health. Apple Watch ghi trực tiếp; Garmin, Mi Fitness, Zepp, Huawei Health… đồng bộ vào Apple Health từ cài đặt của app đồng hồ.")
+            Card(L("⌚ Kết nối đồng hồ", "⌚ Connect a watch")) {
+                Text(L("Đọc calo vận động, bước chân, giấc ngủ và cân nặng từ Apple Health. Apple Watch ghi trực tiếp; Garmin, Mi Fitness, Zepp, Huawei Health… đồng bộ vào Apple Health từ cài đặt của app đồng hồ.", "Reads active calories, steps, sleep and weight from Apple Health. Apple Watch records there directly; Garmin, Fitbit, Mi Fitness, Zepp, Huawei Health… can sync to Apple Health from their own app's settings."))
                     .font(.caption).foregroundColor(.secondary)
-                Button { Task { await store.linkHealth() } } label: { Label("Kết nối Apple Health", systemImage: "heart.fill") }
+                Button { Task { await store.linkHealth() } } label: { Label(L("Kết nối Apple Health", "Connect Apple Health"), systemImage: "heart.fill") }
                     .buttonStyle(.borderedProminent)
             }
         }
@@ -104,11 +104,11 @@ struct DayPicker: View {
     @EnvironmentObject var store: AppStore
 
     private var label: String {
-        if Calendar.current.isDateInToday(store.date) { return "Hôm nay" }
-        if Calendar.current.isDateInYesterday(store.date) { return "Hôm qua" }
+        if Calendar.current.isDateInToday(store.date) { return L("Hôm nay", "Today") }
+        if Calendar.current.isDateInYesterday(store.date) { return L("Hôm qua", "Yesterday") }
         let f = DateFormatter()
-        f.locale = Locale(identifier: "vi")
-        f.dateFormat = "EEEE, d/M"
+        f.locale = Lang.en ? Locale.current : Locale(identifier: "vi")
+        f.dateFormat = Lang.en ? "EEEE, MMM d" : "EEEE, d/M"
         return f.string(from: store.date).capitalized
     }
 
@@ -147,7 +147,7 @@ struct CalorieRing: View {
             }
             VStack(spacing: 2) {
                 Text("\(abs(left))").font(.system(size: 30, weight: .bold)).foregroundColor(left < 0 ? .red : .primary)
-                Text(left >= 0 ? "kcal còn lại" : "kcal vượt").font(.caption).foregroundColor(.secondary)
+                Text(left >= 0 ? L("kcal còn lại", "kcal left") : L("kcal vượt", "kcal over")).font(.caption).foregroundColor(.secondary)
             }
         }
         .padding(8)
@@ -201,7 +201,7 @@ private struct WeekBars: View {
             return store.totals(store.data.entries.filter { $0.date == key }).kcal
         }
         let top = max(values.max() ?? 0, target, 1) * 1.1
-        let names = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
+        let names = Lang.en ? ["S", "M", "T", "W", "T", "F", "S"] : ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
 
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .bottom, spacing: 8) {
@@ -218,9 +218,9 @@ private struct WeekBars: View {
             .frame(height: 130, alignment: .bottom)
             let logged = values.filter { $0 > 0 }
             if logged.isEmpty {
-                Text("Ghi nhật ký vài ngày để thấy xu hướng của bạn.").font(.caption).foregroundColor(.secondary)
+                Text(L("Ghi nhật ký vài ngày để thấy xu hướng của bạn.", "Log a few days to see your trend.")).font(.caption).foregroundColor(.secondary)
             } else {
-                Text("Trung bình \(Int(logged.reduce(0, +) / Double(logged.count))) kcal/ngày · mục tiêu \(Int(target))").font(.caption).foregroundColor(.secondary)
+                Text(L("Trung bình \(Int(logged.reduce(0, +) / Double(logged.count))) kcal/ngày · mục tiêu \(Int(target))", "Average \(Int(logged.reduce(0, +) / Double(logged.count))) kcal/day · target \(Int(target))")).font(.caption).foregroundColor(.secondary)
             }
         }
     }

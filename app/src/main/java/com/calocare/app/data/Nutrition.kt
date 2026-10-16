@@ -1,5 +1,6 @@
 package com.calocare.app.data
 
+import com.calocare.app.L
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.math.max
@@ -42,12 +43,12 @@ object Nutrition {
 
     fun bmi(p: Profile): Float = (p.heightCm / 100f).let { h -> if (h > 0f) p.weightKg / (h * h) else 0f }
 
-    /** Asian-Pacific cut-offs (WHO WPRO), which fit Vietnamese adults better than the global ones. */
+    /** Asian-Pacific cut-offs (WHO WPRO) for Vietnamese users, which fit Asian adults better; the global WHO ones elsewhere. */
     fun bmiLabel(bmi: Float) = when {
-        bmi < 18.5f -> "Thiếu cân"
-        bmi < 23f -> "Bình thường"
-        bmi < 25f -> "Thừa cân"
-        else -> "Béo phì"
+        bmi < 18.5f -> L("Thiếu cân", "Underweight")
+        bmi < (if (com.calocare.app.Lang.en) 25f else 23f) -> L("Bình thường", "Normal")
+        bmi < (if (com.calocare.app.Lang.en) 30f else 25f) -> L("Thừa cân", "Overweight")
+        else -> L("Béo phì", "Obese")
     }
 
     fun targetKcal(p: Profile): Int {
@@ -146,32 +147,32 @@ object Nutrition {
     fun warnings(tags: Set<String>, p: Profile): List<Warning> {
         val out = mutableListOf<Warning>()
         for ((tag, label) in Tag.allergens) {
-            if (tag in tags && tag in p.allergies) out += Warning(true, "Chứa ${label.lowercase()} — bạn đã khai dị ứng")
+            if (tag in tags && tag in p.allergies) out += Warning(true, L("Chứa ${label.lowercase()} — bạn đã khai dị ứng", "Contains ${label.lowercase()} — you declared an allergy"))
         }
         if (Condition.DIABETES in p.conditions) {
-            if (Tag.HIGH_SUGAR in tags) out += Warning(false, "Nhiều đường — dễ làm tăng đường huyết")
-            else if (Tag.HIGH_GI in tags) out += Warning(false, "Chỉ số đường huyết cao — ăn ít và ăn sau rau, đạm")
+            if (Tag.HIGH_SUGAR in tags) out += Warning(false, L("Nhiều đường — dễ làm tăng đường huyết", "High in sugar — can raise blood sugar"))
+            else if (Tag.HIGH_GI in tags) out += Warning(false, L("Chỉ số đường huyết cao — ăn ít và ăn sau rau, đạm", "High glycemic index — eat a little, after vegetables and protein"))
         }
         if (Condition.HYPERTENSION in p.conditions && Tag.HIGH_SODIUM in tags)
-            out += Warning(false, "Nhiều muối — không tốt cho huyết áp")
+            out += Warning(false, L("Nhiều muối — không tốt cho huyết áp", "High in salt — bad for blood pressure"))
         if (Condition.GOUT in p.conditions) {
-            if (Tag.HIGH_PURINE in tags) out += Warning(false, "Nhiều purin — có thể gây cơn gout")
-            if (Tag.ALCOHOL in tags) out += Warning(false, "Rượu bia làm tăng acid uric")
+            if (Tag.HIGH_PURINE in tags) out += Warning(false, L("Nhiều purin — có thể gây cơn gout", "High in purines — may trigger gout"))
+            if (Tag.ALCOHOL in tags) out += Warning(false, L("Rượu bia làm tăng acid uric", "Alcohol raises uric acid"))
         }
         if (Condition.CHOLESTEROL in p.conditions && (Tag.HIGH_SATFAT in tags || Tag.FRIED in tags))
-            out += Warning(false, "Nhiều chất béo bão hòa / chiên rán — hạn chế khi mỡ máu cao")
+            out += Warning(false, L("Nhiều chất béo bão hòa / chiên rán — hạn chế khi mỡ máu cao", "Saturated fat / fried — limit with high cholesterol"))
         when (p.diet) {
             Diet.VEGETARIAN ->
                 if (tags.any { it == Tag.MEAT || it == Tag.FISH || it == Tag.SHELLFISH || it == Tag.PORK })
-                    out += Warning(false, "Có thịt / cá — không hợp chế độ ăn chay")
+                    out += Warning(false, L("Có thịt / cá — không hợp chế độ ăn chay", "Contains meat / fish — not vegetarian"))
             Diet.VEGAN ->
                 if (tags.any { it in setOf(Tag.MEAT, Tag.FISH, Tag.SHELLFISH, Tag.PORK, Tag.ANIMAL, Tag.MILK, Tag.EGG) })
-                    out += Warning(false, "Có nguồn gốc động vật — không hợp thuần chay")
+                    out += Warning(false, L("Có nguồn gốc động vật — không hợp thuần chay", "Animal-based — not vegan"))
             Diet.KETO ->
                 if (tags.any { it == Tag.HIGH_CARB || it == Tag.HIGH_SUGAR || it == Tag.HIGH_GI })
-                    out += Warning(false, "Nhiều tinh bột / đường — vượt ngưỡng keto")
+                    out += Warning(false, L("Nhiều tinh bột / đường — vượt ngưỡng keto", "High in carbs / sugar — over the keto limit"))
             Diet.HALAL ->
-                if (Tag.PORK in tags || Tag.ALCOHOL in tags) out += Warning(false, "Có thịt heo / rượu — không Halal")
+                if (Tag.PORK in tags || Tag.ALCOHOL in tags) out += Warning(false, L("Có thịt heo / rượu — không Halal", "Contains pork / alcohol — not halal"))
         }
         return out
     }
@@ -189,13 +190,13 @@ object Nutrition {
     }
 
     private fun why(course: String, tags: Set<String>, diabetic: Boolean) = when (course) {
-        Course.SOUP -> "Khai vị: làm ấm dạ dày, tạo cảm giác no sớm"
-        Course.VEG -> if (diabetic) "Chất xơ đi trước giúp đường huyết sau ăn tăng chậm hơn" else "Chất xơ trước giúp no lâu, hấp thu đường chậm lại"
-        Course.PROTEIN -> "Đạm giúp no bền và giữ cơ"
-        Course.MAIN -> if (diabetic) "Tinh bột ăn sau cùng trong bữa chính để hạn chế đường huyết tăng vọt" else "Tinh bột ăn sau rau và đạm để tránh ăn quá tay"
-        Course.FRUIT -> "Trái cây sau bữa khoảng 30 phút, hoặc để dành bữa phụ"
-        Course.DRINK -> if (Tag.HIGH_SUGAR in tags) "Đồ uống ngọt để sau cùng, uống ít" else "Uống kèm hoặc sau bữa"
-        else -> "Tráng miệng: ăn sau cùng, lượng nhỏ"
+        Course.SOUP -> L("Khai vị: làm ấm dạ dày, tạo cảm giác no sớm", "Starter: warms the stomach and makes you feel full sooner")
+        Course.VEG -> if (diabetic) L("Chất xơ đi trước giúp đường huyết sau ăn tăng chậm hơn", "Fibre first slows the rise in blood sugar after the meal") else L("Chất xơ trước giúp no lâu, hấp thu đường chậm lại", "Fibre first keeps you full longer and slows sugar absorption")
+        Course.PROTEIN -> L("Đạm giúp no bền và giữ cơ", "Protein keeps you full and preserves muscle")
+        Course.MAIN -> if (diabetic) L("Tinh bột ăn sau cùng trong bữa chính để hạn chế đường huyết tăng vọt", "Eat starches last to limit blood sugar spikes") else L("Tinh bột ăn sau rau và đạm để tránh ăn quá tay", "Eat starches after vegetables and protein to avoid overeating")
+        Course.FRUIT -> L("Trái cây sau bữa khoảng 30 phút, hoặc để dành bữa phụ", "Fruit about 30 minutes after the meal, or keep it for a snack")
+        Course.DRINK -> if (Tag.HIGH_SUGAR in tags) L("Đồ uống ngọt để sau cùng, uống ít", "Sweet drinks last, and only a little") else L("Uống kèm hoặc sau bữa", "With or after the meal")
+        else -> L("Tráng miệng: ăn sau cùng, lượng nhỏ", "Dessert: last, in a small portion")
     }
 
     /** Vegetables and soup first, then protein, then starch, sweets last. */
@@ -235,18 +236,18 @@ object Nutrition {
         val target = targetKcal(p).toFloat()
         val ratio = eaten / target
         val streak = streak(data)
-        val who = p.name.ifBlank { "bạn" }
+        val who = p.name.ifBlank { L("bạn", "there") }
         return when {
-            eaten <= 0f -> "👋" to "Chào $who! Chạm vào món đầu tiên để bắt đầu ngày mới nhé."
-            p.goal == Goal.LOSE && ratio > 1.1f -> "💪" to "Hôm nay vượt mục tiêu ${(eaten - target).roundToInt()} kcal. Không sao — đi bộ 30 phút và quay lại nhịp vào bữa tới."
+            eaten <= 0f -> "👋" to L("Chào $who! Chạm vào món đầu tiên để bắt đầu ngày mới nhé.", "Hi $who! Tap your first food to start the day.")
+            p.goal == Goal.LOSE && ratio > 1.1f -> "💪" to L("Hôm nay vượt mục tiêu ${(eaten - target).roundToInt()} kcal. Không sao — đi bộ 30 phút và quay lại nhịp vào bữa tới.", "${(eaten - target).roundToInt()} kcal over today's target. No worries — take a 30-minute walk and get back on track at the next meal.")
             (p.goal == Goal.GAIN || p.goal == Goal.GYM) && ratio < 0.6f && LocalTime.now().hour >= 18 && date == LocalDate.now() ->
-                "🍚" to "Còn thiếu ${(target - eaten).roundToInt()} kcal để tăng cân. Thêm một bữa phụ giàu đạm trước khi ngủ nhé."
-            onTarget(data, date) && streak >= 7 -> "🏆" to "Tuyệt vời! $streak ngày liên tiếp và hôm nay đúng mục tiêu. Giữ phong độ này nhé $who!"
-            onTarget(data, date) && ratio > 1.02f -> "⚖️" to "Vượt mục tiêu ${(eaten - target).roundToInt()} kcal — vẫn trong mức cho phép. Bữa sau ăn nhẹ hơn một chút là cân bằng."
-            onTarget(data, date) -> "🎯" to "Đúng mục tiêu rồi! Bạn đang làm rất tốt."
-            ratio < 0.5f -> "🌱" to "Khởi đầu tốt — còn ${(target - eaten).roundToInt()} kcal cho hôm nay."
-            ratio <= 1f -> "🔥" to "Đã đi được ${(ratio * 100).roundToInt()}% chặng đường hôm nay. Cố lên $who!"
-            else -> "⚖️" to "Hơi vượt mục tiêu một chút. Bữa sau ưu tiên rau và đạm nạc nhé."
+                "🍚" to L("Còn thiếu ${(target - eaten).roundToInt()} kcal để tăng cân. Thêm một bữa phụ giàu đạm trước khi ngủ nhé.", "${(target - eaten).roundToInt()} kcal short of your gain target. Add a protein-rich snack before bed.")
+            onTarget(data, date) && streak >= 7 -> "🏆" to L("Tuyệt vời! $streak ngày liên tiếp và hôm nay đúng mục tiêu. Giữ phong độ này nhé $who!", "Amazing! $streak days in a row and on target today. Keep it up, $who!")
+            onTarget(data, date) && ratio > 1.02f -> "⚖️" to L("Vượt mục tiêu ${(eaten - target).roundToInt()} kcal — vẫn trong mức cho phép. Bữa sau ăn nhẹ hơn một chút là cân bằng.", "${(eaten - target).roundToInt()} kcal over — still within range. A slightly lighter next meal balances it out.")
+            onTarget(data, date) -> "🎯" to L("Đúng mục tiêu rồi! Bạn đang làm rất tốt.", "Right on target! You're doing great.")
+            ratio < 0.5f -> "🌱" to L("Khởi đầu tốt — còn ${(target - eaten).roundToInt()} kcal cho hôm nay.", "Good start — ${(target - eaten).roundToInt()} kcal left for today.")
+            ratio <= 1f -> "🔥" to L("Đã đi được ${(ratio * 100).roundToInt()}% chặng đường hôm nay. Cố lên $who!", "${(ratio * 100).roundToInt()}% of the way through today. Keep going, $who!")
+            else -> "⚖️" to L("Hơi vượt mục tiêu một chút. Bữa sau ưu tiên rau và đạm nạc nhé.", "Slightly over target. Favour vegetables and lean protein next meal.")
         }
     }
 
@@ -263,69 +264,69 @@ object Nutrition {
         val tips = mutableListOf<String>()
 
         if (today && hour >= 18 && t.kcal > 0f && t.protein < macros.protein * 0.6f)
-            tips += "Đạm hôm nay mới ${t.protein.roundToInt()}g / ${macros.protein}g. Bữa tối thêm cá, ức gà, trứng hoặc đậu hũ."
+            tips += L("Đạm hôm nay mới ${t.protein.roundToInt()}g / ${macros.protein}g. Bữa tối thêm cá, ức gà, trứng hoặc đậu hũ.", "Only ${t.protein.roundToInt()}g / ${macros.protein}g protein so far. Add fish, chicken breast, eggs or tofu at dinner.")
         if (today && hour >= 20 && t.kcal > 0 && t.kcal < bmr(p) * 0.7f)
-            tips += "Bạn đang ăn thấp hơn nhiều so với mức trao đổi chất cơ bản (${out.bmr} kcal). Ăn quá ít dễ mất cơ và mệt — đừng bỏ bữa."
+            tips += L("Bạn đang ăn thấp hơn nhiều so với mức trao đổi chất cơ bản (${out.bmr} kcal). Ăn quá ít dễ mất cơ và mệt — đừng bỏ bữa.", "You're eating far below your basal metabolic rate (${out.bmr} kcal). Eating too little costs muscle and energy — don't skip meals.")
         if (t.kcal > target * 1.15f)
-            tips += "Đã vượt mục tiêu ${(t.kcal - target).roundToInt()} kcal. Khoảng ${((t.kcal - target) / (3.5f * p.weightKg / 60f)).roundToInt()} phút đi bộ nhanh sẽ bù lại."
+            tips += L("Đã vượt mục tiêu ${(t.kcal - target).roundToInt()} kcal. Khoảng ${((t.kcal - target) / (3.5f * p.weightKg / 60f)).roundToInt()} phút đi bộ nhanh sẽ bù lại.", "${(t.kcal - target).roundToInt()} kcal over target. About ${((t.kcal - target) / (3.5f * p.weightKg / 60f)).roundToInt()} minutes of brisk walking makes up for it.")
         if (macros.carbs > 0 && t.carbs > macros.carbs * 1.2f)
-            tips += "Tinh bột hơi cao (${t.carbs.roundToInt()}g). Thử đổi nửa chén cơm bằng rau hoặc khoai lang."
+            tips += L("Tinh bột hơi cao (${t.carbs.roundToInt()}g). Thử đổi nửa chén cơm bằng rau hoặc khoai lang.", "Carbs are a bit high (${t.carbs.roundToInt()}g). Try swapping half your rice or bread for vegetables or sweet potato.")
         if (out.fromWearable && out.steps in 1..4999 && today && hour >= 15)
-            tips += "Mới ${out.steps} bước. Đi bộ 15 phút sau bữa tối giúp tiêu hóa và ổn định đường huyết."
+            tips += L("Mới ${out.steps} bước. Đi bộ 15 phút sau bữa tối giúp tiêu hóa và ổn định đường huyết.", "Only ${out.steps} steps. A 15-minute walk after dinner helps digestion and blood sugar.")
 
         val sleep = data.wearable[date.toString()]?.sleepMin ?: 0
         if (sleep in 1..359)
-            tips += "Đêm qua bạn ngủ ${sleep / 60}h${"%02d".format(sleep % 60)}. Thiếu ngủ làm tăng cảm giác thèm ngọt và giảm phục hồi — hôm nay tập nhẹ, ưu tiên đạm và ngủ sớm hơn."
+            tips += L("Đêm qua bạn ngủ ${sleep / 60}h${"%02d".format(sleep % 60)}. Thiếu ngủ làm tăng cảm giác thèm ngọt và giảm phục hồi — hôm nay tập nhẹ, ưu tiên đạm và ngủ sớm hơn.", "You slept ${sleep / 60}h${"%02d".format(sleep % 60)} last night. Short sleep increases sugar cravings and slows recovery — train lightly today, favour protein and go to bed earlier.")
 
         val sugary = entries.count { Tag.HIGH_SUGAR in it.tags }
         if (Condition.DIABETES in p.conditions) {
-            if (sugary > 0) tips += "Hôm nay có $sugary món nhiều đường. Với tiểu đường, nên thay bằng trái cây ít ngọt (ổi, táo) và đo đường huyết sau ăn 2 giờ."
-            tips += "Tiểu đường: ăn rau → đạm → tinh bột, chia 3 bữa chính + 1–2 bữa phụ nhỏ, không bỏ bữa."
+            if (sugary > 0) tips += L("Hôm nay có $sugary món nhiều đường. Với tiểu đường, nên thay bằng trái cây ít ngọt (ổi, táo) và đo đường huyết sau ăn 2 giờ.", "$sugary sugary item(s) today. With diabetes, swap them for low-sugar fruit (guava, apple) and check blood sugar 2 hours after eating.")
+            tips += L("Tiểu đường: ăn rau → đạm → tinh bột, chia 3 bữa chính + 1–2 bữa phụ nhỏ, không bỏ bữa.", "Diabetes: eat vegetables → protein → starch, 3 main meals + 1–2 small snacks, never skip meals.")
         }
         if (Condition.HYPERTENSION in p.conditions)
-            tips += "Huyết áp: giữ muối dưới 5g/ngày — hạn chế nước dùng phở/bún, đồ kho mặn, mì gói."
+            tips += L("Huyết áp: giữ muối dưới 5g/ngày — hạn chế nước dùng phở/bún, đồ kho mặn, mì gói.", "Blood pressure: keep salt under 5 g a day — limit soups and broths, salty sauces, processed meats and instant noodles.")
         if (Condition.GOUT in p.conditions)
-            tips += "Gout: uống 2–2,5 lít nước/ngày, hạn chế nội tạng, hải sản, bia rượu."
+            tips += L("Gout: uống 2–2,5 lít nước/ngày, hạn chế nội tạng, hải sản, bia rượu.", "Gout: drink 2–2.5 litres of water a day; limit organ meats, seafood and alcohol.")
         if (Condition.CHOLESTEROL in p.conditions)
-            tips += "Mỡ máu: ưu tiên cá, yến mạch, các loại hạt; hạn chế đồ chiên và mỡ động vật."
+            tips += L("Mỡ máu: ưu tiên cá, yến mạch, các loại hạt; hạn chế đồ chiên và mỡ động vật.", "Cholesterol: favour fish, oats and nuts; limit fried food and animal fat.")
 
         val bmi = bmi(p)
         if (bmi < 18.5f && p.goal == Goal.LOSE)
-            tips += "BMI của bạn là ${"%.1f".format(bmi)} (thiếu cân) — không nên giảm cân thêm. Hãy đổi mục tiêu sang giữ hoặc tăng cân."
+            tips += L("BMI của bạn là ${"%.1f".format(bmi)} (thiếu cân) — không nên giảm cân thêm. Hãy đổi mục tiêu sang giữ hoặc tăng cân.", "Your BMI is ${"%.1f".format(bmi)} (underweight) — don't lose more weight. Switch your goal to maintain or gain.")
 
         tips += when (p.goal) {
-            Goal.LOSE -> "Giảm cân bền vững: thâm hụt 300–500 kcal/ngày, đạm 1,6g/kg để giữ cơ, ngủ đủ 7 giờ."
-            Goal.GAIN -> "Tăng cân: ăn dư 300–500 kcal/ngày, thêm bữa phụ (sữa, chuối, hạt) và tập kháng lực để tăng cơ thay vì mỡ."
-            Goal.GYM -> "Tăng cơ: đạm khoảng 2g/kg chia đều 4 bữa, nạp 20–30g đạm trong 2 giờ sau tập."
-            Goal.RUN -> "Chạy bộ: nạp tinh bột dễ tiêu 1–2 giờ trước khi chạy (chuối, bánh mì), bù nước và điện giải nếu chạy trên 60 phút."
-            else -> "Giữ cân: giữ nhịp ăn đều, mỗi bữa đủ rau – đạm – tinh bột theo tỉ lệ ½ – ¼ – ¼ đĩa."
+            Goal.LOSE -> L("Giảm cân bền vững: thâm hụt 300–500 kcal/ngày, đạm 1,6g/kg để giữ cơ, ngủ đủ 7 giờ.", "Sustainable weight loss: a 300–500 kcal daily deficit, 1.6 g/kg protein to keep muscle, 7 hours of sleep.")
+            Goal.GAIN -> L("Tăng cân: ăn dư 300–500 kcal/ngày, thêm bữa phụ (sữa, chuối, hạt) và tập kháng lực để tăng cơ thay vì mỡ.", "Weight gain: a 300–500 kcal daily surplus, extra snacks (milk, bananas, nuts) and resistance training so it's muscle, not fat.")
+            Goal.GYM -> L("Tăng cơ: đạm khoảng 2g/kg chia đều 4 bữa, nạp 20–30g đạm trong 2 giờ sau tập.", "Muscle gain: about 2 g/kg protein over 4 meals, and 20–30 g within 2 hours after training.")
+            Goal.RUN -> L("Chạy bộ: nạp tinh bột dễ tiêu 1–2 giờ trước khi chạy (chuối, bánh mì), bù nước và điện giải nếu chạy trên 60 phút.", "Running: easy carbs 1–2 hours before a run (banana, bread); water and electrolytes for runs over 60 minutes.")
+            else -> L("Giữ cân: giữ nhịp ăn đều, mỗi bữa đủ rau – đạm – tinh bột theo tỉ lệ ½ – ¼ – ¼ đĩa.", "Maintenance: eat regularly; each plate ½ vegetables, ¼ protein, ¼ starch.")
         }
         return tips
     }
 
     val goalGuides = mapOf(
         Goal.LOSE to listOf(
-            "Mỗi bữa: ½ đĩa rau, ¼ đạm nạc, ¼ tinh bột nguyên cám.",
-            "Uống nước trước bữa ăn 15 phút; hạn chế nước ngọt, trà sữa.",
-            "Giảm 0,5 kg/tuần là an toàn; giảm nhanh hơn dễ mất cơ và tăng lại.",
+            L("Mỗi bữa: ½ đĩa rau, ¼ đạm nạc, ¼ tinh bột nguyên cám.", "Every meal: ½ plate vegetables, ¼ lean protein, ¼ whole grains."),
+            L("Uống nước trước bữa ăn 15 phút; hạn chế nước ngọt, trà sữa.", "Drink water 15 minutes before meals; limit soda and sweet coffee or tea drinks."),
+            L("Giảm 0,5 kg/tuần là an toàn; giảm nhanh hơn dễ mất cơ và tăng lại.", "0.5 kg a week is safe; faster loss costs muscle and tends to come back."),
         ),
         Goal.MAINTAIN to listOf(
-            "Ăn đa dạng, đủ 3 bữa chính; cân lại mỗi tuần vào cùng một buổi sáng.",
-            "Vận động vừa ít nhất 150 phút mỗi tuần.",
+            L("Ăn đa dạng, đủ 3 bữa chính; cân lại mỗi tuần vào cùng một buổi sáng.", "Eat a varied diet with 3 main meals; weigh yourself weekly on the same morning."),
+            L("Vận động vừa ít nhất 150 phút mỗi tuần.", "At least 150 minutes of moderate activity a week."),
         ),
         Goal.GAIN to listOf(
-            "Ăn 5–6 bữa nhỏ, thêm đồ uống giàu năng lượng (sinh tố bơ, sữa).",
-            "Tăng 0,25–0,5 kg/tuần; kết hợp tập tạ 3 buổi/tuần.",
+            L("Ăn 5–6 bữa nhỏ, thêm đồ uống giàu năng lượng (sinh tố bơ, sữa).", "Eat 5–6 small meals and add energy-dense drinks (smoothies, milk)."),
+            L("Tăng 0,25–0,5 kg/tuần; kết hợp tập tạ 3 buổi/tuần.", "Gain 0.25–0.5 kg a week, with weight training 3 times a week."),
         ),
         Goal.GYM to listOf(
-            "Trước tập 60–90 phút: tinh bột + ít đạm (chuối + sữa chua).",
-            "Sau tập trong 2 giờ: 20–30g đạm + tinh bột (cơm + ức gà, hoặc whey + chuối).",
-            "Ngủ 7–8 giờ — cơ phát triển lúc nghỉ, không phải lúc tập.",
+            L("Trước tập 60–90 phút: tinh bột + ít đạm (chuối + sữa chua).", "60–90 minutes before training: carbs + a little protein (banana + yogurt)."),
+            L("Sau tập trong 2 giờ: 20–30g đạm + tinh bột (cơm + ức gà, hoặc whey + chuối).", "Within 2 hours after training: 20–30 g protein + carbs (rice + chicken, or whey + banana)."),
+            L("Ngủ 7–8 giờ — cơ phát triển lúc nghỉ, không phải lúc tập.", "Sleep 7–8 hours — muscle grows while you rest, not while you train."),
         ),
         Goal.RUN to listOf(
-            "Ngày chạy dài: tăng tinh bột lên 6–8g/kg; ngày nghỉ giảm lại.",
-            "Chạy trên 60 phút: bổ sung 30–60g tinh bột mỗi giờ và nước có điện giải.",
-            "Sau chạy 30 phút: tinh bột + đạm tỉ lệ 3:1 để hồi phục glycogen.",
+            L("Ngày chạy dài: tăng tinh bột lên 6–8g/kg; ngày nghỉ giảm lại.", "Long-run days: raise carbs to 6–8 g/kg; lower them on rest days."),
+            L("Chạy trên 60 phút: bổ sung 30–60g tinh bột mỗi giờ và nước có điện giải.", "Runs over 60 minutes: 30–60 g carbs per hour plus electrolyte drinks."),
+            L("Sau chạy 30 phút: tinh bột + đạm tỉ lệ 3:1 để hồi phục glycogen.", "Within 30 minutes after a run: carbs and protein at 3:1 to restore glycogen."),
         ),
     )
 }

@@ -11,7 +11,9 @@
 "course": "fruit",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Banana",
+"servingEn": "1 medium"
 },
 {
 "id": "tao",
@@ -25,7 +27,9 @@
 "course": "fruit",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Apple",
+"servingEn": "1 fruit"
 },
 {
 "id": "cam",
@@ -39,7 +43,9 @@
 "course": "fruit",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Orange",
+"servingEn": "1 fruit"
 },
 {
 "id": "xoai",
@@ -53,7 +59,9 @@
 "course": "fruit",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Ripe mango",
+"servingEn": "1/2 fruit (150g)"
 },
 {
 "id": "dua_hau",
@@ -69,7 +77,9 @@
 "high_gi"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Watermelon",
+"servingEn": "1 slice (200g)"
 },
 {
 "id": "nho",
@@ -85,7 +95,9 @@
 "high_sugar"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Grapes",
+"servingEn": "1 cup (150g)"
 },
 {
 "id": "thanh_long",
@@ -99,7 +111,9 @@
 "course": "fruit",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Dragon fruit",
+"servingEn": "1/2 fruit (200g)"
 },
 {
 "id": "bo",
@@ -113,7 +127,9 @@
 "course": "fruit",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Avocado",
+"servingEn": "1/2 fruit"
 },
 {
 "id": "dau_tay",
@@ -127,7 +143,9 @@
 "course": "fruit",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Strawberries",
+"servingEn": "1 cup"
 },
 {
 "id": "dua",
@@ -141,7 +159,9 @@
 "course": "fruit",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Pineapple",
+"servingEn": "1 cup"
 },
 {
 "id": "oi",
@@ -155,7 +175,9 @@
 "course": "fruit",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Guava",
+"servingEn": "1 fruit"
 },
 {
 "id": "com_trang",
@@ -172,7 +194,9 @@
 "high_carb"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "White rice",
+"servingEn": "1 bowl (150g)"
 },
 {
 "id": "com_gao_lut",
@@ -188,7 +212,9 @@
 "high_carb"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Brown rice",
+"servingEn": "1 bowl (150g)"
 },
 {
 "id": "banh_mi",
@@ -206,7 +232,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Plain baguette",
+"servingEn": "1 roll"
 },
 {
 "id": "banh_mi_thit",
@@ -226,7 +254,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Bánh mì (pork baguette)",
+"servingEn": "1 sandwich"
 },
 {
 "id": "banh_mi_trung",
@@ -245,7 +275,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Egg bánh mì",
+"servingEn": "1 sandwich"
 },
 {
 "id": "pho_bo",
@@ -263,7 +295,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Beef phở",
+"servingEn": "1 bowl"
 },
 {
 "id": "pho_ga",
@@ -281,7 +315,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Chicken phở",
+"servingEn": "1 bowl"
 },
 {
 "id": "bun_bo_hue",
@@ -301,7 +337,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Bún bò Huế (spicy beef noodle soup)",
+"servingEn": "1 bowl"
 },
 {
 "id": "bun_cha",
@@ -321,7 +359,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Bún chả (grilled pork & noodles)",
+"servingEn": "1 serving"
 },
 {
 "id": "bun_rieu",
@@ -341,7 +381,9 @@
 "high_purine"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Crab noodle soup (bún riêu)",
+"servingEn": "1 bowl"
 },
 {
 "id": "hu_tieu",
@@ -361,7 +403,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Hủ tiếu noodle soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "mi_quang",
@@ -381,7 +425,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Mì Quảng (turmeric noodles)",
+"servingEn": "1 bowl"
 },
 {
 "id": "com_tam",
@@ -403,7 +449,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Broken rice with pork chop (cơm tấm)",
+"servingEn": "1 plate"
 },
 {
 "id": "com_ga",
@@ -420,7 +468,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Chicken rice",
+"servingEn": "1 plate"
 },
 {
 "id": "xoi_man",
@@ -440,7 +490,9 @@
 "high_sodium"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Savory sticky rice",
+"servingEn": "1 pack"
 },
 {
 "id": "chao_ga",
@@ -457,7 +509,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Chicken congee",
+"servingEn": "1 bowl"
 },
 {
 "id": "mi_goi",
@@ -477,7 +531,9 @@
 "high_carb"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Instant noodles",
+"servingEn": "1 pack"
 },
 {
 "id": "banh_cuon",
@@ -496,7 +552,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Steamed rice rolls (bánh cuốn)",
+"servingEn": "1 plate"
 },
 {
 "id": "goi_cuon",
@@ -515,7 +573,9 @@
 "peanut"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Fresh spring rolls",
+"servingEn": "2 rolls"
 },
 {
 "id": "cha_gio",
@@ -535,7 +595,9 @@
 "high_satfat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Fried spring rolls",
+"servingEn": "3 rolls"
 },
 {
 "id": "banh_xeo",
@@ -554,7 +616,9 @@
 "pork"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Vietnamese crispy pancake",
+"servingEn": "1 pancake"
 },
 {
 "id": "banh_chung",
@@ -572,7 +636,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Bánh chưng (sticky rice cake)",
+"servingEn": "1/4 cake"
 },
 {
 "id": "khoai_lang",
@@ -586,7 +652,9 @@
 "course": "main",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Boiled sweet potato",
+"servingEn": "1 medium (150g)"
 },
 {
 "id": "bap",
@@ -600,7 +668,9 @@
 "course": "main",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Boiled corn",
+"servingEn": "1 ear"
 },
 {
 "id": "yen_mach",
@@ -618,7 +688,9 @@
 "animal"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Oatmeal with milk",
+"servingEn": "1 bowl"
 },
 {
 "id": "trung_luoc",
@@ -635,7 +707,9 @@
 "animal"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Boiled egg",
+"servingEn": "1 egg"
 },
 {
 "id": "trung_chien",
@@ -653,7 +727,9 @@
 "fried"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Fried egg",
+"servingEn": "1 egg"
 },
 {
 "id": "uc_ga",
@@ -669,7 +745,9 @@
 "meat"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Pan-seared chicken breast",
+"servingEn": "100g"
 },
 {
 "id": "ga_luoc",
@@ -685,7 +763,9 @@
 "meat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Boiled chicken",
+"servingEn": "100g"
 },
 {
 "id": "thit_kho",
@@ -706,7 +786,9 @@
 "high_satfat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Braised pork with egg",
+"servingEn": "1 serving"
 },
 {
 "id": "thit_luoc",
@@ -723,7 +805,9 @@
 "meat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Boiled pork",
+"servingEn": "100g"
 },
 {
 "id": "bo_xao",
@@ -740,7 +824,9 @@
 "high_purine"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Beef stir-fry with vegetables",
+"servingEn": "1 serving"
 },
 {
 "id": "ca_kho",
@@ -757,7 +843,9 @@
 "high_sodium"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Caramelized braised fish",
+"servingEn": "1 serving"
 },
 {
 "id": "ca_hoi",
@@ -773,7 +861,9 @@
 "fish"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Pan-seared salmon",
+"servingEn": "100g"
 },
 {
 "id": "ca_hap",
@@ -789,7 +879,9 @@
 "fish"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Steamed fish",
+"servingEn": "150g"
 },
 {
 "id": "tom_luoc",
@@ -806,7 +898,9 @@
 "high_purine"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Boiled shrimp",
+"servingEn": "100g"
 },
 {
 "id": "muc_xao",
@@ -823,7 +917,9 @@
 "high_purine"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Stir-fried squid",
+"servingEn": "1 serving"
 },
 {
 "id": "dau_hu",
@@ -839,7 +935,9 @@
 "soy"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Tofu in tomato sauce",
+"servingEn": "1 serving"
 },
 {
 "id": "dau_hu_chien",
@@ -856,7 +954,9 @@
 "fried"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Fried tofu",
+"servingEn": "1 large piece"
 },
 {
 "id": "long_heo",
@@ -875,7 +975,9 @@
 "high_satfat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Boiled pork offal",
+"servingEn": "100g"
 },
 {
 "id": "rau_luoc",
@@ -889,7 +991,9 @@
 "course": "veg",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Boiled vegetables",
+"servingEn": "1 plate"
 },
 {
 "id": "rau_muong_xao",
@@ -903,7 +1007,9 @@
 "course": "veg",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Garlic morning glory",
+"servingEn": "1 plate"
 },
 {
 "id": "salad",
@@ -917,7 +1023,9 @@
 "course": "veg",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Green salad with vinaigrette",
+"servingEn": "1 plate"
 },
 {
 "id": "dua_leo",
@@ -931,7 +1039,9 @@
 "course": "veg",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Cucumber",
+"servingEn": "1 cucumber"
 },
 {
 "id": "ca_chua",
@@ -945,7 +1055,9 @@
 "course": "veg",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Tomato",
+"servingEn": "1 tomato"
 },
 {
 "id": "canh_rau",
@@ -959,7 +1071,9 @@
 "course": "soup",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Vegetable soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "canh_chua",
@@ -975,7 +1089,9 @@
 "fish"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Sweet & sour fish soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "canh_bi",
@@ -992,7 +1108,9 @@
 "pork"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Pumpkin soup with minced pork",
+"servingEn": "1 bowl"
 },
 {
 "id": "sua_tuoi",
@@ -1009,7 +1127,9 @@
 "animal"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Unsweetened milk",
+"servingEn": "1 carton 180ml"
 },
 {
 "id": "sua_co_duong",
@@ -1027,7 +1147,9 @@
 "high_sugar"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Sweetened milk",
+"servingEn": "1 carton 180ml"
 },
 {
 "id": "sua_chua",
@@ -1044,7 +1166,9 @@
 "animal"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Yogurt",
+"servingEn": "1 cup 100g"
 },
 {
 "id": "sua_dau_nanh",
@@ -1060,7 +1184,9 @@
 "soy"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Soy milk",
+"servingEn": "1 glass 250ml"
 },
 {
 "id": "ca_phe_sua",
@@ -1078,7 +1204,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Vietnamese iced milk coffee",
+"servingEn": "1 glass"
 },
 {
 "id": "ca_phe_den",
@@ -1092,7 +1220,9 @@
 "course": "drink",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Black coffee, no sugar",
+"servingEn": "1 cup"
 },
 {
 "id": "tra_sua",
@@ -1111,7 +1241,9 @@
 "high_gi"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Bubble milk tea",
+"servingEn": "1 cup 500ml"
 },
 {
 "id": "nuoc_ngot",
@@ -1128,7 +1260,9 @@
 "high_gi"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Soda (cola)",
+"servingEn": "1 can 330ml"
 },
 {
 "id": "nuoc_cam",
@@ -1144,7 +1278,9 @@
 "high_sugar"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Orange juice",
+"servingEn": "1 glass"
 },
 {
 "id": "nuoc_mia",
@@ -1161,7 +1297,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Sugarcane juice",
+"servingEn": "1 glass"
 },
 {
 "id": "nuoc_dua",
@@ -1175,7 +1313,9 @@
 "course": "drink",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Fresh coconut water",
+"servingEn": "1 coconut"
 },
 {
 "id": "tra_xanh",
@@ -1189,7 +1329,9 @@
 "course": "drink",
 "tags": [],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Unsweetened tea",
+"servingEn": "1 cup"
 },
 {
 "id": "sinh_to_bo",
@@ -1207,7 +1349,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Avocado smoothie",
+"servingEn": "1 glass"
 },
 {
 "id": "bia",
@@ -1225,7 +1369,9 @@
 "gluten"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Beer",
+"servingEn": "1 can 330ml"
 },
 {
 "id": "whey",
@@ -1242,7 +1388,9 @@
 "animal"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Whey protein",
+"servingEn": "1 scoop (30g)"
 },
 {
 "id": "che",
@@ -1258,7 +1406,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Sweet bean dessert (chè)",
+"servingEn": "1 cup"
 },
 {
 "id": "banh_flan",
@@ -1277,7 +1427,9 @@
 "high_sugar"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Crème caramel (flan)",
+"servingEn": "1 cup"
 },
 {
 "id": "kem",
@@ -1295,7 +1447,9 @@
 "high_sugar"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Ice cream",
+"servingEn": "1 bar"
 },
 {
 "id": "socola",
@@ -1314,7 +1468,9 @@
 "high_satfat"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Chocolate",
+"servingEn": "1 small bar (30g)"
 },
 {
 "id": "banh_quy",
@@ -1334,7 +1490,9 @@
 "high_sugar"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Cookies",
+"servingEn": "3 cookies"
 },
 {
 "id": "dau_phong",
@@ -1350,7 +1508,9 @@
 "peanut"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Roasted peanuts",
+"servingEn": "1 handful (30g)"
 },
 {
 "id": "hat_dieu",
@@ -1366,7 +1526,9 @@
 "nuts"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Cashews",
+"servingEn": "1 handful (30g)"
 },
 {
 "id": "hanh_nhan",
@@ -1382,7 +1544,9 @@
 "nuts"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Almonds",
+"servingEn": "1 handful (30g)"
 },
 {
 "id": "khoai_tay_chien",
@@ -1400,7 +1564,9 @@
 "high_gi"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "French fries",
+"servingEn": "1 medium serving"
 },
 {
 "id": "bun_thit_nuong",
@@ -1420,7 +1586,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Grilled pork vermicelli",
+"servingEn": "1 bowl"
 },
 {
 "id": "bun_dau",
@@ -1442,7 +1610,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Vermicelli with fried tofu & shrimp paste",
+"servingEn": "1 small tray"
 },
 {
 "id": "bun_mam",
@@ -1463,7 +1633,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Fermented fish noodle soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "bun_moc",
@@ -1482,7 +1654,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Pork ball noodle soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "bun_ca",
@@ -1500,7 +1674,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Fish noodle soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "mien_ga",
@@ -1517,7 +1693,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Chicken glass noodle soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "banh_canh",
@@ -1538,7 +1716,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Crab tapioca noodle soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "cao_lau",
@@ -1557,7 +1737,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Cao lầu noodles",
+"servingEn": "1 bowl"
 },
 {
 "id": "bo_kho",
@@ -1576,7 +1758,9 @@
 "high_sodium"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Beef stew with baguette",
+"servingEn": "1 bowl + 1 roll"
 },
 {
 "id": "bo_ne",
@@ -1597,7 +1781,9 @@
 "fried"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Sizzling beef & eggs",
+"servingEn": "1 serving + bread"
 },
 {
 "id": "com_chien",
@@ -1620,7 +1806,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Yangzhou fried rice",
+"servingEn": "1 plate"
 },
 {
 "id": "com_suon",
@@ -1640,7 +1828,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Rice with grilled pork chop",
+"servingEn": "1 plate"
 },
 {
 "id": "com_rang_dua_bo",
@@ -1660,7 +1850,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Fried rice with beef & pickles",
+"servingEn": "1 plate"
 },
 {
 "id": "xoi_ga",
@@ -1678,7 +1870,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Sticky rice with chicken",
+"servingEn": "1 box"
 },
 {
 "id": "xoi_dau",
@@ -1695,7 +1889,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Mung bean sticky rice",
+"servingEn": "1 pack"
 },
 {
 "id": "chao_long",
@@ -1715,7 +1911,9 @@
 "high_sodium"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Pork offal congee",
+"servingEn": "1 bowl"
 },
 {
 "id": "banh_bao",
@@ -1735,7 +1933,9 @@
 "high_carb"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Pork steamed bun",
+"servingEn": "1 bun"
 },
 {
 "id": "banh_gio",
@@ -1752,7 +1952,9 @@
 "meat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Pyramid rice dumpling",
+"servingEn": "1 dumpling"
 },
 {
 "id": "banh_bot_loc",
@@ -1771,7 +1973,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Tapioca shrimp dumplings",
+"servingEn": "5 pieces"
 },
 {
 "id": "banh_trang_tron",
@@ -1791,7 +1995,9 @@
 "high_sodium"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Rice paper salad",
+"servingEn": "1 bag"
 },
 {
 "id": "pha_lau",
@@ -1811,7 +2017,9 @@
 "milk"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Braised offal (phá lấu)",
+"servingEn": "1 bowl"
 },
 {
 "id": "nem_nuong",
@@ -1829,7 +2037,9 @@
 "peanut"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Grilled pork sausage rolls",
+"servingEn": "3 rolls"
 },
 {
 "id": "lau_thai",
@@ -1848,7 +2058,9 @@
 "high_purine"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Thai seafood hotpot",
+"servingEn": "1 portion"
 },
 {
 "id": "ga_kho_gung",
@@ -1866,7 +2078,9 @@
 "high_sodium"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Ginger braised chicken",
+"servingEn": "1 serving"
 },
 {
 "id": "ga_nuong",
@@ -1882,7 +2096,9 @@
 "meat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Grilled chicken",
+"servingEn": "1 leg"
 },
 {
 "id": "suon_xao_chua_ngot",
@@ -1901,7 +2117,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Sweet & sour pork ribs",
+"servingEn": "1 serving"
 },
 {
 "id": "thit_bam_ca_chua",
@@ -1918,7 +2136,9 @@
 "meat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Minced pork in tomato sauce",
+"servingEn": "1 serving"
 },
 {
 "id": "cha_lua",
@@ -1937,7 +2157,9 @@
 "high_sodium"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Vietnamese pork roll (chả lụa)",
+"servingEn": "2 thick slices (50g)"
 },
 {
 "id": "ca_chien",
@@ -1954,7 +2176,9 @@
 "fried"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Fried fish",
+"servingEn": "1 medium fish"
 },
 {
 "id": "ca_thu_sot_ca",
@@ -1971,7 +2195,9 @@
 "high_purine"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Mackerel in tomato sauce",
+"servingEn": "1 steak"
 },
 {
 "id": "tom_rim",
@@ -1990,7 +2216,9 @@
 "high_sodium"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Caramelized shrimp",
+"servingEn": "1 serving"
 },
 {
 "id": "trung_vit_lon",
@@ -2008,7 +2236,9 @@
 "high_purine"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Balut (fertilized duck egg)",
+"servingEn": "1 egg"
 },
 {
 "id": "dau_hu_non",
@@ -2024,7 +2254,9 @@
 "soy"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Steamed silken tofu",
+"servingEn": "1 box"
 },
 {
 "id": "rau_cai_xao",
@@ -2038,7 +2270,9 @@
 "course": "veg",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Stir-fried greens with mushrooms",
+"servingEn": "1 plate"
 },
 {
 "id": "dau_que_xao",
@@ -2052,7 +2286,9 @@
 "course": "veg",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Stir-fried green beans",
+"servingEn": "1 plate"
 },
 {
 "id": "goi_ga",
@@ -2070,7 +2306,9 @@
 "fish"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Chicken cabbage salad",
+"servingEn": "1 plate"
 },
 {
 "id": "goi_du_du",
@@ -2088,7 +2326,9 @@
 "fish"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Green papaya salad",
+"servingEn": "1 plate"
 },
 {
 "id": "canh_kho_qua",
@@ -2105,7 +2345,9 @@
 "meat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Stuffed bitter melon soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "canh_cai_thit",
@@ -2122,7 +2364,9 @@
 "meat"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Mustard greens & pork soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "canh_rong_bien",
@@ -2138,7 +2382,9 @@
 "soy"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Seaweed tofu soup",
+"servingEn": "1 bowl"
 },
 {
 "id": "du_du",
@@ -2152,7 +2398,9 @@
 "course": "fruit",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Ripe papaya",
+"servingEn": "1 slice (200g)"
 },
 {
 "id": "buoi",
@@ -2166,7 +2414,9 @@
 "course": "fruit",
 "tags": [],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Pomelo",
+"servingEn": "3 segments"
 },
 {
 "id": "mit",
@@ -2182,7 +2432,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Jackfruit",
+"servingEn": "4 pods"
 },
 {
 "id": "sau_rieng",
@@ -2198,7 +2450,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Durian",
+"servingEn": "2 pods (100g)"
 },
 {
 "id": "vai",
@@ -2215,7 +2469,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Lychee / longan",
+"servingEn": "10 fruits"
 },
 {
 "id": "che_thai",
@@ -2234,7 +2490,9 @@
 "high_gi"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Thai fruit dessert (chè Thái)",
+"servingEn": "1 cup"
 },
 {
 "id": "tau_hu_nuoc_duong",
@@ -2251,7 +2509,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Tofu pudding in ginger syrup",
+"servingEn": "1 bowl"
 },
 {
 "id": "banh_chuoi",
@@ -2270,7 +2530,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Baked banana cake",
+"servingEn": "1 slice"
 },
 {
 "id": "banh_trung_thu",
@@ -2292,7 +2554,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Mooncake (mixed nuts)",
+"servingEn": "1/4 cake"
 },
 {
 "id": "tra_dao",
@@ -2308,7 +2572,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Peach iced tea",
+"servingEn": "1 glass"
 },
 {
 "id": "tra_tac",
@@ -2324,7 +2590,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Kumquat iced tea",
+"servingEn": "1 glass"
 },
 {
 "id": "bac_xiu",
@@ -2342,7 +2610,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Bạc xỉu (milky iced coffee)",
+"servingEn": "1 glass"
 },
 {
 "id": "sinh_to_xoai",
@@ -2360,7 +2630,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Mango smoothie",
+"servingEn": "1 glass"
 },
 {
 "id": "sua_dau_xanh",
@@ -2376,7 +2648,9 @@
 "high_sugar"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Mung bean milk",
+"servingEn": "1 glass"
 },
 {
 "id": "ruou_de",
@@ -2392,7 +2666,9 @@
 "alcohol"
 ],
 "region": "vn",
-"custom": false
+"custom": false,
+"en": "Rice liquor",
+"servingEn": "1 shot (30ml)"
 },
 {
 "id": "nuoc_tang_luc",
@@ -2409,7 +2685,9 @@
 "high_gi"
 ],
 "region": "all",
-"custom": false
+"custom": false,
+"en": "Energy drink",
+"servingEn": "1 can 250ml"
 },
 {
 "id": "pizza",
@@ -2430,7 +2708,9 @@
 "high_sodium"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Pizza",
+"servingEn": "1 slice"
 },
 {
 "id": "burger",
@@ -2452,7 +2732,9 @@
 "high_satfat"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Beef burger",
+"servingEn": "1 burger"
 },
 {
 "id": "ga_ran",
@@ -2472,7 +2754,9 @@
 "high_sodium"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Fried chicken",
+"servingEn": "1 piece"
 },
 {
 "id": "sandwich",
@@ -2489,7 +2773,9 @@
 "meat"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Chicken sandwich",
+"servingEn": "1 sandwich"
 },
 {
 "id": "mi_y",
@@ -2507,7 +2793,9 @@
 "high_carb"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Spaghetti bolognese",
+"servingEn": "1 plate"
 },
 {
 "id": "sushi",
@@ -2525,7 +2813,9 @@
 "high_carb"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Sushi",
+"servingEn": "6 pieces"
 },
 {
 "id": "steak",
@@ -2543,7 +2833,9 @@
 "high_satfat"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Beef steak",
+"servingEn": "150g"
 },
 {
 "id": "sua_chua_hy_lap",
@@ -2560,7 +2852,9 @@
 "animal"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Greek yogurt",
+"servingEn": "1 cup 150g"
 },
 {
 "id": "banh_mi_nuong",
@@ -2576,7 +2870,9 @@
 "gluten"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Toast",
+"servingEn": "2 slices"
 },
 {
 "id": "bo_dau_phong",
@@ -2592,6 +2888,1829 @@
 "peanut"
 ],
 "region": "intl",
-"custom": false
+"custom": false,
+"en": "Peanut butter",
+"servingEn": "1 tbsp"
+},
+{
+"id": "pancake",
+"name": "Bánh pancake (siro)",
+"emoji": "🥞",
+"serving": "3 cái",
+"kcal": 520,
+"protein": 10.0,
+"carbs": 85.0,
+"fat": 15.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"egg",
+"high_sugar",
+"high_gi"
+],
+"region": "intl",
+"custom": false,
+"en": "Pancakes with syrup",
+"servingEn": "3 pancakes"
+},
+{
+"id": "waffle",
+"name": "Bánh waffle",
+"emoji": "🧇",
+"serving": "1 cái",
+"kcal": 290,
+"protein": 7.0,
+"carbs": 33.0,
+"fat": 14.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"egg"
+],
+"region": "intl",
+"custom": false,
+"en": "Waffle",
+"servingEn": "1 waffle"
+},
+{
+"id": "croissant",
+"name": "Bánh sừng bò",
+"emoji": "🥐",
+"serving": "1 cái",
+"kcal": 270,
+"protein": 5.0,
+"carbs": 31.0,
+"fat": 14.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Croissant",
+"servingEn": "1 croissant"
+},
+{
+"id": "bagel_cream_cheese",
+"name": "Bánh bagel phô mai kem",
+"emoji": "🥯",
+"serving": "1 cái",
+"kcal": 380,
+"protein": 12.0,
+"carbs": 56.0,
+"fat": 11.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Bagel with cream cheese",
+"servingEn": "1 bagel"
+},
+{
+"id": "ngu_coc",
+"name": "Ngũ cốc với sữa",
+"emoji": "🥣",
+"serving": "1 chén",
+"kcal": 250,
+"protein": 8.0,
+"carbs": 42.0,
+"fat": 5.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"high_gi"
+],
+"region": "intl",
+"custom": false,
+"en": "Cereal with milk",
+"servingEn": "1 bowl"
+},
+{
+"id": "granola",
+"name": "Granola sữa chua",
+"emoji": "🥣",
+"serving": "1 chén",
+"kcal": 320,
+"protein": 12.0,
+"carbs": 44.0,
+"fat": 11.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"nuts"
+],
+"region": "intl",
+"custom": false,
+"en": "Granola with yogurt",
+"servingEn": "1 bowl"
+},
+{
+"id": "trung_bac",
+"name": "Trứng bác",
+"emoji": "🍳",
+"serving": "2 quả",
+"kcal": 200,
+"protein": 13.0,
+"carbs": 2.0,
+"fat": 15.0,
+"course": "protein",
+"tags": [
+"egg",
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Scrambled eggs",
+"servingEn": "2 eggs"
+},
+{
+"id": "omelette",
+"name": "Trứng ốp lết phô mai",
+"emoji": "🍳",
+"serving": "1 phần (3 trứng)",
+"kcal": 330,
+"protein": 21.0,
+"carbs": 2.0,
+"fat": 26.0,
+"course": "protein",
+"tags": [
+"egg",
+"milk",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Cheese omelette",
+"servingEn": "3-egg omelette"
+},
+{
+"id": "thit_xong_khoi",
+"name": "Thịt xông khói",
+"emoji": "🥓",
+"serving": "3 lát",
+"kcal": 130,
+"protein": 9.0,
+"carbs": 0.0,
+"fat": 10.0,
+"course": "protein",
+"tags": [
+"pork",
+"meat",
+"high_sodium",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Bacon",
+"servingEn": "3 slices"
+},
+{
+"id": "xuc_xich",
+"name": "Xúc xích",
+"emoji": "🌭",
+"serving": "2 cây",
+"kcal": 280,
+"protein": 11.0,
+"carbs": 3.0,
+"fat": 25.0,
+"course": "protein",
+"tags": [
+"pork",
+"meat",
+"high_sodium",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Sausages",
+"servingEn": "2 links"
+},
+{
+"id": "avocado_toast",
+"name": "Bánh mì nướng bơ",
+"emoji": "🥑",
+"serving": "1 lát",
+"kcal": 260,
+"protein": 7.0,
+"carbs": 26.0,
+"fat": 15.0,
+"course": "main",
+"tags": [
+"gluten"
+],
+"region": "intl",
+"custom": false,
+"en": "Avocado toast",
+"servingEn": "1 slice"
+},
+{
+"id": "english_breakfast",
+"name": "Bữa sáng kiểu Anh",
+"emoji": "🍳",
+"serving": "1 dĩa",
+"kcal": 850,
+"protein": 40.0,
+"carbs": 55.0,
+"fat": 52.0,
+"course": "main",
+"tags": [
+"egg",
+"pork",
+"meat",
+"gluten",
+"high_sodium",
+"high_satfat",
+"fried"
+],
+"region": "intl",
+"custom": false,
+"en": "Full English breakfast",
+"servingEn": "1 plate"
+},
+{
+"id": "cheeseburger",
+"name": "Burger phô mai",
+"emoji": "🍔",
+"serving": "1 cái",
+"kcal": 550,
+"protein": 30.0,
+"carbs": 40.0,
+"fat": 30.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat",
+"milk",
+"animal",
+"sesame",
+"high_sodium",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Cheeseburger",
+"servingEn": "1 burger"
+},
+{
+"id": "hot_dog",
+"name": "Hot dog",
+"emoji": "🌭",
+"serving": "1 cái",
+"kcal": 300,
+"protein": 11.0,
+"carbs": 24.0,
+"fat": 18.0,
+"course": "main",
+"tags": [
+"gluten",
+"pork",
+"meat",
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Hot dog",
+"servingEn": "1 hot dog"
+},
+{
+"id": "ga_vien",
+"name": "Gà viên chiên",
+"emoji": "🍗",
+"serving": "6 miếng",
+"kcal": 280,
+"protein": 15.0,
+"carbs": 17.0,
+"fat": 17.0,
+"course": "protein",
+"tags": [
+"fried",
+"meat",
+"gluten",
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Chicken nuggets",
+"servingEn": "6 pieces"
+},
+{
+"id": "canh_ga_bbq",
+"name": "Cánh gà sốt BBQ",
+"emoji": "🍗",
+"serving": "6 cánh",
+"kcal": 520,
+"protein": 36.0,
+"carbs": 20.0,
+"fat": 33.0,
+"course": "protein",
+"tags": [
+"meat",
+"high_sodium",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "BBQ chicken wings",
+"servingEn": "6 wings"
+},
+{
+"id": "mac_cheese",
+"name": "Nui phô mai",
+"emoji": "🧀",
+"serving": "1 chén",
+"kcal": 400,
+"protein": 15.0,
+"carbs": 46.0,
+"fat": 17.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Mac and cheese",
+"servingEn": "1 cup"
+},
+{
+"id": "lasagna",
+"name": "Lasagna bò",
+"emoji": "🍝",
+"serving": "1 miếng",
+"kcal": 450,
+"protein": 25.0,
+"carbs": 38.0,
+"fat": 21.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"meat",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Beef lasagna",
+"servingEn": "1 piece"
+},
+{
+"id": "carbonara",
+"name": "Mì Ý carbonara",
+"emoji": "🍝",
+"serving": "1 dĩa",
+"kcal": 600,
+"protein": 24.0,
+"carbs": 70.0,
+"fat": 25.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk",
+"egg",
+"pork",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Spaghetti carbonara",
+"servingEn": "1 plate"
+},
+{
+"id": "pizza_margherita",
+"name": "Pizza margherita",
+"emoji": "🍕",
+"serving": "1 miếng",
+"kcal": 250,
+"protein": 11.0,
+"carbs": 31.0,
+"fat": 9.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Margherita pizza",
+"servingEn": "1 slice"
+},
+{
+"id": "caesar_salad",
+"name": "Salad Caesar gà",
+"emoji": "🥗",
+"serving": "1 dĩa",
+"kcal": 440,
+"protein": 30.0,
+"carbs": 15.0,
+"fat": 29.0,
+"course": "main",
+"tags": [
+"meat",
+"milk",
+"egg",
+"gluten",
+"fish"
+],
+"region": "intl",
+"custom": false,
+"en": "Chicken Caesar salad",
+"servingEn": "1 bowl"
+},
+{
+"id": "club_sandwich",
+"name": "Club sandwich",
+"emoji": "🥪",
+"serving": "1 cái",
+"kcal": 590,
+"protein": 32.0,
+"carbs": 45.0,
+"fat": 31.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat",
+"pork",
+"egg",
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Club sandwich",
+"servingEn": "1 sandwich"
+},
+{
+"id": "tuna_sandwich",
+"name": "Sandwich cá ngừ",
+"emoji": "🥪",
+"serving": "1 cái",
+"kcal": 400,
+"protein": 22.0,
+"carbs": 38.0,
+"fat": 17.0,
+"course": "main",
+"tags": [
+"gluten",
+"fish",
+"egg"
+],
+"region": "intl",
+"custom": false,
+"en": "Tuna sandwich",
+"servingEn": "1 sandwich"
+},
+{
+"id": "wrap_ga",
+"name": "Bánh cuộn wrap gà",
+"emoji": "🌯",
+"serving": "1 cuốn",
+"kcal": 450,
+"protein": 28.0,
+"carbs": 45.0,
+"fat": 16.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat"
+],
+"region": "intl",
+"custom": false,
+"en": "Chicken wrap",
+"servingEn": "1 wrap"
+},
+{
+"id": "burrito",
+"name": "Burrito bò",
+"emoji": "🌯",
+"serving": "1 cái",
+"kcal": 700,
+"protein": 32.0,
+"carbs": 80.0,
+"fat": 26.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat",
+"milk",
+"high_sodium",
+"high_carb"
+],
+"region": "intl",
+"custom": false,
+"en": "Beef burrito",
+"servingEn": "1 burrito"
+},
+{
+"id": "taco",
+"name": "Taco",
+"emoji": "🌮",
+"serving": "2 cái",
+"kcal": 400,
+"protein": 20.0,
+"carbs": 32.0,
+"fat": 20.0,
+"course": "main",
+"tags": [
+"meat",
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Tacos",
+"servingEn": "2 tacos"
+},
+{
+"id": "nachos",
+"name": "Nachos phô mai",
+"emoji": "🧀",
+"serving": "1 phần",
+"kcal": 570,
+"protein": 14.0,
+"carbs": 56.0,
+"fat": 33.0,
+"course": "snack",
+"tags": [
+"milk",
+"fried",
+"high_sodium",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Nachos with cheese",
+"servingEn": "1 serving"
+},
+{
+"id": "kebab",
+"name": "Bánh mì kebab",
+"emoji": "🥙",
+"serving": "1 cái",
+"kcal": 620,
+"protein": 33.0,
+"carbs": 55.0,
+"fat": 29.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat",
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Döner kebab",
+"servingEn": "1 kebab"
+},
+{
+"id": "falafel",
+"name": "Falafel",
+"emoji": "🧆",
+"serving": "5 viên",
+"kcal": 330,
+"protein": 13.0,
+"carbs": 32.0,
+"fat": 18.0,
+"course": "protein",
+"tags": [
+"fried",
+"sesame"
+],
+"region": "intl",
+"custom": false,
+"en": "Falafel",
+"servingEn": "5 balls"
+},
+{
+"id": "hummus",
+"name": "Hummus",
+"emoji": "🫘",
+"serving": "4 muỗng canh",
+"kcal": 160,
+"protein": 5.0,
+"carbs": 14.0,
+"fat": 10.0,
+"course": "snack",
+"tags": [
+"sesame"
+],
+"region": "intl",
+"custom": false,
+"en": "Hummus",
+"servingEn": "4 tbsp"
+},
+{
+"id": "fish_chips",
+"name": "Cá chiên khoai tây",
+"emoji": "🐟",
+"serving": "1 phần",
+"kcal": 840,
+"protein": 35.0,
+"carbs": 80.0,
+"fat": 42.0,
+"course": "main",
+"tags": [
+"fish",
+"gluten",
+"fried",
+"high_sodium",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Fish and chips",
+"servingEn": "1 serving"
+},
+{
+"id": "roast_chicken",
+"name": "Gà quay",
+"emoji": "🍗",
+"serving": "1/4 con",
+"kcal": 400,
+"protein": 40.0,
+"carbs": 0.0,
+"fat": 26.0,
+"course": "protein",
+"tags": [
+"meat"
+],
+"region": "intl",
+"custom": false,
+"en": "Roast chicken",
+"servingEn": "1/4 chicken"
+},
+{
+"id": "khoai_nghien",
+"name": "Khoai tây nghiền",
+"emoji": "🥔",
+"serving": "1 chén",
+"kcal": 240,
+"protein": 4.0,
+"carbs": 35.0,
+"fat": 9.0,
+"course": "main",
+"tags": [
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Mashed potatoes",
+"servingEn": "1 cup"
+},
+{
+"id": "pad_thai",
+"name": "Pad Thái",
+"emoji": "🍜",
+"serving": "1 dĩa",
+"kcal": 600,
+"protein": 25.0,
+"carbs": 75.0,
+"fat": 22.0,
+"course": "main",
+"tags": [
+"shellfish",
+"egg",
+"peanut",
+"high_sodium",
+"high_carb"
+],
+"region": "intl",
+"custom": false,
+"en": "Pad Thai",
+"servingEn": "1 plate"
+},
+{
+"id": "tom_yum",
+"name": "Canh Tom Yum",
+"emoji": "🍲",
+"serving": "1 tô",
+"kcal": 180,
+"protein": 18.0,
+"carbs": 10.0,
+"fat": 7.0,
+"course": "soup",
+"tags": [
+"shellfish",
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Tom yum soup",
+"servingEn": "1 bowl"
+},
+{
+"id": "green_curry",
+"name": "Cà ri xanh gà",
+"emoji": "🍛",
+"serving": "1 phần + cơm",
+"kcal": 650,
+"protein": 28.0,
+"carbs": 70.0,
+"fat": 28.0,
+"course": "main",
+"tags": [
+"meat",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Thai green curry with rice",
+"servingEn": "1 serving + rice"
+},
+{
+"id": "ramen",
+"name": "Mì ramen",
+"emoji": "🍜",
+"serving": "1 tô",
+"kcal": 550,
+"protein": 25.0,
+"carbs": 65.0,
+"fat": 20.0,
+"course": "main",
+"tags": [
+"gluten",
+"pork",
+"egg",
+"soy",
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Ramen",
+"servingEn": "1 bowl"
+},
+{
+"id": "udon",
+"name": "Mì udon",
+"emoji": "🍜",
+"serving": "1 tô",
+"kcal": 400,
+"protein": 14.0,
+"carbs": 70.0,
+"fat": 5.0,
+"course": "main",
+"tags": [
+"gluten",
+"soy",
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Udon noodle soup",
+"servingEn": "1 bowl"
+},
+{
+"id": "teriyaki",
+"name": "Cơm gà teriyaki",
+"emoji": "🍱",
+"serving": "1 phần",
+"kcal": 600,
+"protein": 35.0,
+"carbs": 80.0,
+"fat": 14.0,
+"course": "main",
+"tags": [
+"meat",
+"soy",
+"gluten",
+"high_sodium",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Chicken teriyaki rice",
+"servingEn": "1 bowl"
+},
+{
+"id": "sashimi",
+"name": "Sashimi cá hồi",
+"emoji": "🍣",
+"serving": "6 lát (100g)",
+"kcal": 210,
+"protein": 22.0,
+"carbs": 0.0,
+"fat": 13.0,
+"course": "protein",
+"tags": [
+"fish"
+],
+"region": "intl",
+"custom": false,
+"en": "Salmon sashimi",
+"servingEn": "6 slices (100g)"
+},
+{
+"id": "poke",
+"name": "Poke bowl cá hồi",
+"emoji": "🥗",
+"serving": "1 tô",
+"kcal": 600,
+"protein": 30.0,
+"carbs": 65.0,
+"fat": 22.0,
+"course": "main",
+"tags": [
+"fish",
+"soy",
+"sesame"
+],
+"region": "intl",
+"custom": false,
+"en": "Salmon poke bowl",
+"servingEn": "1 bowl"
+},
+{
+"id": "bibimbap",
+"name": "Cơm trộn Hàn Quốc",
+"emoji": "🍲",
+"serving": "1 tô",
+"kcal": 560,
+"protein": 22.0,
+"carbs": 85.0,
+"fat": 15.0,
+"course": "main",
+"tags": [
+"egg",
+"meat",
+"soy",
+"sesame"
+],
+"region": "intl",
+"custom": false,
+"en": "Bibimbap",
+"servingEn": "1 bowl"
+},
+{
+"id": "kimchi",
+"name": "Kim chi",
+"emoji": "🥬",
+"serving": "1 chén nhỏ",
+"kcal": 25,
+"protein": 1.0,
+"carbs": 4.0,
+"fat": 0.5,
+"course": "veg",
+"tags": [
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Kimchi",
+"servingEn": "1 small bowl"
+},
+{
+"id": "tteokbokki",
+"name": "Bánh gạo cay",
+"emoji": "🌶️",
+"serving": "1 phần",
+"kcal": 450,
+"protein": 9.0,
+"carbs": 90.0,
+"fat": 5.0,
+"course": "main",
+"tags": [
+"gluten",
+"high_sodium",
+"high_carb"
+],
+"region": "intl",
+"custom": false,
+"en": "Tteokbokki",
+"servingEn": "1 serving"
+},
+{
+"id": "ga_ran_han",
+"name": "Gà rán Hàn Quốc",
+"emoji": "🍗",
+"serving": "6 miếng",
+"kcal": 760,
+"protein": 45.0,
+"carbs": 40.0,
+"fat": 46.0,
+"course": "protein",
+"tags": [
+"fried",
+"meat",
+"gluten",
+"soy",
+"high_sodium",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Korean fried chicken",
+"servingEn": "6 pieces"
+},
+{
+"id": "dimsum",
+"name": "Há cảo / xíu mại",
+"emoji": "🥟",
+"serving": "4 viên",
+"kcal": 220,
+"protein": 11.0,
+"carbs": 22.0,
+"fat": 9.0,
+"course": "main",
+"tags": [
+"gluten",
+"pork",
+"shellfish"
+],
+"region": "intl",
+"custom": false,
+"en": "Dim sum dumplings",
+"servingEn": "4 pieces"
+},
+{
+"id": "sui_cao",
+"name": "Sủi cảo",
+"emoji": "🥟",
+"serving": "8 cái",
+"kcal": 400,
+"protein": 18.0,
+"carbs": 45.0,
+"fat": 16.0,
+"course": "main",
+"tags": [
+"gluten",
+"pork"
+],
+"region": "intl",
+"custom": false,
+"en": "Pork dumplings",
+"servingEn": "8 dumplings"
+},
+{
+"id": "butter_chicken",
+"name": "Gà sốt bơ Ấn Độ",
+"emoji": "🍛",
+"serving": "1 phần",
+"kcal": 490,
+"protein": 30.0,
+"carbs": 14.0,
+"fat": 35.0,
+"course": "protein",
+"tags": [
+"meat",
+"milk",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Butter chicken",
+"servingEn": "1 serving"
+},
+{
+"id": "chicken_tikka",
+"name": "Gà tikka masala",
+"emoji": "🍛",
+"serving": "1 phần",
+"kcal": 440,
+"protein": 33.0,
+"carbs": 16.0,
+"fat": 27.0,
+"course": "protein",
+"tags": [
+"meat",
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Chicken tikka masala",
+"servingEn": "1 serving"
+},
+{
+"id": "naan",
+"name": "Bánh naan",
+"emoji": "🫓",
+"serving": "1 cái",
+"kcal": 260,
+"protein": 9.0,
+"carbs": 45.0,
+"fat": 5.0,
+"course": "main",
+"tags": [
+"gluten",
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Naan bread",
+"servingEn": "1 piece"
+},
+{
+"id": "biryani",
+"name": "Cơm biryani gà",
+"emoji": "🍛",
+"serving": "1 dĩa",
+"kcal": 650,
+"protein": 30.0,
+"carbs": 85.0,
+"fat": 20.0,
+"course": "main",
+"tags": [
+"meat",
+"milk",
+"high_carb"
+],
+"region": "intl",
+"custom": false,
+"en": "Chicken biryani",
+"servingEn": "1 plate"
+},
+{
+"id": "com_ca_ri_nhat",
+"name": "Cơm cà ri Nhật",
+"emoji": "🍛",
+"serving": "1 dĩa",
+"kcal": 700,
+"protein": 20.0,
+"carbs": 105.0,
+"fat": 22.0,
+"course": "main",
+"tags": [
+"gluten",
+"meat",
+"high_carb"
+],
+"region": "intl",
+"custom": false,
+"en": "Japanese curry rice",
+"servingEn": "1 plate"
+},
+{
+"id": "chili_con_carne",
+"name": "Bò hầm đậu chili",
+"emoji": "🌶️",
+"serving": "1 chén",
+"kcal": 350,
+"protein": 25.0,
+"carbs": 25.0,
+"fat": 16.0,
+"course": "protein",
+"tags": [
+"meat"
+],
+"region": "intl",
+"custom": false,
+"en": "Chili con carne",
+"servingEn": "1 bowl"
+},
+{
+"id": "sup_kem_nam",
+"name": "Súp kem nấm",
+"emoji": "🍄",
+"serving": "1 chén",
+"kcal": 220,
+"protein": 5.0,
+"carbs": 18.0,
+"fat": 15.0,
+"course": "soup",
+"tags": [
+"milk",
+"gluten",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Cream of mushroom soup",
+"servingEn": "1 bowl"
+},
+{
+"id": "sup_ca_chua",
+"name": "Súp cà chua",
+"emoji": "🍅",
+"serving": "1 chén",
+"kcal": 150,
+"protein": 3.0,
+"carbs": 22.0,
+"fat": 5.0,
+"course": "soup",
+"tags": [
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Tomato soup",
+"servingEn": "1 bowl"
+},
+{
+"id": "quinoa",
+"name": "Hạt diêm mạch (quinoa)",
+"emoji": "🌾",
+"serving": "1 chén (185g)",
+"kcal": 220,
+"protein": 8.0,
+"carbs": 39.0,
+"fat": 3.5,
+"course": "main",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Cooked quinoa",
+"servingEn": "1 cup (185g)"
+},
+{
+"id": "ga_tay",
+"name": "Gà tây nướng",
+"emoji": "🦃",
+"serving": "100g",
+"kcal": 190,
+"protein": 29.0,
+"carbs": 0.0,
+"fat": 7.0,
+"course": "protein",
+"tags": [
+"meat"
+],
+"region": "intl",
+"custom": false,
+"en": "Roast turkey",
+"servingEn": "100g"
+},
+{
+"id": "ca_ngu_hop",
+"name": "Cá ngừ đóng hộp",
+"emoji": "🐟",
+"serving": "1 hộp (100g)",
+"kcal": 130,
+"protein": 28.0,
+"carbs": 0.0,
+"fat": 1.0,
+"course": "protein",
+"tags": [
+"fish"
+],
+"region": "intl",
+"custom": false,
+"en": "Canned tuna",
+"servingEn": "1 can (100g)"
+},
+{
+"id": "pho_mai",
+"name": "Phô mai",
+"emoji": "🧀",
+"serving": "1 lát (30g)",
+"kcal": 110,
+"protein": 7.0,
+"carbs": 0.5,
+"fat": 9.0,
+"course": "snack",
+"tags": [
+"milk",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Cheese",
+"servingEn": "1 slice (30g)"
+},
+{
+"id": "bong_cai",
+"name": "Bông cải xanh luộc",
+"emoji": "🥦",
+"serving": "1 chén",
+"kcal": 55,
+"protein": 4.0,
+"carbs": 11.0,
+"fat": 0.6,
+"course": "veg",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Steamed broccoli",
+"servingEn": "1 cup"
+},
+{
+"id": "protein_bar",
+"name": "Thanh protein",
+"emoji": "🍫",
+"serving": "1 thanh",
+"kcal": 200,
+"protein": 20.0,
+"carbs": 22.0,
+"fat": 7.0,
+"course": "snack",
+"tags": [
+"milk",
+"soy",
+"nuts"
+],
+"region": "intl",
+"custom": false,
+"en": "Protein bar",
+"servingEn": "1 bar"
+},
+{
+"id": "khoai_tay_lat",
+"name": "Snack khoai tây",
+"emoji": "🥔",
+"serving": "1 gói nhỏ (30g)",
+"kcal": 160,
+"protein": 2.0,
+"carbs": 15.0,
+"fat": 10.0,
+"course": "snack",
+"tags": [
+"fried",
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Potato chips",
+"servingEn": "1 small bag (30g)"
+},
+{
+"id": "bong_ngo",
+"name": "Bỏng ngô",
+"emoji": "🍿",
+"serving": "1 hộp vừa",
+"kcal": 400,
+"protein": 6.0,
+"carbs": 45.0,
+"fat": 22.0,
+"course": "snack",
+"tags": [
+"high_sodium"
+],
+"region": "intl",
+"custom": false,
+"en": "Popcorn (cinema)",
+"servingEn": "1 medium tub"
+},
+{
+"id": "donut",
+"name": "Bánh donut",
+"emoji": "🍩",
+"serving": "1 cái",
+"kcal": 260,
+"protein": 3.0,
+"carbs": 31.0,
+"fat": 14.0,
+"course": "dessert",
+"tags": [
+"gluten",
+"milk",
+"egg",
+"fried",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Donut",
+"servingEn": "1 donut"
+},
+{
+"id": "muffin",
+"name": "Bánh muffin",
+"emoji": "🧁",
+"serving": "1 cái",
+"kcal": 420,
+"protein": 6.0,
+"carbs": 55.0,
+"fat": 20.0,
+"course": "dessert",
+"tags": [
+"gluten",
+"milk",
+"egg",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Muffin",
+"servingEn": "1 muffin"
+},
+{
+"id": "brownie",
+"name": "Bánh brownie",
+"emoji": "🍫",
+"serving": "1 miếng",
+"kcal": 230,
+"protein": 3.0,
+"carbs": 30.0,
+"fat": 12.0,
+"course": "dessert",
+"tags": [
+"gluten",
+"milk",
+"egg",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Brownie",
+"servingEn": "1 piece"
+},
+{
+"id": "cheesecake",
+"name": "Bánh phô mai",
+"emoji": "🍰",
+"serving": "1 miếng",
+"kcal": 400,
+"protein": 7.0,
+"carbs": 32.0,
+"fat": 28.0,
+"course": "dessert",
+"tags": [
+"gluten",
+"milk",
+"egg",
+"high_sugar",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Cheesecake",
+"servingEn": "1 slice"
+},
+{
+"id": "apple_pie",
+"name": "Bánh táo",
+"emoji": "🥧",
+"serving": "1 miếng",
+"kcal": 410,
+"protein": 4.0,
+"carbs": 58.0,
+"fat": 19.0,
+"course": "dessert",
+"tags": [
+"gluten",
+"milk",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Apple pie",
+"servingEn": "1 slice"
+},
+{
+"id": "banh_kem",
+"name": "Bánh kem",
+"emoji": "🎂",
+"serving": "1 miếng",
+"kcal": 350,
+"protein": 4.0,
+"carbs": 50.0,
+"fat": 15.0,
+"course": "dessert",
+"tags": [
+"gluten",
+"milk",
+"egg",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Birthday cake",
+"servingEn": "1 slice"
+},
+{
+"id": "viet_quat",
+"name": "Việt quất",
+"emoji": "🫐",
+"serving": "1 chén",
+"kcal": 85,
+"protein": 1.1,
+"carbs": 21.0,
+"fat": 0.5,
+"course": "fruit",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Blueberries",
+"servingEn": "1 cup"
+},
+{
+"id": "kiwi",
+"name": "Kiwi",
+"emoji": "🥝",
+"serving": "1 quả",
+"kcal": 42,
+"protein": 0.8,
+"carbs": 10.0,
+"fat": 0.4,
+"course": "fruit",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Kiwi",
+"servingEn": "1 fruit"
+},
+{
+"id": "le",
+"name": "Lê",
+"emoji": "🍐",
+"serving": "1 quả",
+"kcal": 100,
+"protein": 0.6,
+"carbs": 27.0,
+"fat": 0.2,
+"course": "fruit",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Pear",
+"servingEn": "1 fruit"
+},
+{
+"id": "dao",
+"name": "Đào",
+"emoji": "🍑",
+"serving": "1 quả",
+"kcal": 60,
+"protein": 1.4,
+"carbs": 15.0,
+"fat": 0.4,
+"course": "fruit",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Peach",
+"servingEn": "1 fruit"
+},
+{
+"id": "latte",
+"name": "Cà phê latte",
+"emoji": "☕",
+"serving": "1 ly 350ml",
+"kcal": 190,
+"protein": 12.0,
+"carbs": 18.0,
+"fat": 7.0,
+"course": "drink",
+"tags": [
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Latte",
+"servingEn": "1 cup (12 oz)"
+},
+{
+"id": "cappuccino",
+"name": "Cappuccino",
+"emoji": "☕",
+"serving": "1 ly 350ml",
+"kcal": 130,
+"protein": 8.0,
+"carbs": 12.0,
+"fat": 5.0,
+"course": "drink",
+"tags": [
+"milk"
+],
+"region": "intl",
+"custom": false,
+"en": "Cappuccino",
+"servingEn": "1 cup (12 oz)"
+},
+{
+"id": "americano",
+"name": "Americano",
+"emoji": "☕",
+"serving": "1 ly",
+"kcal": 15,
+"protein": 1.0,
+"carbs": 2.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Americano",
+"servingEn": "1 cup"
+},
+{
+"id": "espresso",
+"name": "Espresso",
+"emoji": "☕",
+"serving": "1 shot",
+"kcal": 5,
+"protein": 0.3,
+"carbs": 0.8,
+"fat": 0.1,
+"course": "drink",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Espresso",
+"servingEn": "1 shot"
+},
+{
+"id": "mocha",
+"name": "Cà phê mocha",
+"emoji": "☕",
+"serving": "1 ly 350ml",
+"kcal": 290,
+"protein": 10.0,
+"carbs": 35.0,
+"fat": 11.0,
+"course": "drink",
+"tags": [
+"milk",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Mocha",
+"servingEn": "1 cup (12 oz)"
+},
+{
+"id": "matcha_latte",
+"name": "Matcha latte",
+"emoji": "🍵",
+"serving": "1 ly 350ml",
+"kcal": 200,
+"protein": 8.0,
+"carbs": 28.0,
+"fat": 6.0,
+"course": "drink",
+"tags": [
+"milk",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Matcha latte",
+"servingEn": "1 cup (12 oz)"
+},
+{
+"id": "frappuccino",
+"name": "Frappuccino",
+"emoji": "🥤",
+"serving": "1 ly 470ml",
+"kcal": 380,
+"protein": 5.0,
+"carbs": 54.0,
+"fat": 15.0,
+"course": "drink",
+"tags": [
+"milk",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Frappuccino",
+"servingEn": "1 grande (16 oz)"
+},
+{
+"id": "socola_nong",
+"name": "Sô-cô-la nóng",
+"emoji": "☕",
+"serving": "1 ly",
+"kcal": 260,
+"protein": 9.0,
+"carbs": 35.0,
+"fat": 9.0,
+"course": "drink",
+"tags": [
+"milk",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Hot chocolate",
+"servingEn": "1 cup"
+},
+{
+"id": "milkshake",
+"name": "Sữa lắc",
+"emoji": "🥤",
+"serving": "1 ly 400ml",
+"kcal": 530,
+"protein": 12.0,
+"carbs": 80.0,
+"fat": 18.0,
+"course": "drink",
+"tags": [
+"milk",
+"high_sugar",
+"high_satfat"
+],
+"region": "intl",
+"custom": false,
+"en": "Milkshake",
+"servingEn": "1 medium"
+},
+{
+"id": "smoothie_dau",
+"name": "Sinh tố dâu chuối",
+"emoji": "🥤",
+"serving": "1 ly 400ml",
+"kcal": 220,
+"protein": 4.0,
+"carbs": 50.0,
+"fat": 1.0,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Strawberry banana smoothie",
+"servingEn": "1 glass (14 oz)"
+},
+{
+"id": "nuoc_ngot_khong_duong",
+"name": "Nước ngọt không đường",
+"emoji": "🥤",
+"serving": "1 lon 330ml",
+"kcal": 1,
+"protein": 0.0,
+"carbs": 0.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Diet soda",
+"servingEn": "1 can 330ml"
+},
+{
+"id": "nuoc_chanh",
+"name": "Nước chanh",
+"emoji": "🍋",
+"serving": "1 ly",
+"kcal": 120,
+"protein": 0.2,
+"carbs": 31.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Lemonade",
+"servingEn": "1 glass"
+},
+{
+"id": "tra_da_ngot",
+"name": "Trà đá có đường",
+"emoji": "🧋",
+"serving": "1 ly",
+"kcal": 90,
+"protein": 0.0,
+"carbs": 23.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Sweet iced tea",
+"servingEn": "1 glass"
+},
+{
+"id": "nuoc_the_thao",
+"name": "Nước điện giải",
+"emoji": "🥤",
+"serving": "1 chai 500ml",
+"kcal": 130,
+"protein": 0.0,
+"carbs": 34.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Sports drink",
+"servingEn": "1 bottle 500ml"
+},
+{
+"id": "kombucha",
+"name": "Kombucha",
+"emoji": "🍾",
+"serving": "1 chai 330ml",
+"kcal": 50,
+"protein": 0.0,
+"carbs": 12.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [],
+"region": "intl",
+"custom": false,
+"en": "Kombucha",
+"servingEn": "1 bottle 330ml"
+},
+{
+"id": "nuoc_tao",
+"name": "Nước táo",
+"emoji": "🧃",
+"serving": "1 ly 250ml",
+"kcal": 115,
+"protein": 0.2,
+"carbs": 28.0,
+"fat": 0.3,
+"course": "drink",
+"tags": [
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Apple juice",
+"servingEn": "1 glass 250ml"
+},
+{
+"id": "ruou_vang_do",
+"name": "Rượu vang đỏ",
+"emoji": "🍷",
+"serving": "1 ly 150ml",
+"kcal": 125,
+"protein": 0.0,
+"carbs": 4.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"alcohol"
+],
+"region": "intl",
+"custom": false,
+"en": "Red wine",
+"servingEn": "1 glass 150ml"
+},
+{
+"id": "ruou_vang_trang",
+"name": "Rượu vang trắng",
+"emoji": "🥂",
+"serving": "1 ly 150ml",
+"kcal": 120,
+"protein": 0.0,
+"carbs": 4.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"alcohol"
+],
+"region": "intl",
+"custom": false,
+"en": "White wine",
+"servingEn": "1 glass 150ml"
+},
+{
+"id": "whisky",
+"name": "Whisky / rượu mạnh",
+"emoji": "🥃",
+"serving": "1 ly 45ml",
+"kcal": 100,
+"protein": 0.0,
+"carbs": 0.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"alcohol"
+],
+"region": "intl",
+"custom": false,
+"en": "Whisky / spirits",
+"servingEn": "1 shot 45ml"
+},
+{
+"id": "cocktail",
+"name": "Cocktail",
+"emoji": "🍹",
+"serving": "1 ly",
+"kcal": 220,
+"protein": 0.0,
+"carbs": 20.0,
+"fat": 0.0,
+"course": "drink",
+"tags": [
+"alcohol",
+"high_sugar"
+],
+"region": "intl",
+"custom": false,
+"en": "Cocktail",
+"servingEn": "1 glass"
+},
+{
+"id": "sua_hanh_nhan",
+"name": "Sữa hạnh nhân",
+"emoji": "🥛",
+"serving": "1 ly 250ml",
+"kcal": 40,
+"protein": 1.5,
+"carbs": 1.5,
+"fat": 2.5,
+"course": "drink",
+"tags": [
+"nuts"
+],
+"region": "intl",
+"custom": false,
+"en": "Almond milk (unsweetened)",
+"servingEn": "1 glass 250ml"
 }
 ]

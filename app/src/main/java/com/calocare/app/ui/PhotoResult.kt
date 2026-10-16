@@ -1,5 +1,8 @@
 package com.calocare.app.ui
 
+import com.calocare.app.servingLabel
+import com.calocare.app.label
+import com.calocare.app.L
 import android.app.Activity
 import android.content.Intent
 import android.speech.RecognizerIntent
@@ -83,12 +86,12 @@ fun MicButton(onText: (String) -> Unit, onUnavailable: () -> Unit, modifier: Mod
         onClick = {
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi-VN")
-                .putExtra(RecognizerIntent.EXTRA_PROMPT, "Nói tên món hoặc mô tả món ăn")
+                .putExtra(RecognizerIntent.EXTRA_LANGUAGE, if (com.calocare.app.Lang.en) java.util.Locale.getDefault().toLanguageTag() else "vi-VN")
+                .putExtra(RecognizerIntent.EXTRA_PROMPT, L("Nói tên món hoặc mô tả món ăn", "Say the food's name or describe it"))
             // Not every phone has a speech recogniser installed.
             runCatching { launcher.launch(intent) }.onFailure { onUnavailable() }
         },
-    ) { Icon(Icons.Default.Mic, "Nói tên món", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp)) }
+    ) { Icon(Icons.Default.Mic, L("Nói tên món", "Speak"), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp)) }
 }
 
 /** Result of the meal photo analysis: the user checks dishes, fixes names, sizes and amounts, then saves to the diary. */
@@ -99,18 +102,18 @@ fun PhotoDialog(vm: AppViewModel, data: AppData, state: PhotoState) {
     var adding by remember { mutableStateOf(false) }
     val picked = state.items.filter { it.checked }
 
-    FullScreenDialog("📷 Bữa ăn của bạn", onClose = { vm.photo = null }) {
+    FullScreenDialog(L("📷 Bữa ăn của bạn", "📷 Your meal"), onClose = { vm.photo = null }) {
         LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
                 Image(
-                    state.bitmap.asImageBitmap(), contentDescription = "Ảnh bữa ăn", contentScale = ContentScale.Crop,
+                    state.bitmap.asImageBitmap(), contentDescription = L("Ảnh bữa ăn", "Meal photo"), contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(20.dp)),
                 )
             }
             if (state.loading) item {
                 Row(Modifier.fillMaxWidth().padding(24.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(Modifier.size(28.dp))
-                    Text("   AI đang nhận diện món ăn…")
+                    Text(L("   AI đang nhận diện món ăn…", "   The AI is identifying the food…"))
                 }
             }
             state.error?.let { item { Text(it, color = Palette.Danger) } }
@@ -120,7 +123,7 @@ fun PhotoDialog(vm: AppViewModel, data: AppData, state: PhotoState) {
             val dangers = picked.flatMap { p -> Nutrition.warnings(p.item.tags.toSet(), data.profile).filter { it.danger }.map { p.item.name to it } }
             if (dangers.isNotEmpty()) item {
                 Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.errorContainer).padding(14.dp)) {
-                    Text("⛔ Cảnh báo sức khỏe", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
+                    Text(L("⛔ Cảnh báo sức khỏe", "⛔ Health warning"), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
                     dangers.forEach { (name, w) -> Text("$name: ${w.text}", color = MaterialTheme.colorScheme.onErrorContainer) }
                 }
             }
@@ -131,7 +134,7 @@ fun PhotoDialog(vm: AppViewModel, data: AppData, state: PhotoState) {
                 // Always there: the AI can miss a dish, or recognise nothing at all.
                 FilledTonalButton(onClick = { adding = true }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
                     Icon(Icons.Default.Add, null, Modifier.size(28.dp))
-                    Text(if (state.items.isEmpty()) "  Tự thêm món (gõ hoặc nói)" else "  Thêm món AI bỏ sót", style = MaterialTheme.typography.titleMedium)
+                    Text(if (state.items.isEmpty()) L("  Tự thêm món (gõ hoặc nói)", "  Add items (type or speak)") else L("  Thêm món AI bỏ sót", "  Add an item the AI missed"), style = MaterialTheme.typography.titleMedium)
                 }
             }
             if (state.advice.isNotBlank()) item { Text("🩺 ${state.advice}", style = MaterialTheme.typography.bodyMedium) }
@@ -150,7 +153,7 @@ fun PhotoDialog(vm: AppViewModel, data: AppData, state: PhotoState) {
                     }
                     val total = picked.sumOf { it.kcal }
                     Button(onClick = { vm.commitPhoto() }, enabled = total > 0, modifier = Modifier.fillMaxWidth()) {
-                        Text("Thêm vào nhật ký · $total kcal")
+                        Text(L("Thêm vào nhật ký · $total kcal", "Add to log · $total kcal"))
                     }
                 }
             }
@@ -171,15 +174,15 @@ private fun MealSummary(state: PhotoState, picked: List<PhotoItem>) {
                     Text("${picked.sumOf { it.kcal }}", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
                     Text(" kcal", modifier = Modifier.padding(bottom = 6.dp))
                 }
-                Text("${picked.size} món", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(L("${picked.size} món", "${picked.size} item(s)"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (state.score in 0..100) {
                 val (letter, label, color) = when {
-                    state.score >= 80 -> Triple("A", "Rất tốt", Palette.In)
-                    state.score >= 65 -> Triple("B", "Tốt", Color(0xFF7CB342))
-                    state.score >= 50 -> Triple("C", "Trung bình", Palette.Carbs)
-                    state.score >= 35 -> Triple("D", "Chưa tốt", Palette.Out)
-                    else -> Triple("E", "Kém", Palette.Danger)
+                    state.score >= 80 -> Triple("A", L("Rất tốt", "Very good"), Palette.In)
+                    state.score >= 65 -> Triple("B", L("Tốt", "Good"), Color(0xFF7CB342))
+                    state.score >= 50 -> Triple("C", L("Trung bình", "Average"), Palette.Carbs)
+                    state.score >= 35 -> Triple("D", L("Chưa tốt", "Poor"), Palette.Out)
+                    else -> Triple("E", L("Kém", "Bad"), Palette.Danger)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(Modifier.size(52.dp).clip(CircleShape).background(color), contentAlignment = Alignment.Center) {
@@ -190,14 +193,14 @@ private fun MealSummary(state: PhotoState, picked: List<PhotoItem>) {
             }
         }
         Row {
-            Nutrient("Đạm", "${total { it.item.protein }}g", Modifier.weight(1f))
-            Nutrient("Tinh bột", "${total { it.item.carbs }}g", Modifier.weight(1f))
-            Nutrient("Chất béo", "${total { it.item.fat }}g", Modifier.weight(1f))
+            Nutrient(L("Đạm", "Protein"), "${total { it.item.protein }}g", Modifier.weight(1f))
+            Nutrient(L("Tinh bột", "Carbs"), "${total { it.item.carbs }}g", Modifier.weight(1f))
+            Nutrient(L("Chất béo", "Fat"), "${total { it.item.fat }}g", Modifier.weight(1f))
         }
         // Fibre, sugar and sodium are the AI's estimate even for dishes whose calories come from the app's table.
         if (picked.any { it.item.fiber > 0f || it.item.sugar > 0f || it.item.sodium > 0f }) Row {
-            Nutrient("Chất xơ", "${total { it.item.fiber }}g", Modifier.weight(1f))
-            Nutrient("Đường", "${total { it.item.sugar }}g", Modifier.weight(1f))
+            Nutrient(L("Chất xơ", "Fibre"), "${total { it.item.fiber }}g", Modifier.weight(1f))
+            Nutrient(L("Đường", "Sugar"), "${total { it.item.sugar }}g", Modifier.weight(1f))
             Nutrient("Natri", "${total { it.item.sodium }}mg", Modifier.weight(1f))
         }
         state.pros.forEach { Text("＋ $it", style = MaterialTheme.typography.bodySmall, color = Palette.In) }
@@ -223,34 +226,34 @@ private fun DishCard(vm: AppViewModel, data: AppData, p: PhotoItem, onEdit: () -
             Column(Modifier.weight(1f).clickable(onClick = onEdit)) {
                 Text(p.item.name, fontWeight = FontWeight.SemiBold)
                 Text(
-                    "${p.item.kcal} kcal / ${p.item.portion}" + if (p.item.grams > 0) " · trong ảnh ≈ ${p.item.grams}g" else "",
+                    "${p.item.kcal} kcal / ${p.item.portion}" + if (p.item.grams > 0) L(" · trong ảnh ≈ ${p.item.grams}g", " · in photo ≈ ${p.item.grams}g") else "",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    if (p.fromTable) "✓ Calo theo bảng món ăn của app" else "≈ AI ước tính · chắc ${(p.item.confidence.coerceIn(0f, 1f) * 100).roundToInt()}%",
+                    if (p.fromTable) L("✓ Calo theo bảng món ăn của app", "✓ Calories from the app's food table") else L("≈ AI ước tính · chắc ${(p.item.confidence.coerceIn(0f, 1f) * 100).roundToInt()}%", "≈ AI estimate · ${(p.item.confidence.coerceIn(0f, 1f) * 100).roundToInt()}% sure"),
                     style = MaterialTheme.typography.labelSmall, color = if (p.fromTable) MaterialTheme.colorScheme.primary else Palette.Warn,
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("${p.kcal} kcal", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 // The AI can mistake one dish for another: a clear way to say what it really is.
-                FilledTonalIconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) { Icon(Icons.Default.Edit, "Sửa món", Modifier.size(22.dp)) }
+                FilledTonalIconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) { Icon(Icons.Default.Edit, L("Sửa món", "Edit item"), Modifier.size(22.dp)) }
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("Cỡ", style = MaterialTheme.typography.bodySmall)
+            Text(L("Cỡ", "Size"), style = MaterialTheme.typography.bodySmall)
             // A large egg is not a small egg: the size scales the calories of one serving.
             PhotoItem.SIZES.forEach { (id, label) -> FilterChip(p.size == id, { p.size = id }, enabled = p.checked, label = { Text(label) }) }
             Spacer(Modifier.weight(1f))
-            FilledTonalIconButton(onClick = { p.qty = (p.qty - 0.5f).coerceAtLeast(0.5f) }, enabled = p.checked, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Remove, "Bớt nửa phần", Modifier.size(18.dp)) }
+            FilledTonalIconButton(onClick = { p.qty = (p.qty - 0.5f).coerceAtLeast(0.5f) }, enabled = p.checked, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Remove, L("Bớt nửa phần", "Half a serving less"), Modifier.size(18.dp)) }
             Text("× ${AppViewModel.fmtQty(p.qty)}", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.width(44.dp))
-            FilledTonalIconButton(onClick = { p.qty = (p.qty + 0.5f).coerceAtMost(20f) }, enabled = p.checked, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Add, "Thêm nửa phần", Modifier.size(18.dp)) }
+            FilledTonalIconButton(onClick = { p.qty = (p.qty + 0.5f).coerceAtMost(20f) }, enabled = p.checked, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Add, L("Thêm nửa phần", "Half a serving more"), Modifier.size(18.dp)) }
         }
-        if (p.learned) Text("Số lượng theo thói quen của bạn", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (p.learned) Text(L("Số lượng theo thói quen của bạn", "Amount based on your habits"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (p.alternatives.isNotEmpty()) {
             // One tap instead of typing when the AI picked the wrong look-alike.
             Row(Modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Hay là:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(L("Hay là:", "Or maybe:"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 p.alternatives.forEach { name -> AssistChip(onClick = { vm.pickAlternative(p, name) }, label = { Text(name) }) }
             }
         }
@@ -271,15 +274,15 @@ private fun DishDialog(vm: AppViewModel, data: AppData, target: PhotoItem?, onDi
     val matches = remember(text, foods) { FoodMatcher.ranked(text, foods).take(5).map { it.first } }
     AlertDialog(
         onDismissRequest = { if (!vm.describing) onDismiss() },
-        title = { Text(if (target == null) "Thêm món" else "Đây là món gì?") },
+        title = { Text(if (target == null) L("Thêm món", "Add item") else L("Đây là món gì?", "What is this?")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 OutlinedTextField(
-                    text, { text = it }, label = { Text("Tên món hoặc mô tả") }, maxLines = 4, modifier = Modifier.fillMaxWidth(),
-                    trailingIcon = { MicButton(onText = { text = it }, onUnavailable = { vm.messages.tryEmit("Máy chưa có nhận dạng giọng nói.") }) },
+                    text, { text = it }, label = { Text(L("Tên món hoặc mô tả", "Name or description")) }, maxLines = 4, modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = { MicButton(onText = { text = it }, onUnavailable = { vm.messages.tryEmit(L("Máy chưa có nhận dạng giọng nói.", "Speech recognition isn't available on this phone.")) }) },
                 )
                 Text(
-                    "Ví dụ: “bánh khọt 5 cái” · “hủ tiếu: thịt 100g, rau một ít, bún 100g, nước xương 400ml” · “tương đương 1 tô phở”",
+                    L("Ví dụ: “bánh khọt 5 cái” · “hủ tiếu: thịt 100g, rau một ít, bún 100g, nước xương 400ml” · “tương đương 1 tô phở”", "E.g. “5 chicken wings” · “salad: chicken 100g, avocado half, dressing 2 tbsp” · “about the size of a burger”"),
                     style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 matches.forEach { food ->
@@ -292,15 +295,15 @@ private fun DishDialog(vm: AppViewModel, data: AppData, target: PhotoItem?, onDi
                         FoodImage(food.emoji, food.imageUrl, 32.dp)
                         Spacer(Modifier.width(10.dp))
                         Column(Modifier.weight(1f)) {
-                            Text(food.name, fontWeight = FontWeight.Medium)
-                            Text("${food.kcal} kcal / ${food.serving}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(food.label, fontWeight = FontWeight.Medium)
+                            Text("${food.kcal} kcal / ${food.servingLabel}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
                 if (target != null) {
                     // For "it is this dish, but not this much of it": adjust what went in, by weight.
                     FilledTonalButton(onClick = { ingredients = true }, enabled = !vm.describing && vm.hasAi, modifier = Modifier.fillMaxWidth()) {
-                        Text("🧮 Chỉnh theo thành phần (thịt, rau… bao nhiêu gam)")
+                        Text(L("🧮 Chỉnh theo thành phần (thịt, rau… bao nhiêu gam)", "🧮 Adjust by ingredients (grams of meat, veg…)"))
                     }
                 }
                 Button(
@@ -308,14 +311,14 @@ private fun DishDialog(vm: AppViewModel, data: AppData, target: PhotoItem?, onDi
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     if (vm.describing) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)
-                    Text(if (vm.describing) "  Đang tính…" else "✨ AI tính calo theo mô tả này")
+                    Text(if (vm.describing) L("  Đang tính…", "  Working…") else L("✨ AI tính calo theo mô tả này", "✨ AI calories from this description"))
                 }
             }
         },
         confirmButton = {
-            if (target != null) TextButton(enabled = text.isNotBlank() && !vm.describing, onClick = { vm.renamePhotoItem(target, text); onDismiss() }) { Text("Chỉ đổi tên") }
+            if (target != null) TextButton(enabled = text.isNotBlank() && !vm.describing, onClick = { vm.renamePhotoItem(target, text); onDismiss() }) { Text(L("Chỉ đổi tên", "Rename only")) }
         },
-        dismissButton = { TextButton(enabled = !vm.describing, onClick = onDismiss) { Text("Hủy") } },
+        dismissButton = { TextButton(enabled = !vm.describing, onClick = onDismiss) { Text(L("Hủy", "Cancel")) } },
     )
     if (ingredients && target != null) {
         IngredientEditor(

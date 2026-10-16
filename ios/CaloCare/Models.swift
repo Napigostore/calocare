@@ -59,7 +59,7 @@ struct AppData: Codable {
 enum Goal {
     static let lose = "lose", maintain = "maintain", gain = "gain", gym = "gym", run = "run"
     static let all: [(id: String, label: String)] = [
-        (lose, "🔥 Giảm cân"), (maintain, "⚖️ Giữ cân"), (gain, "🍚 Tăng cân"), (gym, "🏋️ Gym · tăng cơ"), (run, "🏃 Chạy bộ"),
+        (lose, L("🔥 Giảm cân", "🔥 Lose weight")), (maintain, L("⚖️ Giữ cân", "⚖️ Maintain")), (gain, L("🍚 Tăng cân", "🍚 Gain weight")), (gym, L("🏋️ Gym · tăng cơ", "🏋️ Gym · build muscle")), (run, L("🏃 Chạy bộ", "🏃 Running")),
     ]
     static func label(_ id: String) -> String { all.first { $0.id == id }?.label ?? id }
 }
@@ -67,12 +67,12 @@ enum Goal {
 enum Diet {
     static let none = "none"
     static let all: [(id: String, label: String)] = [
-        (none, "Không kiêng"), ("vegetarian", "Ăn chay (có trứng sữa)"), ("vegan", "Thuần chay"), ("keto", "Keto / ít tinh bột"), ("halal", "Halal"),
+        (none, L("Không kiêng", "No restrictions")), ("vegetarian", L("Ăn chay (có trứng sữa)", "Vegetarian (eggs & dairy)")), ("vegan", L("Thuần chay", "Vegan")), ("keto", L("Keto / ít tinh bột", "Keto / low-carb")), ("halal", "Halal"),
     ]
 }
 
 enum Meal {
-    static let all: [(id: String, label: String)] = [("breakfast", "Sáng"), ("lunch", "Trưa"), ("dinner", "Tối"), ("snack", "Ăn vặt")]
+    static let all: [(id: String, label: String)] = [("breakfast", L("Sáng", "Breakfast")), ("lunch", L("Trưa", "Lunch")), ("dinner", L("Tối", "Dinner")), ("snack", L("Ăn vặt", "Snack"))]
     static func label(_ id: String) -> String { all.first { $0.id == id }?.label ?? id }
     static func forHour(_ hour: Int) -> String {
         switch hour {
@@ -86,11 +86,11 @@ enum Meal {
 
 enum HealthTags {
     static let allergens: [(id: String, label: String)] = [
-        ("peanut", "Đậu phộng"), ("nuts", "Hạt cây"), ("shellfish", "Tôm cua, hải sản có vỏ"), ("fish", "Cá"), ("milk", "Sữa / lactose"),
-        ("egg", "Trứng"), ("gluten", "Gluten (lúa mì)"), ("soy", "Đậu nành"), ("sesame", "Mè (vừng)"),
+        ("peanut", L("Đậu phộng", "Peanuts")), ("nuts", L("Hạt cây", "Tree nuts")), ("shellfish", L("Tôm cua, hải sản có vỏ", "Shellfish")), ("fish", L("Cá", "Fish")), ("milk", L("Sữa / lactose", "Milk / lactose")),
+        ("egg", L("Trứng", "Eggs")), ("gluten", L("Gluten (lúa mì)", "Gluten (wheat)")), ("soy", L("Đậu nành", "Soy")), ("sesame", L("Mè (vừng)", "Sesame")),
     ]
     static let conditions: [(id: String, label: String)] = [
-        ("diabetes", "Tiểu đường"), ("hypertension", "Cao huyết áp"), ("gout", "Gout"), ("cholesterol", "Mỡ máu cao"),
+        ("diabetes", L("Tiểu đường", "Diabetes")), ("hypertension", L("Cao huyết áp", "High blood pressure")), ("gout", "Gout"), ("cholesterol", L("Mỡ máu cao", "High cholesterol")),
     ]
 }
 

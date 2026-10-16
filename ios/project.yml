@@ -3,6 +3,8 @@
 name: CaloCare
 options:
   bundleIdPrefix: com.calocare
+  # English is the fallback for every language other than Vietnamese.
+  developmentLanguage: en
   deploymentTarget:
     iOS: "16.0"
 targets:
@@ -33,6 +35,8 @@ targets:
       path: CaloCare/Info.plist
       properties:
         CFBundleDisplayName: CaloCare
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, vi]
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         BackendHost: $(BACKEND_HOST)

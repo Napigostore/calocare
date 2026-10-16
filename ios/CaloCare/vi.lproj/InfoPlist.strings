@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "CaloCare dùng camera để chụp bữa ăn và tính calo.";
+"NSPhotoLibraryUsageDescription" = "CaloCare đọc ảnh bữa ăn bạn chọn để tính calo.";
+"NSHealthShareUsageDescription" = "CaloCare đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng và chiều cao từ Apple Health để tính calo tiêu hao và gợi ý ăn uống phù hợp.";
+"NSHealthUpdateUsageDescription" = "CaloCare không ghi dữ liệu vào Apple Health.";

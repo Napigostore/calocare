@@ -1,5 +1,6 @@
 package com.calocare.app.net
 
+import com.calocare.app.L
 import android.util.Base64
 import com.anthropic.client.AnthropicClient
 import com.anthropic.client.okhttp.AnthropicOkHttpClient
@@ -90,7 +91,7 @@ interface AiClient {
     suspend fun chat(system: String, history: List<ChatTurn>): String
 
     /** Splits a dish (or a few named ingredients) into ingredients with weights. Only the built-in AI does this. */
-    suspend fun breakdown(text: String): List<Ingredient> = throw AiException("Tính theo thành phần cần AI có sẵn của ứng dụng.")
+    suspend fun breakdown(text: String): List<Ingredient> = throw AiException(L("Tính theo thành phần cần AI có sẵn của ứng dụng.", "Ingredient breakdown needs the app's built-in AI."))
 
     companion object {
         // Without a personal key the view model uses HostedClient (the CaloCare server) instead.
@@ -108,7 +109,7 @@ interface AiClient {
 
         internal fun estimatePrompt(name: String) = """
             Estimate the nutrition of one typical serving of this food or dish: "$name".
-            Return exactly one item, or an empty list if this is not a food. Use the Vietnamese name.
+            Return exactly one item, or an empty list if this is not a food. Give its name in ${if (com.calocare.app.Lang.en) "English" else "Vietnamese"}.
             $tagGuide
             Leave advice as a short note on what the estimate assumes.
         """.trimIndent()
@@ -126,7 +127,7 @@ class ClaudeClient(apiKey: String) : AiClient {
         "additionalProperties" to false,
         "required" to listOf("items", "advice"),
         "properties" to mapOf(
-            "advice" to mapOf("type" to "string", "description" to "One or two short sentences of advice in Vietnamese"),
+            "advice" to mapOf("type" to "string", "description" to "One or two short sentences of advice in ${if (com.calocare.app.Lang.en) "English" else "Vietnamese"}"),
             "items" to mapOf(
                 "type" to "array",
                 "items" to mapOf(
@@ -136,9 +137,9 @@ class ClaudeClient(apiKey: String) : AiClient {
                         "name", "emoji", "portion", "kcal", "protein_g", "carbs_g", "fat_g", "course", "tags", "confidence",
                     ),
                     "properties" to mapOf(
-                        "name" to mapOf("type" to "string", "description" to "Dish name in Vietnamese"),
+                        "name" to mapOf("type" to "string", "description" to "Dish name in ${if (com.calocare.app.Lang.en) "English" else "Vietnamese"}"),
                         "emoji" to mapOf("type" to "string", "description" to "A single food emoji"),
-                        "portion" to mapOf("type" to "string", "description" to "Estimated portion, e.g. '1 chén (150g)'"),
+                        "portion" to mapOf("type" to "string", "description" to "Estimated portion in ${if (com.calocare.app.Lang.en) "English" else "Vietnamese"}, e.g. '1 bowl (150g)'"),
                         "kcal" to mapOf("type" to "integer", "description" to "Calories for that portion"),
                         "protein_g" to mapOf("type" to "number"),
                         "carbs_g" to mapOf("type" to "number"),
@@ -206,9 +207,9 @@ class ClaudeClient(apiKey: String) : AiClient {
     }
 
     private fun text(message: Message): String {
-        if (message.stopReason().orElse(null) == StopReason.REFUSAL) throw AiException("AI từ chối trả lời yêu cầu này.")
+        if (message.stopReason().orElse(null) == StopReason.REFUSAL) throw AiException(L("AI từ chối trả lời yêu cầu này.", "The AI declined this request."))
         val text = message.content().mapNotNull { it.text().orElse(null)?.text() }.joinToString("")
-        if (text.isBlank()) throw AiException("AI không trả về nội dung. Hãy thử lại.")
+        if (text.isBlank()) throw AiException(L("AI không trả về nội dung. Hãy thử lại.", "The AI returned nothing. Please try again."))
         return text
     }
 
@@ -216,15 +217,15 @@ class ClaudeClient(apiKey: String) : AiClient {
         try {
             block()
         } catch (e: UnauthorizedException) {
-            throw AiException("API key không hợp lệ. Kiểm tra lại trong Hồ sơ → Trợ lý AI.")
+            throw AiException(L("API key không hợp lệ. Kiểm tra lại trong Hồ sơ → Trợ lý AI.", "Invalid API key. Check it in Profile → AI assistant."))
         } catch (e: RateLimitException) {
-            throw AiException("Đang quá tải lượt gọi AI. Thử lại sau ít phút.")
+            throw AiException(L("Đang quá tải lượt gọi AI. Thử lại sau ít phút.", "The AI is busy. Try again in a few minutes."))
         } catch (e: AnthropicServiceException) {
-            throw AiException("Lỗi từ dịch vụ AI (${e.statusCode()}): ${e.message ?: ""}".take(200))
+            throw AiException(L("Lỗi từ dịch vụ AI (${e.statusCode()}): ${e.message ?: ""}", "AI service error (${e.statusCode()}): ${e.message ?: ""}").take(200))
         } catch (e: AnthropicIoException) {
-            throw AiException("Không kết nối được tới AI. Kiểm tra mạng.")
+            throw AiException(L("Không kết nối được tới AI. Kiểm tra mạng.", "Couldn't reach the AI. Check your connection."))
         } catch (e: kotlinx.serialization.SerializationException) {
-            throw AiException("Không đọc được kết quả AI. Hãy thử lại.")
+            throw AiException(L("Không đọc được kết quả AI. Hãy thử lại.", "Couldn't read the AI's answer. Please try again."))
         }
     }
 

@@ -15,7 +15,7 @@ struct ScanDish: Identifiable {
     var corrected = false
     var userBuilt = false
 
-    static let sizes: [(id: String, label: String, factor: Double)] = [("small", "Nhỏ", 0.75), ("medium", "Vừa", 1.0), ("large", "To", 1.3)]
+    static let sizes: [(id: String, label: String, factor: Double)] = [("small", L("Nhỏ", "Small"), 0.75), ("medium", L("Vừa", "Medium"), 1.0), ("large", L("To", "Large"), 1.3)]
 
     /// Servings to log: the count, scaled by the size.
     var amount: Double { qty * (ScanDish.sizes.first { $0.id == size }?.factor ?? 1) }
@@ -51,7 +51,7 @@ final class MealScan: ObservableObject, Identifiable {
             loading = false
             return
         }
-        guard let jpeg = image.jpegData(compressionQuality: 0.8) else { error = "Không xử lý được ảnh."; loading = false; return }
+        guard let jpeg = image.jpegData(compressionQuality: 0.8) else { error = L("Không xử lý được ảnh.", "Couldn't process the photo."); loading = false; return }
         do {
             let analysis = try await API.shared.analyzePhoto(jpeg: jpeg, context: store.photoContext)
             dishes = analysis.items.map { MealScan.ground($0, foods: store.foods) }
@@ -59,7 +59,7 @@ final class MealScan: ObservableObject, Identifiable {
             score = analysis.score ?? -1
             pros = analysis.pros ?? []
             cons = analysis.cons ?? []
-            if dishes.isEmpty { error = "AI không nhận ra món nào trong ảnh. Bạn có thể tự thêm món bên dưới." }
+            if dishes.isEmpty { error = L("AI không nhận ra món nào trong ảnh. Bạn có thể tự thêm món bên dưới.", "The AI found no food in the photo. You can add items below.") }
         } catch {
             self.error = error.localizedDescription
         }
@@ -79,9 +79,9 @@ extension DetectedItem {
     /// This dish with the name and numbers of a food the app knows.
     func like(_ food: Food) -> DetectedItem {
         var copy = self
-        copy.name = food.name
+        copy.name = food.label
         copy.emoji = food.emoji
-        copy.portion = food.serving
+        copy.portion = food.servingLabel
         copy.kcal = food.kcal
         copy.protein_g = food.protein
         copy.carbs_g = food.carbs
@@ -111,14 +111,14 @@ struct MealScanView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Image(uiImage: scan.image).resizable().scaledToFill().frame(height: 200).frame(maxWidth: .infinity).clipped()
                         .clipShape(RoundedRectangle(cornerRadius: 20))
-                    if scan.loading { HStack { ProgressView(); Text("AI đang nhận diện món ăn…") } }
+                    if scan.loading { HStack { ProgressView(); Text(L("AI đang nhận diện món ăn…", "The AI is identifying the food…")) } }
                     if let error = scan.error { Text(error).foregroundColor(.red) }
                     if !picked.isEmpty { summary(picked) }
                     ForEach(scan.dishes.indices, id: \.self) { index in dishCard(index) }
                     if !scan.loading {
                         // Always there: the AI can miss a dish, or recognise nothing at all.
                         Button { editing = EditTarget(index: nil) } label: {
-                            Label(scan.dishes.isEmpty ? "Tự thêm món" : "Thêm món AI bỏ sót", systemImage: "plus").font(.headline).frame(maxWidth: .infinity).padding(.vertical, 6)
+                            Label(scan.dishes.isEmpty ? L("Tự thêm món", "Add items yourself") : L("Thêm món AI bỏ sót", "Add an item the AI missed"), systemImage: "plus").font(.headline).frame(maxWidth: .infinity).padding(.vertical, 6)
                         }
                         .buttonStyle(.bordered)
                     }
@@ -126,15 +126,15 @@ struct MealScanView: View {
                 .padding(16)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("📷 Bữa ăn của bạn")
+            .navigationTitle(L("📷 Bữa ăn của bạn", "📷 Your meal"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Đóng") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("Đóng", "Close")) { dismiss() } } }
             .safeAreaInset(edge: .bottom) {
                 if !scan.loading && !scan.dishes.isEmpty {
                     VStack(spacing: 8) {
-                        Picker("Bữa", selection: $store.meal) { ForEach(Meal.all, id: \.id) { Text($0.label).tag($0.id) } }.pickerStyle(.segmented)
+                        Picker(L("Bữa", "Meal"), selection: $store.meal) { ForEach(Meal.all, id: \.id) { Text($0.label).tag($0.id) } }.pickerStyle(.segmented)
                         Button { commit(picked) } label: {
-                            Text("Thêm vào nhật ký · \(picked.reduce(0) { $0 + $1.kcal }) kcal").frame(maxWidth: .infinity)
+                            Text(L("Thêm vào nhật ký · \(picked.reduce(0) { $0 + $1.kcal }) kcal", "Add to log · \(picked.reduce(0) { $0 + $1.kcal }) kcal")).frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent).disabled(picked.isEmpty)
                     }
@@ -155,16 +155,16 @@ struct MealScanView: View {
             HStack {
                 VStack(alignment: .leading) {
                     Text("\(picked.reduce(0) { $0 + $1.kcal }) kcal").font(.system(size: 34, weight: .bold))
-                    Text("\(picked.count) món").font(.caption).foregroundColor(.secondary)
+                    Text(L("\(picked.count) món", "\(picked.count) item(s)")).font(.caption).foregroundColor(.secondary)
                 }
                 Spacer()
                 if (0...100).contains(scan.score) { GradeBadge(score: scan.score) }
             }
             HStack {
-                nutrient("Đạm", "\(total { $0.protein_g })g"); nutrient("Tinh bột", "\(total { $0.carbs_g })g"); nutrient("Chất béo", "\(total { $0.fat_g })g")
+                nutrient(L("Đạm", "Protein"), "\(total { $0.protein_g })g"); nutrient(L("Tinh bột", "Carbs"), "\(total { $0.carbs_g })g"); nutrient(L("Chất béo", "Fat"), "\(total { $0.fat_g })g")
             }
             HStack {
-                nutrient("Chất xơ", "\(total { $0.fiber_g })g"); nutrient("Đường", "\(total { $0.sugar_g })g"); nutrient("Natri", "\(total { $0.sodium_mg })mg")
+                nutrient(L("Chất xơ", "Fibre"), "\(total { $0.fiber_g })g"); nutrient(L("Đường", "Sugar"), "\(total { $0.sugar_g })g"); nutrient(L("Natri", "Sodium"), "\(total { $0.sodium_mg })mg")
             }
             ForEach(scan.pros, id: \.self) { Text("＋ \($0)").font(.caption).foregroundColor(Palette.green) }
             ForEach(scan.cons, id: \.self) { Text("－ \($0)").font(.caption).foregroundColor(Palette.warn) }
@@ -187,9 +187,9 @@ struct MealScanView: View {
                 Text(dish.item.emoji ?? "🍽️").font(.title)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(dish.item.name).font(.headline)
-                    Text("\(dish.item.kcal) kcal / \(dish.item.portion ?? "1 phần")" + ((dish.item.grams ?? 0) > 0 ? " · trong ảnh ≈ \(dish.item.grams ?? 0)g" : ""))
+                    Text("\(dish.item.kcal) kcal / \(dish.item.portion ?? L("1 phần", "1 serving"))" + ((dish.item.grams ?? 0) > 0 ? L(" · trong ảnh ≈ \(dish.item.grams ?? 0)g", " · in photo ≈ \(dish.item.grams ?? 0)g") : ""))
                         .font(.caption).foregroundColor(.secondary)
-                    Text(dish.fromTable ? "✓ Calo theo bảng món ăn của app" : "≈ AI ước tính · chắc \(Int((dish.item.confidence ?? 0.5) * 100))%")
+                    Text(dish.fromTable ? L("✓ Calo theo bảng món ăn của app", "✓ Calories from the app's food table") : L("≈ AI ước tính · chắc \(Int((dish.item.confidence ?? 0.5) * 100))%", "≈ AI estimate · \(Int((dish.item.confidence ?? 0.5) * 100))% sure"))
                         .font(.caption2).foregroundColor(dish.fromTable ? Palette.green : Palette.warn)
                 }
                 Spacer()
@@ -201,14 +201,14 @@ struct MealScanView: View {
             }
             HStack {
                 // A large egg is not a small egg: the size scales the calories of one serving.
-                Picker("Cỡ", selection: $scan.dishes[index].size) { ForEach(ScanDish.sizes, id: \.id) { Text($0.label).tag($0.id) } }.pickerStyle(.segmented)
+                Picker(L("Cỡ", "Size"), selection: $scan.dishes[index].size) { ForEach(ScanDish.sizes, id: \.id) { Text($0.label).tag($0.id) } }.pickerStyle(.segmented)
                 Stepper("× \(formatQty(dish.qty))", value: $scan.dishes[index].qty, in: 0.5...20, step: 0.5).fixedSize()
             }
             if !dish.alternatives.isEmpty {
                 // One tap instead of typing when the AI picked the wrong look-alike.
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
-                        Text("Hay là:").font(.caption).foregroundColor(.secondary)
+                        Text(L("Hay là:", "Or maybe:")).font(.caption).foregroundColor(.secondary)
                         ForEach(dish.alternatives, id: \.self) { name in
                             Button(name) { pickAlternative(index, name) }.buttonStyle(.bordered).font(.caption)
                         }
@@ -243,7 +243,7 @@ struct MealScanView: View {
             }
             if dish.userBuilt && dish.food == nil { Task { await API.shared.submitDish(food) } }
         }
-        store.say("Đã thêm \(picked.count) món vào bữa \(Meal.label(store.meal).lowercased())")
+        store.say(L("Đã thêm \(picked.count) món vào bữa \(Meal.label(store.meal).lowercased())", "Added \(picked.count) item(s) to \(Meal.label(store.meal).lowercased())"))
         dismiss()
     }
 }
@@ -253,8 +253,8 @@ struct GradeBadge: View {
 
     var body: some View {
         let grade: (letter: String, label: String, color: Color) =
-            score >= 80 ? ("A", "Rất tốt", Palette.green) : score >= 65 ? ("B", "Tốt", .green) : score >= 50 ? ("C", "Trung bình", Palette.carbs)
-            : score >= 35 ? ("D", "Chưa tốt", Palette.orange) : ("E", "Kém", .red)
+            score >= 80 ? ("A", L("Rất tốt", "Very good"), Palette.green) : score >= 65 ? ("B", L("Tốt", "Good"), .green) : score >= 50 ? ("C", L("Trung bình", "Average"), Palette.carbs)
+            : score >= 35 ? ("D", L("Chưa tốt", "Poor"), Palette.orange) : ("E", L("Kém", "Bad"), .red)
         VStack(spacing: 2) {
             Text(grade.letter).font(.title.bold()).foregroundColor(.white).frame(width: 52, height: 52).background(grade.color, in: Circle())
             Text("\(grade.label) · \(score)").font(.caption2)
@@ -279,19 +279,19 @@ struct DishEditor: View {
             Form {
                 Section {
                     // The keyboard's microphone key dictates in Vietnamese.
-                    TextField("Tên món hoặc mô tả", text: $text, axis: .vertical).lineLimit(1...4)
+                    TextField(L("Tên món hoặc mô tả", "Name or description"), text: $text, axis: .vertical).lineLimit(1...4)
                 } footer: {
-                    Text("Ví dụ: “bánh khọt 5 cái” · “hủ tiếu: thịt 100g, rau một ít, bún 100g, nước xương 400ml” · “tương đương 1 tô phở”")
+                    Text(L("Ví dụ: “bánh khọt 5 cái” · “hủ tiếu: thịt 100g, rau một ít, bún 100g, nước xương 400ml” · “tương đương 1 tô phở”", "E.g. “5 chicken wings” · “salad: chicken 100g, half an avocado, dressing 2 tbsp” · “about the size of a burger”"))
                 }
                 if !matches.isEmpty {
-                    Section("Món có sẵn (dùng calo của món đó)") {
+                    Section(L("Món có sẵn (dùng calo của món đó)", "Known foods (uses their calories)")) {
                         ForEach(matches) { food in
                             Button { choose(food) } label: {
                                 HStack {
                                     Text(food.emoji)
                                     VStack(alignment: .leading) {
-                                        Text(food.name).foregroundColor(.primary)
-                                        Text("\(food.kcal) kcal / \(food.serving)").font(.caption).foregroundColor(.secondary)
+                                        Text(food.label).foregroundColor(.primary)
+                                        Text("\(food.kcal) kcal / \(food.servingLabel)").font(.caption).foregroundColor(.secondary)
                                     }
                                 }
                             }
@@ -299,22 +299,22 @@ struct DishEditor: View {
                     }
                 }
                 Section {
-                    Button { describe() } label: { HStack { Text("✨ AI tính calo theo mô tả này"); if busy { Spacer(); ProgressView() } } }
+                    Button { describe() } label: { HStack { Text(L("✨ AI tính calo theo mô tả này", "✨ AI calories from this description")); if busy { Spacer(); ProgressView() } } }
                         .disabled(busy || text.trimmingCharacters(in: .whitespaces).isEmpty)
                     if index != nil {
-                        Button("🧮 Chỉnh theo thành phần (thịt, rau… bao nhiêu gam)") { showIngredients = true }.disabled(busy)
-                        Button("Chỉ đổi tên, giữ calo") { rename() }.disabled(text.trimmingCharacters(in: .whitespaces).isEmpty)
+                        Button(L("🧮 Chỉnh theo thành phần (thịt, rau… bao nhiêu gam)", "🧮 Adjust by ingredients (grams of meat, veg…)")) { showIngredients = true }.disabled(busy)
+                        Button(L("Chỉ đổi tên, giữ calo", "Rename only, keep calories")) { rename() }.disabled(text.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
             }
-            .navigationTitle(index == nil ? "Thêm món" : "Đây là món gì?")
+            .navigationTitle(index == nil ? L("Thêm món", "Add item") : L("Đây là món gì?", "What is this?"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Hủy") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("Hủy", "Cancel")) { dismiss() } } }
             .onAppear { if let index, text.isEmpty { text = scan.dishes[index].item.name } }
             .sheet(isPresented: $showIngredients) {
                 if let index {
                     let dish = scan.dishes[index]
-                    IngredientEditor(title: dish.item.name, description: "\(dish.item.name): \(formatQty(dish.amount)) × \(dish.item.portion ?? "1 phần")") { totals in
+                    IngredientEditor(title: dish.item.name, description: "\(dish.item.name): \(formatQty(dish.amount)) × \(dish.item.portion ?? L("1 phần", "1 serving"))") { totals in
                         scan.dishes[index].item.kcal = totals.kcal
                         scan.dishes[index].item.protein_g = totals.protein
                         scan.dishes[index].item.carbs_g = totals.carbs
@@ -374,7 +374,7 @@ struct DishEditor: View {
                     }
                     dismiss()
                 } else {
-                    store.say("AI không nhận ra đây là món ăn. Hãy mô tả rõ hơn.")
+                    store.say(L("AI không nhận ra đây là món ăn. Hãy mô tả rõ hơn.", "The AI doesn't recognise this as a food. Please describe it more clearly."))
                 }
             } catch {
                 store.say(error.localizedDescription)
@@ -410,7 +410,7 @@ struct IngredientEditor: View {
         NavigationStack {
             Form {
                 Section {
-                    if loading { HStack { ProgressView(); Text("AI đang tách món thành các thành phần…") } }
+                    if loading { HStack { ProgressView(); Text(L("AI đang tách món thành các thành phần…", "The AI is splitting the dish into ingredients…")) } }
                     ForEach(rows.indices, id: \.self) { i in
                         VStack(alignment: .leading) {
                             HStack {
@@ -424,24 +424,25 @@ struct IngredientEditor: View {
                     }
                     .onDelete { rows.remove(atOffsets: $0) }
                 } header: {
-                    Text("Chỉnh số gam cho giống phần bạn ăn. Vuốt trái để bỏ một thành phần.")
+                    Text(L("Chỉnh số gam cho giống phần bạn ăn. Vuốt trái để bỏ một thành phần.", "Adjust the grams to match your portion. Swipe left to remove an ingredient."))
                 } footer: {
                     if !rows.isEmpty {
-                        Text("Tổng: \(kcal) kcal · \(rows.reduce(0) { $0 + $1.grams })g · Đạm \(Int(rows.reduce(0) { $0 + $1.protein }))g · Bột \(Int(rows.reduce(0) { $0 + $1.carbs }))g · Béo \(Int(rows.reduce(0) { $0 + $1.fat }))g")
+                        Text(L("Tổng", "Total") + ": \(kcal) kcal · \(rows.reduce(0) { $0 + $1.grams })g · " + L("Đạm", "Protein") + " \(Int(rows.reduce(0) { $0 + $1.protein }))g · "
+                             + L("Bột", "Carbs") + " \(Int(rows.reduce(0) { $0 + $1.carbs }))g · " + L("Béo", "Fat") + " \(Int(rows.reduce(0) { $0 + $1.fat }))g")
                     }
                 }
-                Section("Thêm thành phần") {
-                    TextField("măng 2 lạng", text: $extra)
-                    Button { add() } label: { HStack { Text("＋ Thêm"); if adding { Spacer(); ProgressView() } } }
+                Section(L("Thêm thành phần", "Add ingredient")) {
+                    TextField(L("măng 2 lạng", "rice 150g"), text: $extra)
+                    Button { add() } label: { HStack { Text(L("＋ Thêm", "＋ Add")); if adding { Spacer(); ProgressView() } } }
                         .disabled(adding || extra.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
-            .navigationTitle(title.isEmpty ? "Thành phần" : title)
+            .navigationTitle(title.isEmpty ? L("Thành phần", "Ingredients") : title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Hủy") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L("Hủy", "Cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Dùng \(kcal) kcal") {
+                    Button(L("Dùng \(kcal) kcal", "Use \(kcal) kcal")) {
                         onApply(DishTotals(kcal: kcal, protein: rows.reduce(0) { $0 + $1.protein }, carbs: rows.reduce(0) { $0 + $1.carbs },
                                            fat: rows.reduce(0) { $0 + $1.fat }, portion: rows.map { "\($0.name) \($0.grams)g" }.joined(separator: ", ")))
                         dismiss()
@@ -458,7 +459,7 @@ struct IngredientEditor: View {
     }
 
     private func weight(_ grams: Int) -> String {
-        grams >= 100 && grams % 50 == 0 ? "\(grams)g (\(formatQty(Double(grams) / 100)) lạng)" : "\(grams)g"
+        grams >= 100 && grams % 50 == 0 && !Lang.en ? "\(grams)g (\(formatQty(Double(grams) / 100)) lạng)" : "\(grams)g"
     }
 
     private func add() {
@@ -466,7 +467,7 @@ struct IngredientEditor: View {
         Task {
             do {
                 let more = try await API.shared.breakdown(extra.trimmingCharacters(in: .whitespaces))
-                if more.isEmpty { store.say("AI không tách được thành phần. Hãy ghi rõ hơn, ví dụ “thịt vịt 300g”.") } else { rows += more; extra = "" }
+                if more.isEmpty { store.say(L("AI không tách được thành phần. Hãy ghi rõ hơn, ví dụ “thịt vịt 300g”.", "The AI couldn't split this into ingredients. Be more specific, e.g. “chicken breast 200g”.")) } else { rows += more; extra = "" }
             } catch {
                 store.say(error.localizedDescription)
             }

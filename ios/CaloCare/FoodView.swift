@@ -17,7 +17,7 @@ struct FoodView: View {
     var body: some View {
         let searching = !query.trimmingCharacters(in: .whitespaces).isEmpty
         let folded = FoodMatcher.fold(query)
-        let matches = searching ? store.foods.filter { FoodMatcher.fold($0.name).contains(folded) } : store.foods
+        let matches = searching ? store.foods.filter { FoodMatcher.fold($0.name).contains(folded) || FoodMatcher.fold($0.label).contains(folded) } : store.foods
         let matchIds = Set(matches.map { $0.id })
         let similar = searching ? FoodMatcher.ranked(query, in: store.foods).filter { $0.score >= 0.3 && !matchIds.contains($0.food.id) }.prefix(6).map { $0.food } : []
         let mealEntries = store.todaysEntries.filter { $0.meal == store.meal }
@@ -27,14 +27,14 @@ struct FoodView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     DayPicker()
-                    Picker("Bữa", selection: $store.meal) {
+                    Picker(L("Bữa", "Meal"), selection: $store.meal) {
                         ForEach(Meal.all, id: \.id) { Text($0.label).tag($0.id) }
                     }
                     .pickerStyle(.segmented)
 
                     HStack {
                         // The iOS keyboard's own microphone key dictates dish names in Vietnamese.
-                        TextField("Tìm hoặc nói tên món…", text: $query)
+                        TextField(L("Tìm hoặc nói tên món…", "Search or dictate a food…"), text: $query)
                             .textFieldStyle(.roundedBorder)
                             .onChange(of: query) { _ in suggestion = nil; note = "" }
                         Button { showCamera = true } label: { Image(systemName: "camera.fill").font(.title2) }
@@ -45,7 +45,7 @@ struct FoodView: View {
 
                     if !searching && !mealEntries.isEmpty { MealLog(entries: mealEntries) }
 
-                    Text(searching ? "Món khớp tên" : "Đang chọn cho bữa \(Meal.label(store.meal).lowercased()) · chạm = +1 phần")
+                    Text(searching ? L("Món khớp tên", "Matching foods") : L("Đang chọn cho bữa \(Meal.label(store.meal).lowercased()) · chạm = +1 phần", "Adding to \(Meal.label(store.meal).lowercased()) · tap = +1 serving"))
                         .font(.caption).foregroundColor(.secondary)
                     LazyVGrid(columns: columns, spacing: 10) {
                         ForEach(matches) { food in FoodTile(food: food, count: counts[food.id] ?? 0) }
@@ -53,7 +53,7 @@ struct FoodView: View {
 
                     if searching {
                         if !similar.isEmpty {
-                            Text("Món gần giống").font(.headline)
+                            Text(L("Món gần giống", "Similar foods")).font(.headline)
                             LazyVGrid(columns: columns, spacing: 10) {
                                 ForEach(similar) { food in FoodTile(food: food, count: counts[food.id] ?? 0) }
                             }
@@ -64,7 +64,7 @@ struct FoodView: View {
                 .padding(16)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Nhật ký ăn uống")
+            .navigationTitle(L("Nhật ký ăn uống", "Food log"))
             .navigationBarTitleDisplayMode(.inline)
         }
         .fullScreenCover(isPresented: $showCamera) {
@@ -86,13 +86,13 @@ struct FoodView: View {
 
     /// For a dish the app does not have yet: the AI suggests its calories, the user adds or adjusts it.
     private var newDishCard: some View {
-        Card("Món mới: “\(query.trimmingCharacters(in: .whitespaces))”") {
-            Text("AI gợi ý calo từ tên món. Bạn cũng có thể mô tả: “bún 100g, thịt 100g, rau một ít” hoặc “tương đương 1 tô phở”.")
+        Card(L("Món mới: “\(query.trimmingCharacters(in: .whitespaces))”", "New food: “\(query.trimmingCharacters(in: .whitespaces))”")) {
+            Text(L("AI gợi ý calo từ tên món. Bạn cũng có thể mô tả: “bún 100g, thịt 100g, rau một ít” hoặc “tương đương 1 tô phở”.", "The AI estimates calories from the name. You can also describe it: “pasta 100g, chicken 100g, some veg” or “about the size of a burger”."))
                 .font(.caption).foregroundColor(.secondary)
             HStack {
-                Button("✨ AI gợi ý calo") { suggest() }.buttonStyle(.borderedProminent).disabled(busy)
-                Button("＋ Tự nhập") {
-                    editing = Food(id: "custom_\(UUID().uuidString)", name: query.trimmingCharacters(in: .whitespaces), emoji: "🍽️", serving: "1 phần", kcal: 0,
+                Button(L("✨ AI gợi ý calo", "✨ AI calorie estimate")) { suggest() }.buttonStyle(.borderedProminent).disabled(busy)
+                Button(L("＋ Tự nhập", "＋ Enter manually")) {
+                    editing = Food(id: "custom_\(UUID().uuidString)", name: query.trimmingCharacters(in: .whitespaces), emoji: "🍽️", serving: L("1 phần", "1 serving"), kcal: 0,
                                    protein: 0, carbs: 0, fat: 0, course: "main", tags: [], region: "all", custom: true)
                 }
                 .buttonStyle(.bordered)
@@ -100,13 +100,13 @@ struct FoodView: View {
             }
             if let food = suggestion {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("\(food.emoji) \(food.name)").font(.headline)
-                    Text("\(food.kcal) kcal / \(food.serving)").bold()
-                    Text("Đạm \(Int(food.protein))g · Tinh bột \(Int(food.carbs))g · Béo \(Int(food.fat))g · AI ước tính").font(.caption)
+                    Text("\(food.emoji) \(food.label)").font(.headline)
+                    Text("\(food.kcal) kcal / \(food.servingLabel)").bold()
+                    Text(L("Đạm \(Int(food.protein))g · Tinh bột \(Int(food.carbs))g · Béo \(Int(food.fat))g · AI ước tính", "Protein \(Int(food.protein))g · Carbs \(Int(food.carbs))g · Fat \(Int(food.fat))g · AI estimate")).font(.caption)
                     ForEach(Nutrition.warnings(tags: food.tags, profile: store.data.profile), id: \.self) { WarningLine(warning: $0) }
                     HStack {
-                        Button("＋ Thêm vào bữa \(Meal.label(store.meal).lowercased())") { store.add(food); store.saveCustom(food) }.buttonStyle(.borderedProminent)
-                        Button("✏️ Sửa rồi lưu") { editing = food }.buttonStyle(.bordered)
+                        Button(L("＋ Thêm vào bữa \(Meal.label(store.meal).lowercased())", "＋ Add to \(Meal.label(store.meal).lowercased())")) { store.add(food); store.saveCustom(food) }.buttonStyle(.borderedProminent)
+                        Button(L("✏️ Sửa rồi lưu", "✏️ Edit, then save")) { editing = food }.buttonStyle(.bordered)
                     }
                 }
                 .padding(12)
@@ -126,7 +126,7 @@ struct FoodView: View {
                 if let item = try await API.shared.estimate(text) {
                     suggestion = item.asFood(id: "ai_\(UUID().uuidString)")
                 } else {
-                    note = "AI không nhận ra đây là món ăn. Hãy thử mô tả rõ hơn."
+                    note = L("AI không nhận ra đây là món ăn. Hãy thử mô tả rõ hơn.", "The AI doesn't recognise this as a food. Try describing it more clearly.")
                 }
             } catch {
                 note = error.localizedDescription
@@ -147,7 +147,7 @@ struct FoodView: View {
 extension DetectedItem {
     /// One serving of this dish as a food the diary can log.
     func asFood(id: String) -> Food {
-        Food(id: id, name: name, emoji: (emoji ?? "").isEmpty ? "🍽️" : (emoji ?? "🍽️"), serving: portion ?? "1 phần", kcal: kcal, protein: protein_g ?? 0,
+        Food(id: id, name: name, emoji: (emoji ?? "").isEmpty ? "🍽️" : (emoji ?? "🍽️"), serving: portion ?? L("1 phần", "1 serving"), kcal: kcal, protein: protein_g ?? 0,
              carbs: carbs_g ?? 0, fat: fat_g ?? 0, course: course ?? "main", tags: tags ?? [], region: "all", custom: true)
     }
 }
@@ -161,9 +161,9 @@ private struct FoodTile: View {
         Button { store.add(food) } label: {
             VStack(spacing: 4) {
                 Text(food.emoji).font(.system(size: 34))
-                Text(food.name).font(.caption.weight(.medium)).multilineTextAlignment(.center).lineLimit(2, reservesSpace: true)
+                Text(food.label).font(.caption.weight(.medium)).multilineTextAlignment(.center).lineLimit(2, reservesSpace: true)
                 Text("\(food.kcal) kcal").font(.caption2.weight(.semibold)).foregroundColor(Palette.green)
-                Text(food.serving).font(.caption2).foregroundColor(.secondary).lineLimit(1)
+                Text(food.servingLabel).font(.caption2).foregroundColor(.secondary).lineLimit(1)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10).padding(.horizontal, 4)
@@ -186,13 +186,13 @@ private struct MealLog: View {
     var entries: [LogEntry]
 
     var body: some View {
-        Card("Bữa \(Meal.label(store.meal).lowercased()) · \(Int(store.totals(entries).kcal)) kcal") {
+        Card(L("Bữa \(Meal.label(store.meal).lowercased()) · \(Int(store.totals(entries).kcal)) kcal", "\(Meal.label(store.meal)) · \(Int(store.totals(entries).kcal)) kcal")) {
             ForEach(entries) { entry in
                 HStack {
                     Text(entry.emoji).font(.title3)
                     VStack(alignment: .leading) {
-                        Text(entry.name).font(.subheadline.weight(.medium)).lineLimit(1)
-                        Text("\(Int(entry.totalKcal)) kcal · \(entry.serving)").font(.caption).foregroundColor(.secondary).lineLimit(1)
+                        Text(entry.label).font(.subheadline.weight(.medium)).lineLimit(1)
+                        Text("\(Int(entry.totalKcal)) kcal · \(entry.servingLabel)").font(.caption).foregroundColor(.secondary).lineLimit(1)
                     }
                     Spacer()
                     Button { store.changeQty(entry, by: -0.5) } label: { Image(systemName: "minus.circle.fill") }.buttonStyle(.plain)
@@ -216,30 +216,30 @@ struct FoodEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Món ăn") {
-                    TextField("Tên món", text: $food.name)
-                    TextField("Khẩu phần", text: $food.serving)
+                Section(L("Món ăn", "Food")) {
+                    TextField(L("Tên món", "Name"), text: $food.name)
+                    TextField(L("Khẩu phần", "Serving"), text: $food.serving)
                 }
-                Section("Dinh dưỡng mỗi phần") {
+                Section(L("Dinh dưỡng mỗi phần", "Nutrition per serving")) {
                     number("Calo (kcal)", Binding(get: { Double(food.kcal) }, set: { food.kcal = Int($0) }))
-                    number("Đạm (g)", macro(\.protein))
-                    number("Tinh bột (g)", macro(\.carbs))
-                    number("Chất béo (g)", macro(\.fat))
-                    Text("Đổi đạm, bột, béo thì calo tự tính lại.").font(.caption).foregroundColor(.secondary)
-                    Button("🧮 Tính theo thành phần (thịt, rau… bao nhiêu gam)") { showIngredients = true }
+                    number(L("Đạm (g)", "Protein (g)"), macro(\.protein))
+                    number(L("Tinh bột (g)", "Carbs (g)"), macro(\.carbs))
+                    number(L("Chất béo (g)", "Fat (g)"), macro(\.fat))
+                    Text(L("Đổi đạm, bột, béo thì calo tự tính lại.", "Change protein, carbs or fat and the calories update.")).font(.caption).foregroundColor(.secondary)
+                    Button(L("🧮 Tính theo thành phần (thịt, rau… bao nhiêu gam)", "🧮 Work it out from ingredients (grams of meat, veg…)")) { showIngredients = true }
                         .disabled(food.name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
-            .navigationTitle("Món của tôi")
+            .navigationTitle(L("Món của tôi", "My food"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Hủy") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L("Hủy", "Cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Lưu") {
+                    Button(L("Lưu", "Save")) {
                         var saved = food
                         saved.custom = true
                         store.saveCustom(saved)
-                        store.say("Đã lưu \(saved.name)")
+                        store.say(L("Đã lưu \(saved.name)", "Saved \(saved.name)"))
                         dismiss()
                     }
                     .disabled(food.name.trimmingCharacters(in: .whitespaces).isEmpty || food.kcal <= 0)

@@ -1,5 +1,6 @@
 package com.calocare.app.net
 
+import com.calocare.app.L
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
@@ -30,7 +31,7 @@ class DeepSeekClient(private val apiKey: String) : AiClient {
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
     override suspend fun analyzePhoto(jpeg: ByteArray, userContext: String): MealAnalysis =
-        throw AiException("DeepSeek chưa đọc được ảnh. Chụp ảnh bữa ăn cần API key của Anthropic.")
+        throw AiException(L("DeepSeek chưa đọc được ảnh. Chụp ảnh bữa ăn cần API key của Anthropic.", "DeepSeek can't read photos. Meal photos need an Anthropic API key."))
 
     override suspend fun estimateFood(name: String): MealAnalysis {
         val system = """
@@ -41,7 +42,7 @@ class DeepSeekClient(private val apiKey: String) : AiClient {
         return try {
             json.decodeFromString<MealAnalysis>(text)
         } catch (e: SerializationException) {
-            throw AiException("Không đọc được kết quả AI. Hãy thử lại.")
+            throw AiException(L("Không đọc được kết quả AI. Hãy thử lại.", "Couldn't read the AI's answer. Please try again."))
         }
     }
 
@@ -66,19 +67,19 @@ class DeepSeekClient(private val apiKey: String) : AiClient {
                 val text = response.body?.string().orEmpty()
                 when (response.code) {
                     in 200..299 -> Unit
-                    401 -> throw AiException("API key DeepSeek không hợp lệ. Kiểm tra lại trong Hồ sơ → Trợ lý AI.")
-                    402 -> throw AiException("Tài khoản DeepSeek đã hết số dư.")
-                    429 -> throw AiException("Đang quá tải lượt gọi AI. Thử lại sau ít phút.")
-                    else -> throw AiException("Lỗi từ DeepSeek (${response.code}): ${text.take(150)}")
+                    401 -> throw AiException(L("API key DeepSeek không hợp lệ. Kiểm tra lại trong Hồ sơ → Trợ lý AI.", "Invalid DeepSeek API key. Check it in Profile → AI assistant."))
+                    402 -> throw AiException(L("Tài khoản DeepSeek đã hết số dư.", "Your DeepSeek balance has run out."))
+                    429 -> throw AiException(L("Đang quá tải lượt gọi AI. Thử lại sau ít phút.", "The AI is busy. Try again in a few minutes."))
+                    else -> throw AiException(L("Lỗi từ DeepSeek (${response.code}): ${text.take(150)}", "DeepSeek error (${response.code}): ${text.take(150)}"))
                 }
                 val content = runCatching {
                     json.parseToJsonElement(text).jsonObject["choices"]!!.jsonArray[0].jsonObject["message"]!!
                         .jsonObject["content"]!!.jsonPrimitive.contentOrNull
                 }.getOrNull()
-                content?.takeIf { it.isNotBlank() } ?: throw AiException("AI không trả về nội dung. Hãy thử lại.")
+                content?.takeIf { it.isNotBlank() } ?: throw AiException(L("AI không trả về nội dung. Hãy thử lại.", "The AI returned nothing. Please try again."))
             }
         } catch (e: IOException) {
-            throw AiException("Không kết nối được tới DeepSeek. Kiểm tra mạng.")
+            throw AiException(L("Không kết nối được tới DeepSeek. Kiểm tra mạng.", "Couldn't reach DeepSeek. Check your connection."))
         }
     }
 

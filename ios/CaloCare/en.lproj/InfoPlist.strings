@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "CaloCare uses the camera to photograph your meals and work out their calories.";
+"NSPhotoLibraryUsageDescription" = "CaloCare reads the meal photos you choose to work out their calories.";
+"NSHealthShareUsageDescription" = "CaloCare reads active calories, steps, exercise minutes, sleep, weight and height from Apple Health to work out the calories you burn and tailor its food advice.";
+"NSHealthUpdateUsageDescription" = "CaloCare does not write any data to Apple Health.";

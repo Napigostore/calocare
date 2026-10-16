@@ -1,5 +1,7 @@
 package com.calocare.app.ui
 
+import com.calocare.app.label
+import com.calocare.app.L
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -61,8 +63,8 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Text("Thực đơn gợi ý", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("Món ăn ${Region.labels[profile.region]} · đã lọc theo sức khỏe của bạn", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+            Text(L("Thực đơn gợi ý", "Suggested menu"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(L("Món ăn ${Region.labels[profile.region]} · đã lọc theo sức khỏe của bạn", "${Region.labels[profile.region]} dishes · filtered for your health"), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
         }
         item {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -73,14 +75,14 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
         }
         item {
             SectionCard(
-                title = "≈ $total kcal · mục tiêu $target",
-                trailing = { TextButton(onClick = { seed++ }) { Icon(Icons.Default.Refresh, null); Text(" Đổi thực đơn") } },
+                title = L("≈ $total kcal · mục tiêu $target", "≈ $total kcal · target $target"),
+                trailing = { TextButton(onClick = { seed++ }) { Icon(Icons.Default.Refresh, null); Text(L(" Đổi thực đơn", " New menu")) } },
             ) {
-                Text("Đạm ${macros.protein}g · Tinh bột ${macros.carbs}g · Béo ${macros.fat}g mỗi ngày", style = MaterialTheme.typography.bodyMedium)
+                Text(L("Đạm ${macros.protein}g · Tinh bột ${macros.carbs}g · Béo ${macros.fat}g mỗi ngày", "Protein ${macros.protein}g · Carbs ${macros.carbs}g · Fat ${macros.fat}g a day"), style = MaterialTheme.typography.bodyMedium)
                 val filters = profile.conditions.mapNotNull { Condition.labels[it] } +
-                    (if (profile.allergies.isNotEmpty()) listOf("dị ứng") else emptyList()) +
+                    (if (profile.allergies.isNotEmpty()) listOf(L("dị ứng", "allergies")) else emptyList()) +
                     (if (profile.diet != Diet.NONE) listOf(Diet.labels[profile.diet] ?: "") else emptyList())
-                if (filters.isNotEmpty()) Text("🛡️ Đã loại món không hợp: ${filters.joinToString()}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                if (filters.isNotEmpty()) Text(L("🛡️ Đã loại món không hợp: ${filters.joinToString()}", "🛡️ Excluded unsuitable dishes: ${filters.joinToString()}"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
             }
         }
 
@@ -91,11 +93,11 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
                     if (meal.items.isNotEmpty()) FilledTonalButton(
                         onClick = { vm.addMeal(meal.items.map { it.food to it.qty }, meal.meal) },
                         contentPadding = PaddingValues(horizontal = 12.dp),
-                    ) { Text("＋ Nhật ký") }
+                    ) { Text(L("＋ Nhật ký", "＋ Log")) }
                 },
             ) {
                 if (meal.items.isEmpty()) {
-                    Text("Chưa có món phù hợp với các giới hạn của bạn. Hãy hỏi chuyên gia AI để có gợi ý riêng.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(L("Chưa có món phù hợp với các giới hạn của bạn. Hãy hỏi chuyên gia AI để có gợi ý riêng.", "No dishes fit your restrictions yet. Ask the AI expert for personal suggestions."), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 // Items are listed in the order they should be eaten: soup and vegetables, protein, starch, then fruit.
                 val asEntries = meal.items.mapIndexed { i, it ->
@@ -109,7 +111,7 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
                         FoodImage(item.food.emoji, item.food.imageUrl, 36.dp)
                         Spacer(Modifier.width(10.dp))
                         Column(Modifier.weight(1f)) {
-                            Text("${item.food.name} × ${AppViewModel.fmtQty(item.qty)}", fontWeight = FontWeight.Medium)
+                            Text("${item.food.label} × ${AppViewModel.fmtQty(item.qty)}", fontWeight = FontWeight.Medium)
                             Text(step.why, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Text("${(item.food.kcal * item.qty).toInt()}", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 6.dp))
@@ -119,9 +121,9 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
         }
 
         item {
-            SectionCard(title = "${Goal.emoji[goal]} Nguyên tắc cho ${Goal.labels[goal]?.lowercase()}") {
+            SectionCard(title = L("${Goal.emoji[goal]} Nguyên tắc cho ${Goal.labels[goal]?.lowercase()}", "${Goal.emoji[goal]} Rules for ${Goal.labels[goal]?.lowercase()}")) {
                 Nutrition.goalGuides[goal].orEmpty().forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
-                FilledTonalButton(onClick = onCoach) { Text("✨ Nhờ AI lập thực đơn riêng cho tôi") }
+                FilledTonalButton(onClick = onCoach) { Text(L("✨ Nhờ AI lập thực đơn riêng cho tôi", "✨ Ask AI for a menu just for me")) }
             }
         }
     }

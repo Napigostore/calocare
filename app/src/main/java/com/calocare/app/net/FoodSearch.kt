@@ -1,5 +1,6 @@
 package com.calocare.app.net
 
+import com.calocare.app.L
 import com.calocare.app.data.Course
 import com.calocare.app.data.Food
 import com.calocare.app.data.Region
@@ -86,7 +87,7 @@ object FoodSearch {
                 name = if (brand != null && !name.contains(brand, ignoreCase = true)) "$name · $brand" else name,
                 emoji = "🛒",
                 imageUrl = p.str("image_front_small_url"),
-                serving = if (perServing != null) (p.str("serving_size") ?: "1 phần") else "100g",
+                serving = if (perServing != null) (p.str("serving_size") ?: L("1 phần", "1 serving")) else "100g",
                 kcal = kcal.roundToInt(),
                 protein = n.num("proteins$suffix") ?: 0f,
                 carbs = n.num("carbohydrates$suffix") ?: 0f,

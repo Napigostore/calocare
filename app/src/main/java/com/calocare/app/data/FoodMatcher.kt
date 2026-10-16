@@ -1,5 +1,6 @@
 package com.calocare.app.data
 
+import com.calocare.app.label
 import java.text.Normalizer
 
 /**
@@ -29,7 +30,7 @@ object FoodMatcher {
     fun ranked(query: String, foods: List<Food>): List<Pair<Food, Float>> {
         val q = fold(query)
         if (q.isEmpty()) return emptyList()
-        return foods.map { it to similarity(q, fold(it.name)) }.filter { it.second > 0f }.sortedByDescending { it.second }
+        return foods.map { it to maxOf(similarity(q, fold(it.name)), similarity(q, fold(it.label))) }.filter { it.second > 0f }.sortedByDescending { it.second }
     }
 
     /** The food this name most likely means, or null when nothing is close enough to trust. */

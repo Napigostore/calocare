@@ -1,5 +1,6 @@
 package com.calocare.app
 
+import com.calocare.app.L
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -81,10 +82,10 @@ class MainActivity : ComponentActivity() {
 private class Tab(val label: String, val icon: ImageVector)
 
 private val tabs = listOf(
-    Tab("Hôm nay", Icons.Default.Home),
-    Tab("Ăn uống", Icons.Default.Restaurant),
-    Tab("Thực đơn", Icons.Default.MenuBook),
-    Tab("Tiến độ", Icons.Default.Insights),
+    Tab(L("Hôm nay", "Today"), Icons.Default.Home),
+    Tab(L("Ăn uống", "Food"), Icons.Default.Restaurant),
+    Tab(L("Thực đơn", "Menu"), Icons.Default.MenuBook),
+    Tab(L("Tiến độ", "Progress"), Icons.Default.Insights),
     Tab("Coach", Icons.Default.SupportAgent),
 )
 
@@ -137,17 +138,17 @@ private fun MainScreen(vm: AppViewModel, data: AppData, showPrivacy: Boolean) {
     }
 
     vm.photo?.let { PhotoDialog(vm, data, it) }
-    if (profile) FullScreenDialog("Hồ sơ", onClose = { profile = false }) {
+    if (profile) FullScreenDialog(L("Hồ sơ", "Profile"), onClose = { profile = false }) {
         ProfileScreen(vm, data, PaddingValues(0.dp), onPrivacy = { privacy = true })
     }
-    if (privacy) FullScreenDialog("Chính sách quyền riêng tư", onClose = { privacy = false }) { PrivacyContent() }
+    if (privacy) FullScreenDialog(L("Chính sách quyền riêng tư", "Privacy policy"), onClose = { privacy = false }) { PrivacyContent() }
     if (needKey) {
         AlertDialog(
             onDismissRequest = { needKey = false },
-            title = { Text("✨ Cần bật trợ lý AI") },
-            text = { Text("Tính năng này dùng AI. Hãy nhập API key trong Hồ sơ → Trợ lý AI. Mọi tính năng còn lại vẫn dùng được mà không cần key.") },
-            confirmButton = { Button(onClick = { needKey = false; profile = true }) { Text("Mở Hồ sơ") } },
-            dismissButton = { TextButton(onClick = { needKey = false }) { Text("Để sau") } },
+            title = { Text(L("✨ Cần bật trợ lý AI", "✨ AI assistant needed")) },
+            text = { Text(L("Tính năng này dùng AI. Hãy nhập API key trong Hồ sơ → Trợ lý AI. Mọi tính năng còn lại vẫn dùng được mà không cần key.", "This feature uses AI. Enter an API key in Profile → AI assistant. Everything else works without a key.")) },
+            confirmButton = { Button(onClick = { needKey = false; profile = true }) { Text(L("Mở Hồ sơ", "Open profile")) } },
+            dismissButton = { TextButton(onClick = { needKey = false }) { Text(L("Để sau", "Later")) } },
         )
     }
 }

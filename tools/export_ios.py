@@ -20,6 +20,10 @@ LINE = re.compile(
     r'f\("(?P<id>[^"]+)", "(?P<name>[^"]+)", "(?P<emoji>[^"]*)", "(?P<serving>[^"]+)", (?P<kcal>\d+), (?P<p>[\d.]+), (?P<c>[\d.]+), (?P<f>[\d.]+), '
     r'(?P<course>[A-Z]+)(?:, "(?P<tags>[^"]*)")?(?:, (?:region = )?(?P<region>[AI]))?\)'
 )
+# English names and servings, by id (FoodNames.kt).
+NAMES = os.path.join(ROOT, 'app/src/main/java/com/calocare/app/data/FoodNames.kt')
+EN = {m[0]: (m[1], m[2]) for m in re.findall(r'"([^"]+)" to \("((?:[^"\\]|\\.)*)" to "((?:[^"\\]|\\.)*)"\)', io.open(NAMES, encoding='utf-8').read())}
+
 foods = []
 for line in io.open(SRC, encoding='utf-8'):
     if not line.lstrip().startswith('f("'):
@@ -30,6 +34,7 @@ for line in io.open(SRC, encoding='utf-8'):
         'id': m['id'], 'name': m['name'], 'emoji': m['emoji'], 'serving': m['serving'], 'kcal': int(m['kcal']),
         'protein': float(m['p']), 'carbs': float(m['c']), 'fat': float(m['f']), 'course': m['course'].lower(),
         'tags': (m['tags'] or '').split(), 'region': {'A': 'all', 'I': 'intl', None: 'vn'}[m['region']], 'custom': False,
+        'en': EN[m['id']][0], 'servingEn': EN[m['id']][1],
     })
 io.open(os.path.join(IOS, 'seed.json'), 'w', encoding='utf-8', newline='\n').write(json.dumps(foods, ensure_ascii=False, indent=0))
 

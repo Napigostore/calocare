@@ -6,7 +6,7 @@ struct CoachView: View {
     @State private var input = ""
     @State private var busy = false
 
-    private let starters = ["Tối nay tôi nên ăn gì?", "Nhận xét tuần ăn uống của tôi", "Gợi ý thực đơn ngày mai cho tôi", "Ăn gì trước và sau khi tập?"]
+    private let starters = [L("Tối nay tôi nên ăn gì?", "What should I eat tonight?"), L("Nhận xét tuần ăn uống của tôi", "Review my eating this week"), L("Gợi ý thực đơn ngày mai cho tôi", "Suggest a menu for tomorrow"), L("Ăn gì trước và sau khi tập?", "What to eat before and after training?")]
 
     var body: some View {
         NavigationStack {
@@ -15,7 +15,7 @@ struct CoachView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 10) {
                             if turns.isEmpty {
-                                Text("Mình đã xem hồ sơ, mục tiêu và nhật ký 7 ngày của bạn. Hỏi bất cứ điều gì về ăn uống và tập luyện nhé.")
+                                Text(L("Mình đã xem hồ sơ, mục tiêu và nhật ký 7 ngày của bạn. Hỏi bất cứ điều gì về ăn uống và tập luyện nhé.", "I've looked at your profile, goal and last 7 days of logs. Ask me anything about food and training."))
                                     .foregroundColor(.secondary)
                                 ForEach(starters, id: \.self) { s in Button(s) { send(s) }.buttonStyle(.bordered) }
                             }
@@ -27,19 +27,19 @@ struct CoachView: View {
                                     .frame(maxWidth: .infinity, alignment: turns[i].fromUser ? .trailing : .leading)
                                     .id(i)
                             }
-                            if busy { HStack { ProgressView(); Text("Đang soạn câu trả lời…").foregroundColor(.secondary) }.id(-1) }
+                            if busy { HStack { ProgressView(); Text(L("Đang soạn câu trả lời…", "Writing a reply…")).foregroundColor(.secondary) }.id(-1) }
                         }
                         .padding(16)
                     }
                     .onChange(of: turns.count) { _ in withAnimation { proxy.scrollTo(turns.count - 1, anchor: .bottom) } }
                 }
                 HStack {
-                    TextField("Hỏi coach…", text: $input, axis: .vertical).lineLimit(1...4).textFieldStyle(.roundedBorder)
+                    TextField(L("Hỏi coach…", "Ask the coach…"), text: $input, axis: .vertical).lineLimit(1...4).textFieldStyle(.roundedBorder)
                     Button { send(input) } label: { Image(systemName: "arrow.up.circle.fill").font(.title) }
                         .disabled(busy || input.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
                 .padding(12)
-                Text("Thông tin mang tính tham khảo, không thay thế tư vấn của bác sĩ.").font(.caption2).foregroundColor(.secondary).padding(.bottom, 6)
+                Text(L("Thông tin mang tính tham khảo, không thay thế tư vấn của bác sĩ.", "For information only; not a substitute for your doctor's advice.")).font(.caption2).foregroundColor(.secondary).padding(.bottom, 6)
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Coach")
@@ -76,48 +76,48 @@ struct ProfileView: View {
         let macros = Nutrition.macroTargets(p)
         NavigationStack {
             List {
-                Section("Chỉ số của bạn") {
-                    Text("🎯 Mục tiêu nạp: \(Nutrition.targetKcal(p)) kcal/ngày").bold()
+                Section(L("Chỉ số của bạn", "Your numbers")) {
+                    Text(L("🎯 Mục tiêu nạp: \(Nutrition.targetKcal(p)) kcal/ngày", "🎯 Daily target: \(Nutrition.targetKcal(p)) kcal")).bold()
                     Text("BMR \(Int(Nutrition.bmr(p))) kcal · TDEE \(Int(Nutrition.tdee(p))) kcal · BMI \(String(format: "%.1f", Nutrition.bmi(p)))")
-                    Text("Đạm \(macros.protein)g · Tinh bột \(macros.carbs)g · Béo \(macros.fat)g").foregroundColor(.secondary)
+                    Text(L("Đạm \(macros.protein)g · Tinh bột \(macros.carbs)g · Béo \(macros.fat)g", "Protein \(macros.protein)g · Carbs \(macros.carbs)g · Fat \(macros.fat)g")).foregroundColor(.secondary)
                 }
                 Section {
-                    NavigationLink("Sửa hồ sơ, mục tiêu và sức khỏe") { ProfileForm(title: "Hồ sơ", saveLabel: "Lưu thay đổi") }
+                    NavigationLink(L("Sửa hồ sơ, mục tiêu và sức khỏe", "Edit profile, goal and health")) { ProfileForm(title: L("Hồ sơ", "Profile"), saveLabel: L("Lưu thay đổi", "Save changes")) }
                 }
                 Section {
                     if store.healthLinked {
-                        Label("Đã kết nối Apple Health", systemImage: "checkmark.circle.fill").foregroundColor(Palette.green)
-                        Text("CaloCare chỉ đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng và chiều cao. Đổi quyền trong Cài đặt → Sức khỏe → Truy cập dữ liệu & thiết bị → CaloCare.")
+                        Label(L("Đã kết nối Apple Health", "Apple Health connected"), systemImage: "checkmark.circle.fill").foregroundColor(Palette.green)
+                        Text(L("CaloCare chỉ đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng và chiều cao. Đổi quyền trong Cài đặt → Sức khỏe → Truy cập dữ liệu & thiết bị → CaloCare.", "CaloCare only reads active calories, steps, exercise minutes, sleep, weight and height. Change access in Settings → Health → Data Access & Devices → CaloCare."))
                             .font(.caption).foregroundColor(.secondary)
-                        Button("Ngừng dùng dữ liệu Apple Health", role: .destructive) { store.unlinkHealth() }
+                        Button(L("Ngừng dùng dữ liệu Apple Health", "Stop using Apple Health data"), role: .destructive) { store.unlinkHealth() }
                     } else {
-                        Button { Task { await store.linkHealth() } } label: { Label("Kết nối Apple Health", systemImage: "heart.fill") }
-                        Text("Apple Watch ghi thẳng vào Apple Health. Garmin Connect, Mi Fitness, Zepp, Huawei Health, Samsung Health… bật đồng bộ sang Apple Health trong cài đặt của app đồng hồ.")
+                        Button { Task { await store.linkHealth() } } label: { Label(L("Kết nối Apple Health", "Connect Apple Health"), systemImage: "heart.fill") }
+                        Text(L("Apple Watch ghi thẳng vào Apple Health. Garmin Connect, Mi Fitness, Zepp, Huawei Health, Samsung Health… bật đồng bộ sang Apple Health trong cài đặt của app đồng hồ.", "Apple Watch records straight into Apple Health. Garmin Connect, Fitbit, Mi Fitness, Zepp, Huawei Health… turn on syncing to Apple Health in their own app's settings."))
                             .font(.caption).foregroundColor(.secondary)
                     }
-                } header: { Text("⌚ Đồng hồ & Apple Health") }
-                Section("✨ Trợ lý AI") {
+                } header: { Text(L("⌚ Đồng hồ & Apple Health", "⌚ Watch & Apple Health")) }
+                Section(L("✨ Trợ lý AI", "✨ AI assistant")) {
                     if let quota {
-                        Text("📷 Còn \(quota.photos_left_today) ảnh hôm nay" + (quota.trial_photos_left > 0 ? " · \(quota.trial_photos_left) ảnh dùng thử" : ""))
-                        Text("💬 Còn \(quota.chats_left_today) câu hỏi" + (quota.trial_chats_left > 0 ? " dùng thử" : " hôm nay"))
+                        Text(L("📷 Còn \(quota.photos_left_today) ảnh hôm nay", "📷 \(quota.photos_left_today) photos left today") + (quota.trial_photos_left > 0 ? L(" · \(quota.trial_photos_left) ảnh dùng thử", " · \(quota.trial_photos_left) trial photos") : ""))
+                        Text(L("💬 Còn \(quota.chats_left_today) câu hỏi", "💬 \(quota.chats_left_today) questions left") + (quota.trial_chats_left > 0 ? L(" dùng thử", " (trial)") : L(" hôm nay", " today")))
                     } else if !API.shared.configured {
-                        Text("Bản này chưa được cấu hình máy chủ AI.").foregroundColor(.secondary)
+                        Text(L("Bản này chưa được cấu hình máy chủ AI.", "This build has no AI server configured.")).foregroundColor(.secondary)
                     }
-                    Text("Dùng thử 100 ảnh (tối đa 30 ảnh/ngày) và 100 câu hỏi. Sau đó mỗi ngày có 6 ảnh và 10 câu hỏi.").font(.caption).foregroundColor(.secondary)
+                    Text(L("Dùng thử 100 ảnh (tối đa 30 ảnh/ngày) và 100 câu hỏi. Sau đó mỗi ngày có 6 ảnh và 10 câu hỏi.", "Trial: 100 photos (up to 30 a day) and 100 questions. After that, 6 photos and 10 questions a day.")).font(.caption).foregroundColor(.secondary)
                 }
-                Section("Quyền riêng tư & dữ liệu") {
-                    Text("Hồ sơ và nhật ký chỉ nằm trên thiết bị này. Ảnh, câu hỏi và tên món bạn tạo được gửi tới máy chủ CaloCare khi bạn dùng tính năng AI. Dữ liệu Apple Health chỉ được đọc và dùng trên máy này, không gửi đi đâu.").font(.caption)
-                    Button("Xóa toàn bộ dữ liệu", role: .destructive) { confirmWipe = true }
+                Section(L("Quyền riêng tư & dữ liệu", "Privacy & data")) {
+                    Text(L("Hồ sơ và nhật ký chỉ nằm trên thiết bị này. Ảnh, câu hỏi và tên món bạn tạo được gửi tới máy chủ CaloCare khi bạn dùng tính năng AI. Dữ liệu Apple Health chỉ được đọc và dùng trên máy này, không gửi đi đâu.", "Your profile and log stay on this device. Photos, questions and names of foods you create go to CaloCare's server when you use AI features. Apple Health data is only read and used on this device and is never sent anywhere.")).font(.caption)
+                    Button(L("Xóa toàn bộ dữ liệu", "Delete all data"), role: .destructive) { confirmWipe = true }
                 }
                 Section {
-                    Text("CaloCare đưa ra ước tính và gợi ý tham khảo, không thay thế chẩn đoán hay chỉ định của bác sĩ.").font(.caption).foregroundColor(.secondary)
+                    Text(L("CaloCare đưa ra ước tính và gợi ý tham khảo, không thay thế chẩn đoán hay chỉ định của bác sĩ.", "CaloCare gives estimates and general suggestions; it does not replace your doctor's diagnosis or advice.")).font(.caption).foregroundColor(.secondary)
                 }
             }
-            .navigationTitle("Hồ sơ")
+            .navigationTitle(L("Hồ sơ", "Profile"))
             .task { if !Demo.active { quota = await API.shared.refreshQuota() } }
-            .confirmationDialog("Xóa hồ sơ, nhật ký và món tự tạo khỏi thiết bị? Không thể khôi phục.", isPresented: $confirmWipe, titleVisibility: .visible) {
-                Button("Xóa", role: .destructive) { store.wipe() }
-                Button("Giữ lại", role: .cancel) {}
+            .confirmationDialog(L("Xóa hồ sơ, nhật ký và món tự tạo khỏi thiết bị? Không thể khôi phục.", "Delete your profile, log and custom foods from this device? This can't be undone."), isPresented: $confirmWipe, titleVisibility: .visible) {
+                Button(L("Xóa", "Delete"), role: .destructive) { store.wipe() }
+                Button(L("Giữ lại", "Keep"), role: .cancel) {}
             }
         }
     }
@@ -133,42 +133,42 @@ struct ProfileForm: View {
     @State private var loaded = false
 
     private let activityLevels: [(value: Double, label: String)] = [
-        (1.2, "Ít vận động (ngồi nhiều)"), (1.375, "Nhẹ (tập 1–3 buổi/tuần)"), (1.55, "Vừa (tập 3–5 buổi/tuần)"), (1.725, "Nặng (tập 6–7 buổi/tuần)"),
+        (1.2, L("Ít vận động (ngồi nhiều)", "Sedentary (mostly sitting)")), (1.375, L("Nhẹ (tập 1–3 buổi/tuần)", "Light (1–3 workouts a week)")), (1.55, L("Vừa (tập 3–5 buổi/tuần)", "Moderate (3–5 workouts a week)")), (1.725, L("Nặng (tập 6–7 buổi/tuần)", "Heavy (6–7 workouts a week)")),
     ]
 
     var body: some View {
         let thisYear = Calendar.current.component(.year, from: Date())
         let valid = (1925...(thisYear - 10)).contains(draft.birthYear) && (100...230).contains(draft.heightCm) && (25...300).contains(draft.weightKg)
         Form {
-            Section("Về bạn") {
-                TextField("Tên gọi", text: $draft.name)
-                Picker("Giới tính", selection: $draft.male) { Text("Nam").tag(true); Text("Nữ").tag(false) }.pickerStyle(.segmented)
-                numberRow("Năm sinh", Binding(get: { Double(draft.birthYear) }, set: { draft.birthYear = Int($0) }))
-                numberRow("Chiều cao (cm)", $draft.heightCm)
-                numberRow("Cân nặng (kg)", $draft.weightKg)
-                Picker("Mức vận động", selection: $draft.activity) { ForEach(activityLevels, id: \.value) { Text($0.label).tag($0.value) } }
+            Section(L("Về bạn", "About you")) {
+                TextField(L("Tên gọi", "Name"), text: $draft.name)
+                Picker(L("Giới tính", "Sex"), selection: $draft.male) { Text(L("Nam", "Male")).tag(true); Text(L("Nữ", "Female")).tag(false) }.pickerStyle(.segmented)
+                numberRow(L("Năm sinh", "Birth year"), Binding(get: { Double(draft.birthYear) }, set: { draft.birthYear = Int($0) }))
+                numberRow(L("Chiều cao (cm)", "Height (cm)"), $draft.heightCm)
+                numberRow(L("Cân nặng (kg)", "Weight (kg)"), $draft.weightKg)
+                Picker(L("Mức vận động", "Activity level"), selection: $draft.activity) { ForEach(activityLevels, id: \.value) { Text($0.label).tag($0.value) } }
             }
-            Section("Mục tiêu") {
-                Picker("Mục tiêu", selection: $draft.goal) { ForEach(Goal.all, id: \.id) { Text($0.label).tag($0.id) } }
+            Section(L("Mục tiêu", "Goal")) {
+                Picker(L("Mục tiêu", "Goal"), selection: $draft.goal) { ForEach(Goal.all, id: \.id) { Text($0.label).tag($0.id) } }
                 if draft.goal == Goal.lose || draft.goal == Goal.gain {
-                    Picker("Tốc độ mỗi tuần", selection: $draft.weeklyRateKg) { Text("0,25 kg").tag(0.25); Text("0,5 kg").tag(0.5); Text("0,75 kg").tag(0.75) }.pickerStyle(.segmented)
+                    Picker(L("Tốc độ mỗi tuần", "Rate per week"), selection: $draft.weeklyRateKg) { Text(L("0,25 kg", "0.25 kg")).tag(0.25); Text(L("0,5 kg", "0.5 kg")).tag(0.5); Text(L("0,75 kg", "0.75 kg")).tag(0.75) }.pickerStyle(.segmented)
                 }
             }
-            Section("Bệnh lý cần lưu ý") {
+            Section(L("Bệnh lý cần lưu ý", "Health conditions")) {
                 ForEach(HealthTags.conditions, id: \.id) { c in Toggle(c.label, isOn: membership(\.conditions, c.id)) }
             }
-            Section("Dị ứng thực phẩm") {
+            Section(L("Dị ứng thực phẩm", "Food allergies")) {
                 ForEach(HealthTags.allergens, id: \.id) { a in Toggle(a.label, isOn: membership(\.allergies, a.id)) }
             }
-            Section("Chế độ ăn") {
-                Picker("Chế độ ăn", selection: $draft.diet) { ForEach(Diet.all, id: \.id) { Text($0.label).tag($0.id) } }
+            Section(L("Chế độ ăn", "Diet")) {
+                Picker(L("Chế độ ăn", "Diet"), selection: $draft.diet) { ForEach(Diet.all, id: \.id) { Text($0.label).tag($0.id) } }
             }
             Section {
                 Button(saveLabel) {
                     var saved = draft
                     saved.onboarded = true
                     store.update { $0.profile = saved }
-                    store.say("Đã lưu hồ sơ")
+                    store.say(L("Đã lưu hồ sơ", "Profile saved"))
                     dismiss()
                 }
                 .disabled(!valid)

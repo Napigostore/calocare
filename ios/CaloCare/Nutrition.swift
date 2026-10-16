@@ -75,31 +75,31 @@ enum Nutrition {
     static func warnings(tags: [String], profile p: Profile) -> [HealthWarning] {
         var out: [HealthWarning] = []
         for allergen in HealthTags.allergens where tags.contains(allergen.id) && p.allergies.contains(allergen.id) {
-            out.append(HealthWarning(danger: true, text: "Chứa \(allergen.label.lowercased()) — bạn đã khai dị ứng"))
+            out.append(HealthWarning(danger: true, text: L("Chứa \(allergen.label.lowercased()) — bạn đã khai dị ứng", "Contains \(allergen.label.lowercased()) — you declared an allergy")))
         }
         if p.conditions.contains("diabetes") {
-            if tags.contains("high_sugar") { out.append(HealthWarning(danger: false, text: "Nhiều đường — dễ làm tăng đường huyết")) }
-            else if tags.contains("high_gi") { out.append(HealthWarning(danger: false, text: "Chỉ số đường huyết cao — ăn ít và ăn sau rau, đạm")) }
+            if tags.contains("high_sugar") { out.append(HealthWarning(danger: false, text: L("Nhiều đường — dễ làm tăng đường huyết", "High in sugar — can raise blood sugar"))) }
+            else if tags.contains("high_gi") { out.append(HealthWarning(danger: false, text: L("Chỉ số đường huyết cao — ăn ít và ăn sau rau, đạm", "High glycemic index — eat a little, after vegetables and protein"))) }
         }
         if p.conditions.contains("hypertension") && tags.contains("high_sodium") {
-            out.append(HealthWarning(danger: false, text: "Nhiều muối — không tốt cho huyết áp"))
+            out.append(HealthWarning(danger: false, text: L("Nhiều muối — không tốt cho huyết áp", "High in salt — bad for blood pressure")))
         }
         if p.conditions.contains("gout") && (tags.contains("high_purine") || tags.contains("alcohol")) {
-            out.append(HealthWarning(danger: false, text: "Nhiều purin hoặc rượu bia — có thể gây cơn gout"))
+            out.append(HealthWarning(danger: false, text: L("Nhiều purin hoặc rượu bia — có thể gây cơn gout", "High in purines or alcohol — may trigger gout")))
         }
         if p.conditions.contains("cholesterol") && (tags.contains("high_satfat") || tags.contains("fried")) {
-            out.append(HealthWarning(danger: false, text: "Nhiều chất béo bão hòa / chiên rán — hạn chế khi mỡ máu cao"))
+            out.append(HealthWarning(danger: false, text: L("Nhiều chất béo bão hòa / chiên rán — hạn chế khi mỡ máu cao", "Saturated fat / fried — limit with high cholesterol")))
         }
         let animal = ["meat", "fish", "shellfish", "pork"]
         switch p.diet {
         case "vegetarian":
-            if tags.contains(where: { animal.contains($0) }) { out.append(HealthWarning(danger: false, text: "Có thịt / cá — không hợp chế độ ăn chay")) }
+            if tags.contains(where: { animal.contains($0) }) { out.append(HealthWarning(danger: false, text: L("Có thịt / cá — không hợp chế độ ăn chay", "Contains meat / fish — not vegetarian"))) }
         case "vegan":
-            if tags.contains(where: { (animal + ["animal", "milk", "egg"]).contains($0) }) { out.append(HealthWarning(danger: false, text: "Có nguồn gốc động vật — không hợp thuần chay")) }
+            if tags.contains(where: { (animal + ["animal", "milk", "egg"]).contains($0) }) { out.append(HealthWarning(danger: false, text: L("Có nguồn gốc động vật — không hợp thuần chay", "Animal-based — not vegan"))) }
         case "keto":
-            if tags.contains(where: { ["high_carb", "high_sugar", "high_gi"].contains($0) }) { out.append(HealthWarning(danger: false, text: "Nhiều tinh bột / đường — vượt ngưỡng keto")) }
+            if tags.contains(where: { ["high_carb", "high_sugar", "high_gi"].contains($0) }) { out.append(HealthWarning(danger: false, text: L("Nhiều tinh bột / đường — vượt ngưỡng keto", "High in carbs / sugar — over the keto limit"))) }
         case "halal":
-            if tags.contains("pork") || tags.contains("alcohol") { out.append(HealthWarning(danger: false, text: "Có thịt heo / rượu — không Halal")) }
+            if tags.contains("pork") || tags.contains("alcohol") { out.append(HealthWarning(danger: false, text: L("Có thịt heo / rượu — không Halal", "Contains pork / alcohol — not halal"))) }
         default: break
         }
         return out
@@ -127,9 +127,10 @@ enum FoodMatcher {
 
     /// Foods that share anything with the query, best match first.
     static func ranked(_ query: String, in foods: [Food]) -> [(food: Food, score: Double)] {
+        // Both names count, so a dish is found by its Vietnamese or its English name.
         let q = fold(query)
         if q.isEmpty { return [] }
-        return foods.map { (food: $0, score: similarity(q, fold($0.name))) }.filter { $0.score > 0 }.sorted { $0.score > $1.score }
+        return foods.map { (food: $0, score: max(similarity(q, fold($0.name)), similarity(q, fold($0.label)))) }.filter { $0.score > 0 }.sorted { $0.score > $1.score }
     }
 
     /// The food this name most likely means, or nil when nothing is close enough to trust.

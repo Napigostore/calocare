@@ -1,5 +1,6 @@
 package com.calocare.app.data
 
+import com.calocare.app.L
 import java.time.LocalDate
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -47,6 +48,12 @@ object MenuPlanner {
         c(Meal.BREAKFAST, Region.INTL, all, "banh_mi_nuong".one, "trung_chien" x 2.0, "sua_tuoi".one),
         c(Meal.BREAKFAST, Region.INTL, setOf(L, M, Y), "sua_chua_hy_lap".one, "dau_tay".one, "hanh_nhan".one),
         c(Meal.BREAKFAST, Region.INTL, setOf(G, R, M), "banh_mi_nuong".one, "bo_dau_phong".one, "chuoi".one),
+        c(Meal.BREAKFAST, Region.INTL, setOf(L, M, Y), "trung_bac".one, "avocado_toast".one, "americano".one),
+        c(Meal.BREAKFAST, Region.INTL, setOf(L, M, R), "granola".one, "viet_quat".one),
+        c(Meal.BREAKFAST, Region.INTL, setOf(G, R), "pancake".one, "trung_bac".one),
+        c(Meal.BREAKFAST, Region.INTL, setOf(Y, G), "omelette".one, "banh_mi_nuong".one, "latte".one),
+        c(Meal.BREAKFAST, Region.INTL, setOf(M, G), "bagel_cream_cheese".one, "cappuccino".one),
+        c(Meal.BREAKFAST, Region.INTL, setOf(M, R), "ngu_coc".one, "chuoi".one),
 
         // ---------------- lunch
         c(Meal.LUNCH, Region.ALL, setOf(L, Y, M), "canh_rau".one, "rau_luoc".one, "uc_ga".one, "com_gao_lut".one),
@@ -63,6 +70,13 @@ object MenuPlanner {
         c(Meal.LUNCH, Region.INTL, setOf(M, Y, R), "salad".one, "sandwich".one),
         c(Meal.LUNCH, Region.INTL, setOf(G, R, M), "salad".one, "mi_y".one),
         c(Meal.LUNCH, Region.INTL, setOf(M, R, L), "salad".one, "sushi".one),
+        c(Meal.LUNCH, Region.INTL, setOf(L, M, Y), "caesar_salad".one),
+        c(Meal.LUNCH, Region.INTL, setOf(L, Y, M), "wrap_ga".one, "tao".one),
+        c(Meal.LUNCH, Region.INTL, setOf(Y, R, M), "poke".one),
+        c(Meal.LUNCH, Region.INTL, setOf(G, R), "teriyaki".one, "sup_ca_chua".one),
+        c(Meal.LUNCH, Region.INTL, setOf(G, Y), "burrito".one),
+        c(Meal.LUNCH, Region.INTL, setOf(M, Y), "tuna_sandwich".one, "salad".one),
+        c(Meal.LUNCH, Region.INTL, setOf(M, R, G), "bibimbap".one, "kimchi".one),
 
         // ---------------- dinner
         c(Meal.DINNER, Region.ALL, setOf(L, M), "canh_rau".one, "rau_luoc".one, "ca_hap".one, "com_gao_lut" x 0.5),
@@ -75,6 +89,12 @@ object MenuPlanner {
         c(Meal.DINNER, Region.ALL, all, "rau_luoc".one, "ga_luoc".one, "bo".one),
         c(Meal.DINNER, Region.INTL, setOf(G, Y, M), "salad".one, "steak".one, "khoai_lang".one),
         c(Meal.DINNER, Region.INTL, all, "salad".one, "ca_hoi".one, "com_gao_lut".one),
+        c(Meal.DINNER, Region.INTL, setOf(L, M, Y), "roast_chicken".one, "bong_cai".one, "quinoa".one),
+        c(Meal.DINNER, Region.INTL, setOf(L, Y), "ga_tay".one, "bong_cai".one, "khoai_lang".one),
+        c(Meal.DINNER, Region.INTL, setOf(M, G, R), "chicken_tikka".one, "com_trang".one, "bong_cai".one),
+        c(Meal.DINNER, Region.INTL, setOf(G, R), "carbonara".one, "salad".one),
+        c(Meal.DINNER, Region.INTL, setOf(M, Y), "chili_con_carne".one, "com_gao_lut".one, "salad".one),
+        c(Meal.DINNER, Region.INTL, setOf(M, R, L), "tom_yum".one, "sashimi".one, "com_trang" x 0.5),
 
         // ---------------- snack
         c(Meal.SNACK, Region.ALL, setOf(L, M), "sua_chua".one, "dau_tay".one),
@@ -87,6 +107,11 @@ object MenuPlanner {
         c(Meal.SNACK, Region.ALL, all, "hat_dieu".one),
         c(Meal.SNACK, Region.VN, all, "oi".one),
         c(Meal.SNACK, Region.ALL, all, "dua_leo" x 2.0, "trung_luoc".one),
+        c(Meal.SNACK, Region.INTL, setOf(Y, R), "protein_bar".one),
+        c(Meal.SNACK, Region.INTL, setOf(L, M), "hummus".one, "dua_leo".one),
+        c(Meal.SNACK, Region.INTL, setOf(L, M, Y), "sua_chua_hy_lap".one, "viet_quat".one),
+        c(Meal.SNACK, Region.INTL, setOf(G, M), "pho_mai".one, "tao".one),
+        c(Meal.SNACK, Region.INTL, all, "kiwi" x 2.0),
     )
 
     private fun shares(goal: String) = when (goal) {
@@ -137,16 +162,16 @@ object MenuPlanner {
         val rnd = Random(seed)
         if (open.isEmpty() || remaining < 200f) {
             val budget = remaining.coerceIn(80f, 250f)
-            val note = if (remaining < 200f) "Bạn gần chạm mục tiêu hôm nay — nếu còn đói, chọn món nhẹ."
-            else "Các bữa chính đã xong. Còn ${remaining.roundToInt()} kcal cho một bữa phụ."
+            val note = if (remaining < 200f) L("Bạn gần chạm mục tiêu hôm nay — nếu còn đói, chọn món nhẹ.", "You're close to today's target — if you're still hungry, pick something light.")
+            else L("Các bữa chính đã xong. Còn ${remaining.roundToInt()} kcal cho một bữa phụ.", "Main meals are done. ${remaining.roundToInt()} kcal left for a snack.")
             return NextMeal(pick(p, p.goal, Meal.SNACK, budget, rnd), budget.roundToInt(), note)
         }
         val next = open.first()
         val budget = remaining * (share[next] ?: 0.3f) / open.sumOf { (share[it] ?: 0.3f).toDouble() }.toFloat()
         val macros = Nutrition.macroTargets(p, target)
         val note = if (eaten.kcal > 0f && eaten.protein / macros.protein < eaten.kcal / target - 0.1f)
-            "Đạm đang thấp hơn tiến độ — bữa này đừng bỏ phần đạm."
-        else "Còn ${remaining.roundToInt()} kcal cho ${open.size} bữa chính còn lại."
+            L("Đạm đang thấp hơn tiến độ — bữa này đừng bỏ phần đạm.", "Protein is behind schedule — don't skip it this meal.")
+        else L("Còn ${remaining.roundToInt()} kcal cho ${open.size} bữa chính còn lại.", "${remaining.roundToInt()} kcal left for the ${open.size} remaining main meal(s).")
         return NextMeal(pick(p, p.goal, next, budget, rnd), budget.roundToInt(), note)
     }
 }

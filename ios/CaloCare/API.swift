@@ -73,7 +73,7 @@ struct RemoteDish: Decodable {
     var region: String?
 
     var food: Food {
-        Food(id: id, name: name, emoji: emoji ?? "🍽️", serving: serving ?? "1 phần", kcal: kcal, protein: protein_g ?? 0, carbs: carbs_g ?? 0,
+        Food(id: id, name: name, emoji: emoji ?? "🍽️", serving: serving ?? L("1 phần", "1 serving"), kcal: kcal, protein: protein_g ?? 0, carbs: carbs_g ?? 0,
              fat: fat_g ?? 0, course: course ?? "main", tags: tags ?? [], region: region ?? "vn", custom: false)
     }
 }
@@ -124,10 +124,11 @@ final class API {
     private(set) var lastQuota: Quota?
 
     private func send(_ path: String, body: [String: Any]? = nil) async throws -> Data {
-        guard configured, let url = URL(string: "https://\(host)\(path)") else { throw APIError(message: "Ứng dụng chưa được cấu hình máy chủ AI.") }
+        guard configured, let url = URL(string: "https://\(host)\(path)") else { throw APIError(message: L("Ứng dụng chưa được cấu hình máy chủ AI.", "This build has no AI server configured.")) }
         var request = URLRequest(url: url, timeoutInterval: 120)
         request.setValue(appKey, forHTTPHeaderField: "X-App-Key")
         request.setValue(deviceId, forHTTPHeaderField: "X-Device")
+        request.setValue(Lang.code, forHTTPHeaderField: "X-Lang")
         if let body {
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -138,20 +139,20 @@ final class API {
         do {
             (data, response) = try await URLSession.shared.data(for: request)
         } catch {
-            throw APIError(message: "Không kết nối được tới máy chủ AI. Kiểm tra mạng.")
+            throw APIError(message: L("Không kết nối được tới máy chủ AI. Kiểm tra mạng.", "Couldn't reach the AI server. Check your connection."))
         }
         if let quota = (try? JSONDecoder().decode(QuotaEnvelope.self, from: data))?.quota { lastQuota = quota }
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         guard (200..<300).contains(status) else {
             // The server's messages are already written for the user (allowance used up, busy, ...).
             let message = (try? JSONDecoder().decode(ServerMessage.self, from: data))?.message
-            throw APIError(message: message ?? "Máy chủ AI đang gặp sự cố (\(status)). Hãy thử lại sau.")
+            throw APIError(message: message ?? L("Máy chủ AI đang gặp sự cố (\(status)). Hãy thử lại sau.", "The AI server has a problem (\(status)). Please try again later."))
         }
         return data
     }
 
     private func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-        do { return try JSONDecoder().decode(type, from: data) } catch { throw APIError(message: "Không đọc được kết quả AI. Hãy thử lại.") }
+        do { return try JSONDecoder().decode(type, from: data) } catch { throw APIError(message: L("Không đọc được kết quả AI. Hãy thử lại.", "Couldn't read the AI's answer. Please try again.")) }
     }
 
     func refreshQuota() async -> Quota? {

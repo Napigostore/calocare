@@ -1,5 +1,8 @@
 package com.calocare.app
 
+import com.calocare.app.servingLabel
+import com.calocare.app.label
+import com.calocare.app.L
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -84,7 +87,7 @@ class PhotoItem(val ai: DetectedItem, item: DetectedItem, fromTable: Boolean, qt
     val kcal get() = (item.kcal * amount).roundToInt()
 
     companion object {
-        val SIZES = listOf("small" to "Nhỏ", "medium" to "Vừa", "large" to "To")
+        val SIZES = listOf("small" to L("Nhỏ", "Small"), "medium" to L("Vừa", "Medium"), "large" to L("To", "Large"))
         // Roughly how far a small or large egg, bowl or fruit is from the standard one.
         val SIZE_FACTOR = mapOf("small" to 0.75f, "medium" to 1f, "large" to 1.3f)
     }
@@ -223,7 +226,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             d.copy(entries = entries, customFoods = if (keep) d.customFoods + food else d.customFoods)
         }
         val amount = if (qty == 1f) "+1" else "+${fmtQty(qty)}"
-        messages.tryEmit("$amount ${food.name} · ${(food.kcal * qty).roundToInt()} kcal" + (warnings.firstOrNull()?.let { "\n⚠️ ${it.text}" } ?: ""))
+        messages.tryEmit("$amount ${food.label} · ${(food.kcal * qty).roundToInt()} kcal" + (warnings.firstOrNull()?.let { "\n⚠️ ${it.text}" } ?: ""))
     }
 
     fun addMeal(items: List<Pair<Food, Float>>, meal: String) {
@@ -237,7 +240,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             }
             d.copy(entries = entries)
         }
-        messages.tryEmit("Đã thêm ${items.size} món vào bữa ${Meal.labels[meal]?.lowercase()}")
+        messages.tryEmit(L("Đã thêm ${items.size} món vào bữa ${Meal.labels[meal]?.lowercase()}", "Added ${items.size} item(s) to ${Meal.labels[meal]?.lowercase()}"))
     }
 
     fun changeQty(entryId: Long, delta: Float) = store.update { d ->
@@ -263,7 +266,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             )
         }
         offerToLibrary(food)
-        messages.tryEmit("Đã lưu ${food.name}")
+        messages.tryEmit(L("Đã lưu ${food.name}", "Saved ${food.label}"))
     }
 
     fun deleteCustomFood(id: String) = store.update { d -> d.copy(customFoods = d.customFoods.filterNot { it.id == id }) }
@@ -291,7 +294,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         store.update { d ->
             d.copy(exercises = d.exercises + ExerciseEntry(nextId(), date.toString(), activity.name, activity.emoji, minutes, kcal))
         }
-        messages.tryEmit("${activity.emoji} ${activity.name} $minutes phút · −$kcal kcal")
+        messages.tryEmit(L("${activity.emoji} ${activity.name} $minutes phút · −$kcal kcal", "${activity.emoji} ${activity.name} $minutes min · −$kcal kcal"))
     }
 
     fun removeExercise(id: Long) = store.update { d -> d.copy(exercises = d.exercises.filterNot { it.id == id }) }
@@ -315,7 +318,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun applyAdaptive(delta: Int) {
         updateProfile { it.copy(kcalAdjust = it.kcalAdjust + delta, kcalAdjustDate = LocalDate.now().toString()) }
-        messages.tryEmit("Đã điều chỉnh mục tiêu ${if (delta > 0) "+" else ""}$delta kcal/ngày")
+        messages.tryEmit(L("Đã điều chỉnh mục tiêu ${if (delta > 0) "+" else ""}$delta kcal/ngày", "Target adjusted by ${if (delta > 0) "+" else ""}$delta kcal/day"))
     }
 
     // ------------------------------------------------------------------ watch / band (Health Connect)
@@ -338,11 +341,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 store.update { d -> d.copy(wearable = d.wearable + days, profile = d.profile.copy(wearableLinked = true)) }
                 body.heightCm?.takeIf { it in 100f..230f }?.let { h -> updateProfile { it.copy(heightCm = h) } }
                 body.weightKg?.takeIf { it in 25f..300f && it != data.value.profile.weightKg }?.let { logWeight(it) }
-                wearableNote = if (days.isEmpty()) "Đã kết nối nhưng chưa có dữ liệu. Mở app của đồng hồ và bật đồng bộ với Health Connect."
-                else "Đã đồng bộ ${days.size} ngày gần nhất."
+                wearableNote = if (days.isEmpty()) L("Đã kết nối nhưng chưa có dữ liệu. Mở app của đồng hồ và bật đồng bộ với Health Connect.", "Connected, but no data yet. Open your watch's app and turn on syncing with Health Connect.")
+                else L("Đã đồng bộ ${days.size} ngày gần nhất.", "Synced the last ${days.size} days.")
                 if (announce) messages.tryEmit(wearableNote)
             } catch (e: Exception) {
-                wearableNote = "Không đọc được dữ liệu: ${e.message}"
+                wearableNote = L("Không đọc được dữ liệu: ${e.message}", "Couldn't read the data: ${e.message}")
             } finally {
                 wearableBusy = false
             }
@@ -369,10 +372,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 onlineResults = FoodSearch.search(query.trim())
                 if (onlineResults.isEmpty()) {
-                    onlineNote = if (hasAi) "Không thấy sản phẩm nào trên Open Food Facts. Thử “AI gợi ý calo”." else "Không tìm thấy. Bạn có thể tự nhập món này."
+                    onlineNote = if (hasAi) L("Không thấy sản phẩm nào trên Open Food Facts. Thử “AI gợi ý calo”.", "Nothing found on Open Food Facts. Try “AI calorie estimate”.") else L("Không tìm thấy. Bạn có thể tự nhập món này.", "Nothing found. You can enter this food yourself.")
                 }
             } catch (e: Exception) {
-                onlineNote = "Không tìm được trên mạng (${e.message ?: "lỗi mạng"})."
+                onlineNote = L("Không tìm được trên mạng (${e.message ?: "lỗi mạng"}).", "Online search failed (${e.message ?: "network error"}).")
             } finally {
                 onlineBusy = false
             }
@@ -392,13 +395,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 // A personal DeepSeek key answers chat; estimates go to the built-in AI, which knows the app's food table.
                 val analysis = (if (photosOnHosted) hosted else ai()).estimateFood(query.trim())
                 val item = analysis.items.firstOrNull()
-                if (item == null) onlineNote = "AI không nhận ra đây là món ăn. Hãy thử mô tả rõ hơn."
+                if (item == null) onlineNote = L("AI không nhận ra đây là món ăn. Hãy thử mô tả rõ hơn.", "The AI doesn't recognise this as a food. Try describing it more clearly.")
                 else {
                     aiSuggestion = item.toFood("ai_${nextId()}")
                     onlineNote = analysis.advice
                 }
             } catch (e: AiException) {
-                onlineNote = e.message ?: "Lỗi AI"
+                onlineNote = e.message ?: L("Lỗi AI", "AI error")
             } finally {
                 onlineBusy = false
             }
@@ -419,7 +422,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun analyzePhoto(uri: Uri) {
         viewModelScope.launch {
             val picked = withContext(Dispatchers.IO) { runCatching { loadBitmap(uri, GALLERY_MAX_SIDE) }.getOrNull() }
-            if (picked == null) messages.tryEmit("Không mở được ảnh.") else analyze(picked)
+            if (picked == null) messages.tryEmit(L("Không mở được ảnh.", "Couldn't open the photo.")) else analyze(picked)
         }
     }
 
@@ -446,7 +449,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             state.score = analysis.score
             state.pros = analysis.pros
             state.cons = analysis.cons
-            if (analysis.items.isEmpty()) state.error = "AI không nhận ra món nào trong ảnh. Bạn có thể tự thêm món bên dưới bằng cách gõ hoặc nói."
+            if (analysis.items.isEmpty()) state.error = L("AI không nhận ra món nào trong ảnh. Bạn có thể tự thêm món bên dưới bằng cách gõ hoặc nói.", "The AI found no food in the photo. You can add items below by typing or speaking.")
         } catch (e: AiException) {
             state.error = e.message
         } finally {
@@ -461,7 +464,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun DetectedItem.like(food: Food) = copy(
-        name = food.name, emoji = food.emoji, portion = food.serving, kcal = food.kcal, protein = food.protein,
+        name = food.label, emoji = food.emoji, portion = food.servingLabel, kcal = food.kcal, protein = food.protein,
         carbs = food.carbs, fat = food.fat, course = food.course, tags = food.tags.toList(),
     )
 
@@ -484,7 +487,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
      * person usually eats. A bowl of noodle soup at 7 am from someone who logs phở most mornings is phở.
      */
     private fun photoContext(d: AppData): String {
-        val usual = frequentFoods(d, meal).take(10).joinToString { it.name }
+        val usual = frequentFoods(d, meal).take(10).joinToString { it.label }
         return profileSummary(d) + "; meal: ${Meal.labels[meal]}" + if (usual.isNotEmpty()) "; often eats: $usual" else ""
     }
 
@@ -507,7 +510,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             describing = true
             try {
                 val item = (if (photosOnHosted) hosted else ai()).estimateFood(text.trim()).items.firstOrNull()
-                if (item == null) messages.tryEmit("AI không nhận ra đây là món ăn. Hãy mô tả rõ hơn.")
+                if (item == null) messages.tryEmit(L("AI không nhận ra đây là món ăn. Hãy mô tả rõ hơn.", "The AI doesn't recognise this as a food. Please describe it more clearly."))
                 else {
                     // The description already carries the amount and size, so the numbers are taken as they are.
                     val described = item.copy(qty = 1f, size = "medium")
@@ -525,7 +528,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     onDone()
                 }
             } catch (e: AiException) {
-                messages.tryEmit(e.message ?: "Lỗi AI")
+                messages.tryEmit(e.message ?: L("Lỗi AI", "AI error"))
             } finally {
                 describing = false
             }
@@ -535,11 +538,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     /** Ingredients of a dish for the ingredient editor, or null (with a message shown) when the AI could not say. */
     suspend fun breakdown(text: String): List<Ingredient>? = try {
         (if (photosOnHosted) hosted else ai()).breakdown(text.trim()).ifEmpty {
-            messages.tryEmit("AI không tách được thành phần. Hãy ghi rõ hơn, ví dụ “thịt vịt 300g”.")
+            messages.tryEmit(L("AI không tách được thành phần. Hãy ghi rõ hơn, ví dụ “thịt vịt 300g”.", "The AI couldn't split this into ingredients. Be more specific, e.g. “duck meat 300g”."))
             null
         }
     } catch (e: AiException) {
-        messages.tryEmit(e.message ?: "Lỗi AI")
+        messages.tryEmit(e.message ?: L("Lỗi AI", "AI error"))
         null
     }
 
@@ -636,7 +639,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 chat += ChatTurn(false, ai().chat(context, chat.toList().takeLast(MAX_CHAT_TURNS).dropWhile { !it.fromUser }))
             } catch (e: AiException) {
                 chat.removeAt(chat.lastIndex)
-                messages.tryEmit(e.message ?: "Lỗi AI")
+                messages.tryEmit(e.message ?: L("Lỗi AI", "AI error"))
             } finally {
                 chatBusy = false
             }
@@ -647,7 +650,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val p = d.profile
         val parts = mutableListOf(
             "${if (p.male) "male" else "female"}, ${Nutrition.age(p)} years, ${p.heightCm.roundToInt()} cm, ${p.weightKg} kg",
-            "goal: ${Goal.labels[p.goal]}", "daily target ${Nutrition.targetKcal(p)} kcal",
+            "goal: ${p.goal}", "daily target ${Nutrition.targetKcal(p)} kcal",
         )
         if (p.conditions.isNotEmpty()) parts += "conditions: " + p.conditions.mapNotNull { Condition.labels[it] }.joinToString()
         if (p.allergies.isNotEmpty()) parts += "allergies: " + p.allergies.mapNotNull { Tag.allergens[it] }.joinToString()
@@ -659,7 +662,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val p = d.profile
         return listOf(
             "You are the in-app coach of CaloCare, acting as both a registered dietitian and a sports coach.",
-            "Reply in Vietnamese, warm and concrete, in short paragraphs or brief lists that read well on a phone. Give specific dishes, portions and numbers rather than general principles.",
+            "Reply in ${if (com.calocare.app.Lang.en) "English" else "Vietnamese"}, warm and concrete, in short paragraphs or brief lists that read well on a phone. Give specific dishes, portions and numbers rather than general principles.",
             "You are not a substitute for their doctor: for medication, blood-sugar targets or symptoms, give general guidance and tell them to check with their clinician. Never suggest eating below ${if (p.male) 1500 else 1200} kcal a day.",
             "Respect their conditions, allergies and diet in every suggestion, and point out conflicts in what they have eaten.",
             "Keep each reply under 120 words, unless the user asks for a full menu or plan.",
@@ -671,7 +674,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val p = d.profile
         val macros = Nutrition.macroTargets(p)
         val lines = mutableListOf(
-            "User: ${p.name.ifBlank { "(no name)" }}, lives in ${Region.labels[p.region]} (suggest local dishes).",
+            "User: ${p.name.ifBlank { "(no name)" }}, prefers ${if (p.region == Region.INTL) "international / Western" else "Vietnamese"} food (suggest dishes they can easily find).",
             "Profile: ${profileSummary(d)}; BMI ${"%.1f".format(Nutrition.bmi(p))}; target weight ${p.targetWeightKg} kg.",
             "Daily macro targets: P ${macros.protein}g, C ${macros.carbs}g, F ${macros.fat}g.",
             "Last 7 days (date: kcal in/out, protein/carbs/fat g, steps); days with nothing logged are omitted:",
@@ -685,7 +688,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
         val eatenToday = d.entriesOn(LocalDate.now()).totals().kcal.roundToInt()
         lines += "Today so far: $eatenToday kcal eaten, ${Nutrition.targetKcal(p) - eatenToday} kcal left of the target."
-        lines += "Eaten today: " + d.entriesOn(LocalDate.now()).joinToString { "${it.name} x${fmtQty(it.qty)} (${Meal.labels[it.meal]})" }.ifBlank { "nothing logged yet" }
+        lines += "Eaten today: " + d.entriesOn(LocalDate.now()).joinToString { "${it.label} x${fmtQty(it.qty)} (${Meal.labels[it.meal]})" }.ifBlank { "nothing logged yet" }
         return lines.joinToString("\n")
     }
 

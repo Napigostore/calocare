@@ -1,5 +1,7 @@
 package com.calocare.app.ui
 
+import com.calocare.app.label
+import com.calocare.app.L
 import androidx.compose.foundation.Image
 import com.calocare.app.data.FoodMatcher
 import com.calocare.app.PhotoItem
@@ -82,7 +84,7 @@ fun FullScreenDialog(title: String, onClose: () -> Unit, content: @Composable Co
             Column(Modifier.systemBarsPadding().imePadding()) {
                 Row(Modifier.padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    IconButton(onClick = onClose) { Icon(Icons.Default.Close, "Đóng") }
+                    IconButton(onClick = onClose) { Icon(Icons.Default.Close, L("Đóng", "Close")) }
                 }
                 content()
             }
@@ -90,12 +92,12 @@ fun FullScreenDialog(title: String, onClose: () -> Unit, content: @Composable Co
     }
 }
 
-private val starters = listOf(
-    "Gợi ý thực đơn ngày mai cho tôi",
-    "Tối nay tôi nên ăn gì?",
-    "Nhận xét tuần ăn uống của tôi",
-    "Lịch tập phù hợp mục tiêu của tôi",
-    "Ăn gì trước và sau khi tập?",
+private val starters get() = listOf(
+    L("Gợi ý thực đơn ngày mai cho tôi", "Suggest a menu for tomorrow"),
+    L("Tối nay tôi nên ăn gì?", "What should I eat tonight?"),
+    L("Nhận xét tuần ăn uống của tôi", "Review my eating this week"),
+    L("Lịch tập phù hợp mục tiêu của tôi", "A workout plan for my goal"),
+    L("Ăn gì trước và sau khi tập?", "What to eat before and after training?"),
 )
 
 /** Coach tab: proactive advice from the user's own numbers on top, AI chat underneath. */
@@ -112,7 +114,7 @@ fun CoachScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedA
         LazyColumn(Modifier.weight(1f), state = listState, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             item { Text("Coach", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
             item {
-                SectionCard(title = "🩺 Hôm nay bạn nên…") {
+                SectionCard(title = L("🩺 Hôm nay bạn nên…", "🩺 Today you should…")) {
                     val today = java.time.LocalDate.now()
                     val flagged = data.entriesOn(today).flatMap { e -> Nutrition.warnings(e.tags, data.profile).map { e.name to it } }.distinct()
                     flagged.take(3).forEach { (name, w) -> WarningLine(w.copy(text = "$name: ${w.text}")) }
@@ -122,8 +124,8 @@ fun CoachScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedA
             item { NextMealCard(vm, data) }
             if (vm.chat.isEmpty()) item {
                 Text(
-                    if (vm.hasAi) "Hỏi thêm bất cứ điều gì — mình đã xem hồ sơ, mục tiêu và nhật ký 7 ngày của bạn."
-                    else "Các lời khuyên trên tính từ số liệu của bạn, không cần mạng. Để trò chuyện với coach AI, bật Trợ lý AI trong Hồ sơ.",
+                    if (vm.hasAi) L("Hỏi thêm bất cứ điều gì — mình đã xem hồ sơ, mục tiêu và nhật ký 7 ngày của bạn.", "Ask me anything — I've looked at your profile, goal and last 7 days of logs.")
+                    else L("Các lời khuyên trên tính từ số liệu của bạn, không cần mạng. Để trò chuyện với coach AI, bật Trợ lý AI trong Hồ sơ.", "These tips are worked out from your numbers, offline. To chat with the AI coach, turn on the AI assistant in Profile."),
                     color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -141,7 +143,7 @@ fun CoachScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedA
             if (vm.chatBusy) item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    Text("  Đang soạn câu trả lời…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(L("  Đang soạn câu trả lời…", "  Writing a reply…"), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -152,16 +154,16 @@ fun CoachScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedA
         }
         Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
-                input, { input = it }, placeholder = { Text("Hỏi coach…") }, maxLines = 4,
+                input, { input = it }, placeholder = { Text(L("Hỏi coach…", "Ask the coach…")) }, maxLines = 4,
                 shape = RoundedCornerShape(24.dp), modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.width(8.dp))
             FilledIconButton(onClick = { send(input); if (vm.hasAi) input = "" }, enabled = input.isNotBlank() && !vm.chatBusy) {
-                Icon(Icons.AutoMirrored.Filled.Send, "Gửi")
+                Icon(Icons.AutoMirrored.Filled.Send, L("Gửi", "Send"))
             }
         }
         Text(
-            "Thông tin mang tính tham khảo, không thay thế tư vấn của bác sĩ.",
+            L("Thông tin mang tính tham khảo, không thay thế tư vấn của bác sĩ.", "For information only; not a substitute for your doctor's advice."),
             style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
         )

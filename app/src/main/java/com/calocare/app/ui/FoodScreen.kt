@@ -1,5 +1,8 @@
 package com.calocare.app.ui
 
+import com.calocare.app.servingLabel
+import com.calocare.app.label
+import com.calocare.app.L
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -93,9 +96,9 @@ import kotlin.math.roundToInt
 /** Lower-case and strip Vietnamese diacritics so "pho" finds "Phở". */
 private fun fold(s: String) = Normalizer.normalize(s.lowercase().replace('đ', 'd'), Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
 
-private val categories = listOf(
-    "all" to "Tất cả", "main" to "Món chính", "protein" to "Đạm", "veg" to "Rau & canh",
-    "fruit" to "Trái cây", "drink" to "Đồ uống", "snack" to "Ăn vặt", "mine" to "Của tôi",
+private val categories get() = listOf(
+    "all" to L("Tất cả", "All"), "main" to L("Món chính", "Mains"), "protein" to L("Đạm", "Protein"), "veg" to L("Rau & canh", "Veg & soups"),
+    "fruit" to L("Trái cây", "Fruit"), "drink" to L("Đồ uống", "Drinks"), "snack" to L("Ăn vặt", "Snacks"), "mine" to L("Của tôi", "Mine"),
 )
 
 private fun inCategory(food: Food, category: String) = when (category) {
@@ -121,7 +124,7 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
     var camera by remember { mutableStateOf(false) }
 
     val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) camera = true else vm.messages.tryEmit("Cần quyền camera để chụp bữa ăn. Bạn vẫn có thể chọn ảnh từ thư viện.")
+        if (granted) camera = true else vm.messages.tryEmit(L("Cần quyền camera để chụp bữa ăn. Bạn vẫn có thể chọn ảnh từ thư viện.", "Camera permission is needed to photograph meals. You can still choose a photo from the gallery."))
     }
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) vm.analyzePhoto(uri)
@@ -134,14 +137,14 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
 
     // Local dishes first, then the ones shared by every region, then the rest.
     val allFoods = remember(data.customFoods, profile.region, vm.library) {
-        val quick = FoodDb.quickIds.withIndex().associate { it.value to it.index }
+        val quick = FoodDb.quickIds(profile.region).withIndex().associate { it.value to it.index }
         val edited = data.customFoods.map { it.id }.toSet()
         data.customFoods + vm.library.filterNot { it.id in edited }.sortedWith(
             compareBy<Food> { quick[it.id] ?: Int.MAX_VALUE }.thenBy { if (it.region == profile.region) 0 else if (it.region == Region.ALL) 1 else 2 }
         )
     }
     val searching = query.isNotBlank()
-    val shown = if (searching) fold(query).let { q -> allFoods.filter { fold(it.name).contains(q) } } else allFoods.filter { inCategory(it, category) }
+    val shown = if (searching) fold(query).let { q -> allFoods.filter { fold(it.name).contains(q) || fold(it.label).contains(q) } } else allFoods.filter { inCategory(it, category) }
     val frequent = if (searching) emptyList() else vm.frequentFoods(data, vm.meal)
     // Dishes that share words with the query without containing it: "bún bò" finds "Bún bò Huế" above, "Bò kho" here.
     val similar = if (!searching) emptyList() else shown.map { it.id }.toSet().let { found ->
@@ -150,7 +153,7 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
 
     Column(Modifier.padding(top = padding.calculateTopPadding())) {
         Row(Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("Ăn uống", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.weight(1f))
+            Text(L("Ăn uống", "Food"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.weight(1f))
             DateSwitcher(vm)
         }
         Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -174,12 +177,12 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it; vm.clearOnline() },
-                placeholder = { Text("Tìm món…", maxLines = 1) },
+                placeholder = { Text(L("Tìm món…", "Search foods…"), maxLines = 1) },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
                 trailingIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (searching) IconButton(onClick = { query = ""; vm.clearOnline() }) { Icon(Icons.Default.Close, "Xóa") }
-                        MicButton(onText = { query = it; vm.clearOnline() }, onUnavailable = { vm.messages.tryEmit("Máy chưa có nhận dạng giọng nói.") })
+                        if (searching) IconButton(onClick = { query = ""; vm.clearOnline() }) { Icon(Icons.Default.Close, L("Xóa", "Clear")) }
+                        MicButton(onText = { query = it; vm.clearOnline() }, onUnavailable = { vm.messages.tryEmit(L("Máy chưa có nhận dạng giọng nói.", "Speech recognition isn't available on this phone.")) })
                     }
                 },
                 singleLine = true,
@@ -194,11 +197,11 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
                     vm.hasPhotoAi ->
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) camera = true
                         else cameraPermission.launch(Manifest.permission.CAMERA)
-                    vm.hasAi -> vm.messages.tryEmit("DeepSeek chưa đọc được ảnh. Chụp ảnh bữa ăn cần API key của Anthropic.")
+                    vm.hasAi -> vm.messages.tryEmit(L("DeepSeek chưa đọc được ảnh. Chụp ảnh bữa ăn cần API key của Anthropic.", "DeepSeek can't read photos. Meal photos need an Anthropic API key."))
                     else -> onNeedAiKey()
                 }
             }, modifier = Modifier.size(52.dp)) {
-                Icon(Icons.Default.CameraAlt, "Chụp ảnh bữa ăn")
+                Icon(Icons.Default.CameraAlt, L("Chụp ảnh bữa ăn", "Photograph a meal"))
             }
         }
 
@@ -219,7 +222,7 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
             if (!searching) {
                 if (mealEntries.isNotEmpty()) wide("log") { MealLog(vm, data, mealEntries) }
                 if (frequent.isNotEmpty()) {
-                    wide("freq_title") { Text("⭐ Món quen của bạn", fontWeight = FontWeight.SemiBold) }
+                    wide("freq_title") { Text(L("⭐ Món quen của bạn", "⭐ Your usual foods"), fontWeight = FontWeight.SemiBold) }
                     tiles(frequent, "freq_")
                 }
                 wide("cats") {
@@ -230,19 +233,19 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
                     }
                 }
                 wide("hint") {
-                    Text("Đang chọn cho bữa ${Meal.labels[vm.meal]?.lowercase()} · chạm = +1 phần · giữ để sửa món", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(L("Đang chọn cho bữa ${Meal.labels[vm.meal]?.lowercase()} · chạm = +1 phần · giữ để sửa món", "Adding to ${Meal.labels[vm.meal]?.lowercase()} · tap = +1 serving · hold to edit"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
             tiles(shown, "f_")
 
             if (!searching && category == "mine") {
-                wide("new") { OutlinedButton(onClick = { editing = blankFood(vm, "") }) { Icon(Icons.Default.Add, null); Text(" Tạo món của tôi") } }
+                wide("new") { OutlinedButton(onClick = { editing = blankFood(vm, "") }) { Icon(Icons.Default.Add, null); Text(L(" Tạo món của tôi", " Create my food")) } }
             }
 
             if (searching) {
                 if (similar.isNotEmpty()) {
-                    wide("similar_title") { Text("Món gần giống", fontWeight = FontWeight.SemiBold) }
+                    wide("similar_title") { Text(L("Món gần giống", "Similar foods"), fontWeight = FontWeight.SemiBold) }
                     tiles(similar, "sim_")
                 }
                 wide("new_dish") {
@@ -251,7 +254,7 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
                         onCreate = { editing = blankFood(vm, query.trim()) }, onEdit = { editing = it.copy(custom = true) }, onNeedAiKey = onNeedAiKey,
                     )
                 }
-                if (vm.onlineResults.isNotEmpty()) wide("online_title") { Text("🌐 Sản phẩm trên Open Food Facts", fontWeight = FontWeight.SemiBold) }
+                if (vm.onlineResults.isNotEmpty()) wide("online_title") { Text(L("🌐 Sản phẩm trên Open Food Facts", "🌐 Products on Open Food Facts"), fontWeight = FontWeight.SemiBold) }
                 tiles(vm.onlineResults, "online_")
             }
         }
@@ -269,15 +272,15 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
         AlertDialog(
             onDismissRequest = { vm.pendingDanger = null },
             icon = { Text("⛔", fontSize = 32.sp) },
-            title = { Text("Cảnh báo dị ứng") },
+            title = { Text(L("Cảnh báo dị ứng", "Allergy warning")) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("${food.emoji} ${food.name}", fontWeight = FontWeight.SemiBold)
+                    Text("${food.emoji} ${food.label}", fontWeight = FontWeight.SemiBold)
                     warnings.forEach { WarningLine(it) }
                 }
             },
-            confirmButton = { TextButton(onClick = { vm.addFood(food, 1f, warnings); vm.pendingDanger = null }) { Text("Vẫn thêm", color = Palette.Danger) } },
-            dismissButton = { Button(onClick = { vm.pendingDanger = null }) { Text("Không thêm") } },
+            confirmButton = { TextButton(onClick = { vm.addFood(food, 1f, warnings); vm.pendingDanger = null }) { Text(L("Vẫn thêm", "Add anyway"), color = Palette.Danger) } },
+            dismissButton = { Button(onClick = { vm.pendingDanger = null }) { Text(L("Không thêm", "Don't add")) } },
         )
     }
 
@@ -292,7 +295,7 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
 }
 
 private fun blankFood(vm: AppViewModel, name: String) =
-    Food(id = vm.newCustomId(), name = name, kcal = 0, serving = "1 phần", region = Region.ALL, custom = true)
+    Food(id = vm.newCustomId(), name = name, kcal = 0, serving = L("1 phần", "1 serving"), region = Region.ALL, custom = true)
 
 private fun LazyGridScope.wide(key: String, content: @Composable () -> Unit) =
     item(key = key, span = { GridItemSpan(maxLineSpan) }) { content() }
@@ -305,19 +308,19 @@ private fun LazyGridScope.wide(key: String, content: @Composable () -> Unit) =
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun NewDishCard(vm: AppViewModel, query: String, known: Boolean, onCreate: () -> Unit, onEdit: (Food) -> Unit, onNeedAiKey: () -> Unit) {
-    SectionCard(title = if (known) "Không phải món bạn tìm?" else "Món mới: “${query.trim()}”") {
+    SectionCard(title = if (known) L("Không phải món bạn tìm?", "Not what you're looking for?") else L("Món mới: “${query.trim()}”", "New food: “${query.trim()}”")) {
         Text(
-            "AI gợi ý calo từ tên món. Bạn cũng có thể mô tả: “bún 100g, thịt 100g, rau một ít” hoặc “tương đương 1 tô phở”.",
+            L("AI gợi ý calo từ tên món. Bạn cũng có thể mô tả: “bún 100g, thịt 100g, rau một ít” hoặc “tương đương 1 tô phở”.", "The AI estimates calories from the name. You can also describe it: “pasta 100g, chicken 100g, some veg” or “about the size of a burger”."),
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { if (vm.hasAi) vm.estimateWithAi(query) else onNeedAiKey() }, enabled = !vm.onlineBusy) { Text("✨ AI gợi ý calo") }
-            FilledTonalButton(onClick = { vm.searchOnline(query) }, enabled = !vm.onlineBusy) { Text("🌐 Tìm sản phẩm") }
-            OutlinedButton(onClick = onCreate) { Text("＋ Tự nhập") }
+            Button(onClick = { if (vm.hasAi) vm.estimateWithAi(query) else onNeedAiKey() }, enabled = !vm.onlineBusy) { Text(L("✨ AI gợi ý calo", "✨ AI calorie estimate")) }
+            FilledTonalButton(onClick = { vm.searchOnline(query) }, enabled = !vm.onlineBusy) { Text(L("🌐 Tìm sản phẩm", "🌐 Find product")) }
+            OutlinedButton(onClick = onCreate) { Text(L("＋ Tự nhập", "＋ Enter manually")) }
         }
         if (vm.onlineBusy) Row(verticalAlignment = Alignment.CenterVertically) {
             CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-            Text("  Đang tính…")
+            Text(L("  Đang tính…", "  Working…"))
         }
         vm.aiSuggestion?.let { food ->
             Column(
@@ -328,18 +331,18 @@ private fun NewDishCard(vm: AppViewModel, query: String, known: Boolean, onCreat
                     Text(food.emoji, fontSize = 30.sp)
                     Spacer(Modifier.width(10.dp))
                     Column(Modifier.weight(1f)) {
-                        Text(food.name, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        Text("${food.kcal} kcal / ${food.serving}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text(food.label, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text("${food.kcal} kcal / ${food.servingLabel}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
                         Text(
-                            "Đạm ${food.protein.roundToInt()}g · Tinh bột ${food.carbs.roundToInt()}g · Béo ${food.fat.roundToInt()}g · AI ước tính",
+                            L("Đạm ${food.protein.roundToInt()}g · Tinh bột ${food.carbs.roundToInt()}g · Béo ${food.fat.roundToInt()}g · AI ước tính", "Protein ${food.protein.roundToInt()}g · Carbs ${food.carbs.roundToInt()}g · Fat ${food.fat.roundToInt()}g · AI estimate"),
                             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     }
                 }
                 Nutrition.warnings(food.tags, vm.data.value.profile).forEach { WarningLine(it) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { vm.tapFood(food) }) { Text("＋ Thêm vào bữa ${Meal.labels[vm.meal]?.lowercase()}") }
-                    OutlinedButton(onClick = { onEdit(food) }) { Text("✏️ Sửa rồi lưu") }
+                    Button(onClick = { vm.tapFood(food) }) { Text(L("＋ Thêm vào bữa ${Meal.labels[vm.meal]?.lowercase()}", "＋ Add to ${Meal.labels[vm.meal]?.lowercase()}")) }
+                    OutlinedButton(onClick = { onEdit(food) }) { Text(L("✏️ Sửa rồi lưu", "✏️ Edit, then save")) }
                 }
             }
         }
@@ -362,11 +365,11 @@ private fun FoodTile(food: Food, count: Float, flagged: Int, onTap: () -> Unit, 
             FoodImage(food.emoji, food.imageUrl, 56.dp)
             Spacer(Modifier.height(6.dp))
             Text(
-                food.name, style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center,
+                food.label, style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center,
                 maxLines = 2, minLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 16.sp,
             )
             Text("${food.kcal} kcal", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-            Text(food.serving, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(food.servingLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         if (selected) {
             Box(
@@ -383,25 +386,25 @@ private fun MealLog(vm: AppViewModel, data: AppData, entries: List<LogEntry>) {
     var showOrder by rememberSaveable { mutableStateOf(false) }
     val totals = entries.totals()
     SectionCard(
-        title = "${Meal.emoji[vm.meal]} Bữa ${Meal.labels[vm.meal]?.lowercase()} · ${totals.kcal.roundToInt()} kcal",
-        trailing = { if (entries.size >= 2) TextButton(onClick = { showOrder = !showOrder }) { Text(if (showOrder) "Ẩn thứ tự" else "Thứ tự ăn") } },
+        title = L("${Meal.emoji[vm.meal]} Bữa ${Meal.labels[vm.meal]?.lowercase()} · ${totals.kcal.roundToInt()} kcal", "${Meal.emoji[vm.meal]} ${Meal.labels[vm.meal]} · ${totals.kcal.roundToInt()} kcal"),
+        trailing = { if (entries.size >= 2) TextButton(onClick = { showOrder = !showOrder }) { Text(if (showOrder) L("Ẩn thứ tự", "Hide order") else L("Thứ tự ăn", "Eating order")) } },
     ) {
         entries.forEach { e ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 FoodImage(e.emoji, e.imageUrl, 36.dp)
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(e.name, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
-                    Text("${e.totalKcal.roundToInt()} kcal · ${e.serving}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(e.label, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
+                    Text("${e.totalKcal.roundToInt()} kcal · ${e.servingLabel}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Nutrition.warnings(e.tags, data.profile).firstOrNull()?.let { WarningLine(it) }
                 }
-                FilledTonalIconButton(onClick = { vm.changeQty(e.id, -0.5f) }, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Remove, "Bớt nửa phần", Modifier.size(18.dp)) }
+                FilledTonalIconButton(onClick = { vm.changeQty(e.id, -0.5f) }, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Remove, L("Bớt nửa phần", "Half a serving less"), Modifier.size(18.dp)) }
                 Text(AppViewModel.fmtQty(e.qty), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.width(36.dp))
-                FilledTonalIconButton(onClick = { vm.changeQty(e.id, 0.5f) }, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Add, "Thêm nửa phần", Modifier.size(18.dp)) }
+                FilledTonalIconButton(onClick = { vm.changeQty(e.id, 0.5f) }, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Add, L("Thêm nửa phần", "Half a serving more"), Modifier.size(18.dp)) }
             }
         }
         Text(
-            "Đạm ${totals.protein.roundToInt()}g · Tinh bột ${totals.carbs.roundToInt()}g · Béo ${totals.fat.roundToInt()}g",
+            L("Đạm ${totals.protein.roundToInt()}g · Tinh bột ${totals.carbs.roundToInt()}g · Béo ${totals.fat.roundToInt()}g", "Protein ${totals.protein.roundToInt()}g · Carbs ${totals.carbs.roundToInt()}g · Fat ${totals.fat.roundToInt()}g"),
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (showOrder && entries.size >= 2) EatingOrder(entries, data)
@@ -414,7 +417,7 @@ fun EatingOrder(entries: List<LogEntry>, data: AppData) {
         Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.tertiaryContainer).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Text("🍽️ Nên ăn theo thứ tự", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onTertiaryContainer)
+        Text(L("🍽️ Nên ăn theo thứ tự", "🍽️ Best eaten in this order"), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onTertiaryContainer)
         Nutrition.eatingOrder(entries, data.profile).forEachIndexed { i, step ->
             Text("${i + 1}. ${step.emoji} ${step.name}", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onTertiaryContainer)
             Text(step.why, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.padding(start = 18.dp))
@@ -432,34 +435,34 @@ private fun FoodDetailDialog(food: Food, vm: AppViewModel, data: AppData, onDism
             Row(verticalAlignment = Alignment.CenterVertically) {
                 FoodImage(food.emoji, food.imageUrl, 48.dp)
                 Spacer(Modifier.width(12.dp))
-                Text(food.name, style = MaterialTheme.typography.titleMedium)
+                Text(food.label, style = MaterialTheme.typography.titleMedium)
             }
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("${food.kcal} kcal / ${food.serving}", fontWeight = FontWeight.SemiBold)
-                Text("Đạm ${food.protein.roundToInt()}g · Tinh bột ${food.carbs.roundToInt()}g · Béo ${food.fat.roundToInt()}g")
-                Text("Nhóm: ${Course.labels[food.course] ?: food.course}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("${food.kcal} kcal / ${food.servingLabel}", fontWeight = FontWeight.SemiBold)
+                Text(L("Đạm ${food.protein.roundToInt()}g · Tinh bột ${food.carbs.roundToInt()}g · Béo ${food.fat.roundToInt()}g", "Protein ${food.protein.roundToInt()}g · Carbs ${food.carbs.roundToInt()}g · Fat ${food.fat.roundToInt()}g"))
+                Text(L("Nhóm: ${Course.labels[food.course] ?: food.course}", "Group: ${Course.labels[food.course] ?: food.course}"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 val allergens = food.tags.mapNotNull { Tag.allergens[it] }
-                if (allergens.isNotEmpty()) Text("Chất gây dị ứng: ${allergens.joinToString()}", style = MaterialTheme.typography.bodySmall)
+                if (allergens.isNotEmpty()) Text(L("Chất gây dị ứng: ${allergens.joinToString()}", "Allergens: ${allergens.joinToString()}"), style = MaterialTheme.typography.bodySmall)
                 warnings.forEach { WarningLine(it) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(0.5f, 1f, 2f).forEach { q ->
                         FilledTonalButton(onClick = { vm.addFood(food, q, warnings); onDismiss() }, contentPadding = PaddingValues(horizontal = 12.dp)) {
-                            Text("+${AppViewModel.fmtQty(q)} phần")
+                            Text(L("+${AppViewModel.fmtQty(q)} phần", "+${AppViewModel.fmtQty(q)} serving"))
                         }
                     }
                 }
             }
         },
-        confirmButton = { Button(onClick = onEdit) { Text("✏️ Sửa thông tin") } },
+        confirmButton = { Button(onClick = onEdit) { Text(L("✏️ Sửa thông tin", "✏️ Edit")) } },
         dismissButton = {
             Row {
                 // Deleting an edited built-in food brings the original values back.
                 if (mine) TextButton(onClick = { vm.deleteCustomFood(food.id); onDismiss() }) {
-                    Text(if (vm.library.any { it.id == food.id }) "Khôi phục gốc" else "Xóa", color = Palette.Danger)
+                    Text(if (vm.library.any { it.id == food.id }) L("Khôi phục gốc", "Restore original") else L("Xóa", "Delete"), color = Palette.Danger)
                 }
-                TextButton(onClick = onDismiss) { Text("Đóng") }
+                TextButton(onClick = onDismiss) { Text(L("Đóng", "Close")) }
             }
         },
     )
@@ -489,35 +492,35 @@ private fun FoodEditDialog(vm: AppViewModel, initial: Food, onDismiss: () -> Uni
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Sửa thông tin món") },
+        title = { Text(L("Sửa thông tin món", "Edit food")) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(emoji, { emoji = it.take(4) }, label = { Text("Biểu tượng") }, singleLine = true, modifier = Modifier.width(96.dp))
-                    OutlinedTextField(name, { name = it }, label = { Text("Tên món") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(emoji, { emoji = it.take(4) }, label = { Text(L("Biểu tượng", "Icon")) }, singleLine = true, modifier = Modifier.width(96.dp))
+                    OutlinedTextField(name, { name = it }, label = { Text(L("Tên món", "Name")) }, singleLine = true, modifier = Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(serving, { serving = it }, label = { Text("Khẩu phần") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(serving, { serving = it }, label = { Text(L("Khẩu phần", "Serving")) }, singleLine = true, modifier = Modifier.weight(1f))
                     NumberField(kcal, { kcal = it }, "kcal", Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NumberField(protein, { protein = it; follow(it, carbs, fat) }, "Đạm g", Modifier.weight(1f))
-                    NumberField(carbs, { carbs = it; follow(protein, it, fat) }, "Bột g", Modifier.weight(1f))
-                    NumberField(fat, { fat = it; follow(protein, carbs, it) }, "Béo g", Modifier.weight(1f))
+                    NumberField(protein, { protein = it; follow(it, carbs, fat) }, L("Đạm g", "Protein g"), Modifier.weight(1f))
+                    NumberField(carbs, { carbs = it; follow(protein, it, fat) }, L("Bột g", "Carbs g"), Modifier.weight(1f))
+                    NumberField(fat, { fat = it; follow(protein, carbs, it) }, L("Béo g", "Fat g"), Modifier.weight(1f))
                 }
-                Text("Đổi đạm, bột, béo thì calo tự tính lại. Không rành số liệu? Dùng nút dưới đây.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(L("Đổi đạm, bột, béo thì calo tự tính lại. Không rành số liệu? Dùng nút dưới đây.", "Change protein, carbs or fat and the calories update. Not sure of the numbers? Use the button below."), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 FilledTonalButton(onClick = { ingredients = true }, enabled = name.isNotBlank() && vm.hasAi, modifier = Modifier.fillMaxWidth()) {
-                    Text("🧮 Tính theo thành phần (thịt, rau… bao nhiêu gam)")
+                    Text(L("🧮 Tính theo thành phần (thịt, rau… bao nhiêu gam)", "🧮 Work it out from ingredients (grams of meat, veg…)"))
                 }
-                Text("Nhóm món (để gợi ý thứ tự ăn)", style = MaterialTheme.typography.labelLarge)
+                Text(L("Nhóm món (để gợi ý thứ tự ăn)", "Group (for eating-order tips)"), style = MaterialTheme.typography.labelLarge)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Course.all.forEach { c -> FilterChip(course == c, { course = c }, label = { Text(Course.labels[c] ?: c) }) }
                 }
-                Text("Món này có chứa (để cảnh báo sức khỏe)", style = MaterialTheme.typography.labelLarge)
+                Text(L("Món này có chứa (để cảnh báo sức khỏe)", "This food contains (for health warnings)"), style = MaterialTheme.typography.labelLarge)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     val options = Tag.allergens.map { it.key to it.value.substringBefore(" (").substringBefore(" /") } + listOf(
-                        Tag.HIGH_SUGAR to "Nhiều đường", Tag.HIGH_SODIUM to "Nhiều muối", Tag.HIGH_CARB to "Nhiều tinh bột",
-                        Tag.FRIED to "Chiên rán", Tag.HIGH_PURINE to "Nhiều purin", Tag.MEAT to "Thịt", Tag.PORK to "Thịt heo", Tag.ALCOHOL to "Rượu bia",
+                        Tag.HIGH_SUGAR to L("Nhiều đường", "High sugar"), Tag.HIGH_SODIUM to L("Nhiều muối", "High salt"), Tag.HIGH_CARB to L("Nhiều tinh bột", "High carb"),
+                        Tag.FRIED to L("Chiên rán", "Fried"), Tag.HIGH_PURINE to L("Nhiều purin", "High purine"), Tag.MEAT to L("Thịt", "Meat"), Tag.PORK to L("Thịt heo", "Pork"), Tag.ALCOHOL to L("Rượu bia", "Alcohol"),
                     )
                     options.forEach { (tag, label) ->
                         FilterChip(tag in tags, { tags = if (tag in tags) tags - tag else tags + tag }, label = { Text(label) })
@@ -529,14 +532,14 @@ private fun FoodEditDialog(vm: AppViewModel, initial: Food, onDismiss: () -> Uni
             Button(enabled = valid, onClick = {
                 onSave(
                     initial.copy(
-                        name = name.trim(), emoji = emoji.ifBlank { "🍽️" }, serving = serving.ifBlank { "1 phần" },
+                        name = name.trim(), emoji = emoji.ifBlank { "🍽️" }, serving = serving.ifBlank { L("1 phần", "1 serving") },
                         kcal = kcal.toIntOrNull() ?: 0, protein = protein.toFloatOrNull() ?: 0f, carbs = carbs.toFloatOrNull() ?: 0f,
                         fat = fat.toFloatOrNull() ?: 0f, course = course, tags = tags, custom = true,
                     )
                 )
-            }) { Text("Lưu") }
+            }) { Text(L("Lưu", "Save")) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Hủy") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(L("Hủy", "Cancel")) } },
     )
     if (ingredients) {
         IngredientEditor(

@@ -1,5 +1,6 @@
 package com.calocare.app.net
 
+import com.calocare.app.L
 import android.util.Base64
 import com.calocare.app.data.Course
 import com.calocare.app.data.Food
@@ -92,7 +93,7 @@ class HostedClient(
                 history.forEach { add(buildJsonObject { put("role", if (it.fromUser) "user" else "assistant"); put("text", it.text) }) }
             }
         })
-        return result.jsonObject["text"]?.jsonPrimitive?.contentOrNull ?: throw AiException("AI không trả về nội dung. Hãy thử lại.")
+        return result.jsonObject["text"]?.jsonPrimitive?.contentOrNull ?: throw AiException(L("AI không trả về nội dung. Hãy thử lại.", "The AI returned nothing. Please try again."))
     }
 
     /**
@@ -115,7 +116,7 @@ class HostedClient(
         return try {
             json.decodeFromJsonElement<List<Ingredient>>(result.jsonObject["ingredients"] ?: return emptyList())
         } catch (e: SerializationException) {
-            throw AiException("Không đọc được kết quả AI. Hãy thử lại.")
+            throw AiException(L("Không đọc được kết quả AI. Hãy thử lại.", "Couldn't read the AI's answer. Please try again."))
         }
     }
 
@@ -144,14 +145,14 @@ class HostedClient(
     private fun analysis(result: JsonElement): MealAnalysis = try {
         json.decodeFromJsonElement<MealAnalysis>(result)
     } catch (e: SerializationException) {
-        throw AiException("Không đọc được kết quả AI. Hãy thử lại.")
+        throw AiException(L("Không đọc được kết quả AI. Hãy thử lại.", "Couldn't read the AI's answer. Please try again."))
     }
 
     private suspend fun post(path: String, body: JsonObject): JsonElement =
-        request(path, body)["result"] ?: throw AiException("AI không trả về nội dung. Hãy thử lại.")
+        request(path, body)["result"] ?: throw AiException(L("AI không trả về nội dung. Hãy thử lại.", "The AI returned nothing. Please try again."))
 
     private suspend fun request(path: String, body: JsonObject?): JsonObject = withContext(Dispatchers.IO) {
-        val builder = Request.Builder().url(baseUrl.trimEnd('/') + path).header("X-App-Key", appKey).header("X-Device", deviceId)
+        val builder = Request.Builder().url(baseUrl.trimEnd('/') + path).header("X-App-Key", appKey).header("X-Device", deviceId).header("X-Lang", com.calocare.app.Lang.code)
         if (body != null) builder.post(body.toString().toRequestBody("application/json".toMediaType()))
         try {
             http.newCall(builder.build()).execute().use { response ->
@@ -159,12 +160,12 @@ class HostedClient(
                 parsed?.get("quota")?.let { q -> runCatching { onQuota(json.decodeFromJsonElement<Quota>(q)) } }
                 if (!response.isSuccessful || parsed == null) {
                     // The server's messages are already written for the user (quota reached, busy, ...).
-                    throw AiException(parsed?.get("message")?.jsonPrimitive?.contentOrNull ?: "Máy chủ AI đang gặp sự cố (${response.code}). Hãy thử lại sau.")
+                    throw AiException(parsed?.get("message")?.jsonPrimitive?.contentOrNull ?: L("Máy chủ AI đang gặp sự cố (${response.code}). Hãy thử lại sau.", "The AI server has a problem (${response.code}). Please try again later."))
                 }
                 parsed
             }
         } catch (e: IOException) {
-            throw AiException("Không kết nối được tới máy chủ AI. Kiểm tra mạng.")
+            throw AiException(L("Không kết nối được tới máy chủ AI. Kiểm tra mạng.", "Couldn't reach the AI server. Check your connection."))
         }
     }
 }
