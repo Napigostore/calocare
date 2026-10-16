@@ -63,12 +63,13 @@ def main(version_string):
         # A group can only be reviewed with a display name in at least one language.
         names = call('GET', f'/v1/subscriptionGroups/{group["id"]}/subscriptionGroupLocalizations')['data']
         have = {n['attributes']['locale'] for n in names}
+        print(f'::notice title=TestFlight::Group {group["attributes"].get("referenceName")} names: ' + ', '.join(f'{n["attributes"]["locale"]}={n["attributes"].get("name")} ({n["attributes"].get("state")})' for n in names))
         for locale in ('en-US', 'vi'):
             if locale not in have:
-                call('POST', '/v1/subscriptionGroupLocalizations', {'data': {'type': 'subscriptionGroupLocalizations',
-                     'attributes': {'locale': locale, 'name': 'CaloCare Pro'},
-                     'relationships': {'subscriptionGroup': {'data': {'type': 'subscriptionGroups', 'id': group['id']}}}}})
-                print('group name added for', locale)
+                # 409 when the group is locked by a pending submission: its names are then already fixed.
+                call_ok('POST', '/v1/subscriptionGroupLocalizations', {'data': {'type': 'subscriptionGroupLocalizations',
+                        'attributes': {'locale': locale, 'name': 'CaloCare Pro'},
+                        'relationships': {'subscriptionGroup': {'data': {'type': 'subscriptionGroups', 'id': group['id']}}}}}, allow=(409,))
         result = call_ok('POST', '/v1/subscriptionGroupSubmissions',
                          {'data': {'type': 'subscriptionGroupSubmissions', 'relationships': {'subscriptionGroup': {'data': {'type': 'subscriptionGroups', 'id': group['id']}}}}},
                          allow=(409,))
