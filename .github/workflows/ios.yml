@@ -18,6 +18,8 @@ on:
     paths:
       - "ios/**"
       - ".github/workflows/ios.yml"
+      # The App Store Connect scripts the listing and submit jobs run.
+      - "tools/asc_*.py"
   workflow_dispatch:
     inputs:
       testflight:
