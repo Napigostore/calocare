@@ -94,7 +94,24 @@ def main(version_string):
              'relationships': {'appStoreVersion': {'data': {'type': 'appStoreVersions', 'id': version['id']}}}}})
     print('review details: no sign-in required, notes set')
 
-    # Subscriptions: the group and each subscription go in with the version.
+    # One review submission for the app, holding the version. A first subscription can only be submitted while
+    # its app version is already in a submission, so the version goes in first.
+    open_ones = call('GET', f'/v1/apps/{app_id}/reviewSubmissions?filter[platform]=IOS&filter[state]=READY_FOR_REVIEW,UNRESOLVED_ISSUES')['data']
+    if open_ones:
+        submission = open_ones[0]
+    else:
+        submission = call('POST', '/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
+                          'relationships': {'app': {'data': {'type': 'apps', 'id': app_id}}}}})['data']
+    items = call('GET', f'/v1/reviewSubmissions/{submission["id"]}/items?include=appStoreVersion')['data']
+    has_version = any((i.get('relationships', {}).get('appStoreVersion', {}).get('data') or {}).get('id') == version['id'] for i in items)
+    if not has_version:
+        call('POST', '/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {
+            'reviewSubmission': {'data': {'type': 'reviewSubmissions', 'id': submission['id']}},
+            'appStoreVersion': {'data': {'type': 'appStoreVersions', 'id': version['id']}}}}})
+    print('review submission', submission['id'], 'holds the version')
+
+
+    # Then the subscription group and its subscriptions, which join the submission that holds the version.
     for group in call('GET', f'/v1/apps/{app_id}/subscriptionGroups')['data']:
         subs = call('GET', f'/v1/subscriptionGroups/{group["id"]}/subscriptions')['data']
         for sub in subs:
@@ -118,21 +135,6 @@ def main(version_string):
                 call_ok('POST', '/v1/subscriptionSubmissions',
                         {'data': {'type': 'subscriptionSubmissions', 'relationships': {'subscription': {'data': {'type': 'subscriptions', 'id': sub['id']}}}}},
                         allow=(409,))
-
-    # One review submission for the app, holding the version; the subscriptions added above travel with it.
-    open_ones = call('GET', f'/v1/apps/{app_id}/reviewSubmissions?filter[platform]=IOS&filter[state]=READY_FOR_REVIEW,UNRESOLVED_ISSUES')['data']
-    if open_ones:
-        submission = open_ones[0]
-    else:
-        submission = call('POST', '/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
-                          'relationships': {'app': {'data': {'type': 'apps', 'id': app_id}}}}})['data']
-    items = call('GET', f'/v1/reviewSubmissions/{submission["id"]}/items?include=appStoreVersion')['data']
-    has_version = any((i.get('relationships', {}).get('appStoreVersion', {}).get('data') or {}).get('id') == version['id'] for i in items)
-    if not has_version:
-        call('POST', '/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {
-            'reviewSubmission': {'data': {'type': 'reviewSubmissions', 'id': submission['id']}},
-            'appStoreVersion': {'data': {'type': 'appStoreVersions', 'id': version['id']}}}}})
-    print('review submission', submission['id'], 'holds the version')
 
     call('PATCH', f'/v1/reviewSubmissions/{submission["id"]}', {'data': {'type': 'reviewSubmissions', 'id': submission['id'], 'attributes': {'submitted': True}}})
     print('::notice title=TestFlight::Submitted CaloCare ' + version_string + ' (build ' + build['attributes']['version'] + ') with CaloCare Pro for App Review.')
