@@ -75,7 +75,7 @@ final class ProStore: ObservableObject {
     func restore() async {
         busy = true
         defer { busy = false }
-        try? await AppStore.sync()
+        try? await StoreKit.AppStore.sync()
         await refresh()
         note = isPro ? L("Đã khôi phục CaloCare Pro.", "CaloCare Pro restored.") : L("Không tìm thấy gói Pro nào trên Apple ID này.", "No Pro subscription found for this Apple ID.")
     }
