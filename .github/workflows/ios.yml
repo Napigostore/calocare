@@ -41,8 +41,7 @@ jobs:
       - name: Use Xcode 26
         run: |
           X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
-          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | tr '
-' ' ')"; exit 1; fi
+          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | xargs)"; exit 1; fi
           sudo xcode-select -s "$X"
           xcodebuild -version
       - name: Install XcodeGen
@@ -117,8 +116,7 @@ jobs:
       - name: Use Xcode 26
         run: |
           X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
-          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | tr '
-' ' ')"; exit 1; fi
+          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | xargs)"; exit 1; fi
           sudo xcode-select -s "$X"
           xcodebuild -version
       - name: Install XcodeGen
@@ -202,8 +200,7 @@ jobs:
       - name: Use Xcode 26
         run: |
           X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
-          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | tr '
-' ' ')"; exit 1; fi
+          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | xargs)"; exit 1; fi
           sudo xcode-select -s "$X"
           xcodebuild -version
       - name: Install XcodeGen
