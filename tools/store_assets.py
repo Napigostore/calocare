@@ -149,3 +149,57 @@ def screenshots():
 
 
 print('screenshots:', screenshots())
+
+
+# App Store: captions by the screen name in the simulator shot (01-home.png …).
+IOS_CAPTIONS = {
+    'home': 'Biết ngay hôm nay\nnạp và tiêu bao nhiêu calo',
+    'food': 'Chạm một lần\nlà ghi xong món ăn',
+    'scan': 'Chụp ảnh bữa ăn,\nAI tính calo giúp bạn',
+    'coach': 'Coach dinh dưỡng\ngợi ý bữa tiếp theo',
+    'profile': 'Kết nối Apple Watch\nqua Apple Health',
+}
+
+
+def ios_screenshots():
+    """Frames the simulator shots in play-store/ios-raw/ as 1320x2868 App Store images (6.9" iPhone).
+
+    Download the shots first: python tools/store_assets.py fetches them from the "ios-screenshots" release.
+    """
+    import urllib.request
+    from PIL import ImageFont
+    raw = os.path.join(OUT, 'ios-raw')
+    os.makedirs(raw, exist_ok=True)
+    base = 'https://github.com/Napigostore/calocare/releases/download/ios-screenshots/'
+    for i, name in enumerate(IOS_CAPTIONS, 1):
+        target = os.path.join(raw, '%02d-%s.png' % (i, name))
+        try:
+            urllib.request.urlretrieve(base + os.path.basename(target), target)
+        except Exception:
+            pass
+    names = sorted(n for n in os.listdir(raw) if n.endswith('.png'))
+    if not names:
+        return 0
+    done = os.path.join(OUT, 'ios-screenshots')
+    os.makedirs(done, exist_ok=True)
+    font = ImageFont.truetype(os.path.join(os.environ.get('WINDIR', 'C:/Windows'), 'Fonts', 'segoeuib.ttf'), 84)
+    w, h = 1320, 2868
+    for name in names:
+        canvas = Image.new('RGB', (w, h))
+        d = ImageDraw.Draw(canvas)
+        a, b = (0x1F, 0x9D, 0x61), (0x7B, 0xC9, 0x6F)
+        for y in range(h):
+            d.line([(0, y), (w, y)], fill=tuple(round(a[i] + (b[i] - a[i]) * y / h) for i in range(3)))
+        shot = Image.open(os.path.join(raw, name)).convert('RGB')
+        k = min(1100 / shot.width, 2380 / shot.height)
+        shot = shot.resize((round(shot.width * k), round(shot.height * k)), Image.LANCZOS)
+        mask = Image.new('L', shot.size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle([0, 0, shot.width - 1, shot.height - 1], radius=90, fill=255)
+        canvas.paste(shot, ((w - shot.width) // 2, h - shot.height - 70), mask)
+        caption = IOS_CAPTIONS.get(name[3:-4], '')
+        d.multiline_text((w // 2, 215), caption, font=font, fill='white', anchor='mm', align='center', spacing=22)
+        canvas.save(os.path.join(done, name))
+    return len(names)
+
+
+print('ios screenshots:', ios_screenshots())

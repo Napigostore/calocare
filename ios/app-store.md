@@ -30,8 +30,11 @@ Gợi ý bữa tiếp theo dựa trên lượng calo còn lại, thực đơn th
 ● Chế độ sức khỏe
 Khai báo tiểu đường, cao huyết áp, gout, mỡ máu, dị ứng hoặc ăn chay, keto. App cảnh báo khi món ăn không phù hợp.
 
+● Kết nối Apple Watch và đồng hồ thông minh
+Đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng từ Apple Health (Apple Watch, Garmin, Mi Fitness, Zepp…), so calo nạp vào với calo tiêu hao mỗi ngày.
+
 ● Riêng tư
-Không cần tài khoản. Dữ liệu nằm trên điện thoại của bạn. Không quảng cáo.
+Không cần tài khoản. Dữ liệu nằm trên điện thoại của bạn, dữ liệu Apple Health không rời khỏi máy. Không quảng cáo.
 
 Lưu ý: CaloCare cung cấp ước tính và gợi ý tham khảo, không thay thế chẩn đoán hay chỉ định của bác sĩ.
 
@@ -54,7 +57,7 @@ https://calocare-api.calocare-api.workers.dev/privacy
 
 ## App Privacy (Data Collection)
 
-- Health & Fitness: có thu thập, dùng cho App Functionality, không liên kết danh tính, không dùng để theo dõi.
+- Health & Fitness: có thu thập (hồ sơ sức khỏe tự khai gửi kèm ảnh/câu hỏi AI; dữ liệu Apple Health KHÔNG gửi đi), dùng cho App Functionality, không liên kết danh tính, không dùng để theo dõi.
 - Photos: có thu thập (ảnh bữa ăn gửi tới AI, không lưu lại), App Functionality, không liên kết danh tính.
 - Identifiers → Device ID: có (mã băm identifierForVendor để đếm lượt AI), App Functionality, không liên kết danh tính.
 - User Content → Other: có (sửa tên món, món tự tạo), App Functionality, không liên kết danh tính.
