@@ -273,7 +273,8 @@ jobs:
             --metadata_path fastlane/metadata --screenshots_path fastlane/screenshots \
             --skip_binary_upload true --overwrite_screenshots true --force true --run_precheck_before_submit false \
             --submit_for_review false --automatic_release false > deliver.log 2>&1 || {
-            grep -iE "error|invalid|could not|forbidden|exception" deliver.log | grep -v "^$" | awk '!seen[$0]++' | head -30 > problems.txt
+            # The step fastlane was on when it stopped, and its message; the backtrace lines carry no information.
+            sed 's/\x1b\[[0-9;]*m//g' deliver.log | grep -vE "^\s*(/Users|from )|gems/" | grep -v "^\s*$" | tail -40 > problems.txt
             echo "::error title=TestFlight::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' problems.txt)"
             exit 1
           }
