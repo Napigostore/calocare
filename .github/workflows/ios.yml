@@ -20,79 +20,8 @@ on:
   workflow_dispatch:
     inputs:
       testflight:
-        description: Sign and upload to TestFlight
-        type: boolean
-        default: false
-
-jobs:
-  build:
-    runs-on: macos-15
-    # Publishing the .ipa as a release needs write access to the repository's releases.
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install XcodeGen
-        run: brew install xcodegen
-      - name: Backend config
-        env:
-          BACKEND_HOST: ${{ secrets.BACKEND_HOST }}
-          BACKEND_APP_KEY: ${{ secrets.BACKEND_APP_KEY }}
-        run: printf 'BACKEND_HOST = %s\nBACKEND_APP_KEY = %s\n' "$BACKEND_HOST" "$BACKEND_APP_KEY" > ios/Config/Backend.xcconfig
-      - name: Generate project
-        working-directory: ios
-        run: xcodegen generate
-      - name: Compile for the simulator
-        working-directory: ios
-        run: |
-          set -o pipefail
-          xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Debug \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO build > build.log 2>&1 || true
-          # Compiler errors, once each, as one annotation on the run so they can be read without opening the log.
-          grep -E "error:" build.log | sed "s#$GITHUB_WORKSPACE/##" | sort -u | head -80 > errors.txt || true
-          if [ -s errors.txt ]; then
-            cat errors.txt
-            echo "::error title=Swift errors::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' errors.txt)"
-          fi
-          grep -q "BUILD SUCCEEDED" build.log
-      # An unsigned .ipa for trying the app on one's own iPhone without the App Store: a sideloading
-      # tool (Sideloadly, AltStore) signs it with a free Apple ID and installs it over USB.
-      - name: Build the unsigned .ipa
-        if: github.ref == 'refs/heads/main'
-        working-directory: ios
-        run: |
-          xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Release \
-            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath device \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build > device.log 2>&1 || true
-          grep -E "error:" device.log | sed "s#$GITHUB_WORKSPACE/##" | sort -u | head -40 > device-errors.txt || true
-          if [ -s device-errors.txt ]; then
-            echo "::error title=Swift errors::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' device-errors.txt)"
-          fi
-          grep -q "BUILD SUCCEEDED" device.log
-          mkdir Payload
-          cp -R device/Build/Products/Release-iphoneos/CaloCare.app Payload/
-          zip -qry CaloCare-unsigned.ipa Payload
-          ls -la CaloCare-unsigned.ipa
-      - name: Publish the .ipa as the "ios-latest" release
-        if: github.ref == 'refs/heads/main'
-        working-directory: ios
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release delete ios-latest --yes --cleanup-tag || true
-          gh release create ios-latest CaloCare-unsigned.ipa --prerelease --target "$GITHUB_SHA" \
-            --title "CaloCare iOS – bản thử nghiệm mới nhất" \
-            --notes "File .ipa chưa ký, build từ commit $GITHUB_SHA. Cài lên iPhone bằng Sideloadly hoặc AltStore với Apple ID của bạn; bản cài bằng Apple ID miễn phí hết hạn sau 7 ngày."
-      - name: Keep the build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-build-log
-          path: ios/build.log
-
-  testflight:
-    if: ${{ inputs.testflight }}
+    # Run by hand with "testflight" ticked, or push a commit whose message contains [testflight].
+    if: ${{ inputs.testflight || contains(github.event.head_commit.message, '[testflight]') }}
     needs: build
     runs-on: macos-15
     steps:
@@ -115,15 +44,26 @@ jobs:
           ISSUER: ${{ secrets.ASC_ISSUER_ID }}
           KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
-          set -eo pipefail
+          # Problems are published as one annotation on the run, so they can be read without opening the log.
+          report() {
+            grep -iE "error|failed|invalid|denied|no profiles|no account|missing" "$1" | grep -viE "^\s*$|warning:" | sed "s#$GITHUB_WORKSPACE/##" | awk '!seen[$0]++' | head -40 > problems.txt || true
+            [ -s problems.txt ] && echo "::error title=TestFlight::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' problems.txt)"
+            exit 1
+          }
+          missing=""
+          for name in TEAM KEY_ID ISSUER KEY_P8; do [ -z "${!name}" ] && missing="$missing $name"; done
+          if [ -n "$missing" ]; then echo "::error title=TestFlight::Missing secrets:$missing (APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8)"; exit 1; fi
+
           KEY_PATH="$RUNNER_TEMP/AuthKey_$KEY_ID.p8"
-          printf '%s' "$KEY_P8" > "$KEY_PATH"
+          printf '%s\n' "$KEY_P8" > "$KEY_PATH"
           AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER")
           # Each upload needs a build number higher than the last; the run number provides one.
           xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/CaloCare.xcarchive" \
             DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            "${AUTH[@]}" archive | tail -n 40
+            "${AUTH[@]}" archive > archive.log 2>&1 || report archive.log
+          grep -q "ARCHIVE SUCCEEDED" archive.log || report archive.log
+
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -135,4 +75,14 @@ jobs:
           </dict></plist>
           EOF
           xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/CaloCare.xcarchive" \
-            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" "${AUTH[@]}" | tail -n 40
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" "${AUTH[@]}" > export.log 2>&1 || report export.log
+          grep -qE "EXPORT SUCCEEDED|Upload succeeded|Uploaded" export.log || report export.log
+          echo "::notice title=TestFlight::Build ${{ github.run_number }} uploaded. Apple usually needs 10-30 minutes to process it before it appears in TestFlight."
+      - name: Keep the signing logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testflight-logs
+          path: |
+            ios/archive.log
+            ios/export.log
