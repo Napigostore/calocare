@@ -405,6 +405,18 @@ struct IngredientEditor: View {
     @State private var extra = ""
     @State private var adding = false
 
+    /// "Total: 520 kcal · 450g · Protein 30g · Carbs 60g · Fat 15g", built in steps the type checker handles quickly.
+    private func totalsLine(_ kcal: Int) -> String {
+        let grams: Int = rows.reduce(0) { $0 + $1.grams }
+        let protein = Int(rows.reduce(0.0) { $0 + $1.protein })
+        let carbs = Int(rows.reduce(0.0) { $0 + $1.carbs })
+        let fat = Int(rows.reduce(0.0) { $0 + $1.fat })
+        let parts: [String] = [
+            "\(L("Tổng", "Total")): \(kcal) kcal", "\(grams)g", "\(L("Đạm", "Protein")) \(protein)g", "\(L("Bột", "Carbs")) \(carbs)g", "\(L("Béo", "Fat")) \(fat)g",
+        ]
+        return parts.joined(separator: " · ")
+    }
+
     var body: some View {
         let kcal = Int(rows.reduce(0) { $0 + $1.kcal }.rounded())
         NavigationStack {
@@ -427,8 +439,7 @@ struct IngredientEditor: View {
                     Text(L("Chỉnh số gam cho giống phần bạn ăn. Vuốt trái để bỏ một thành phần.", "Adjust the grams to match your portion. Swipe left to remove an ingredient."))
                 } footer: {
                     if !rows.isEmpty {
-                        Text(L("Tổng", "Total") + ": \(kcal) kcal · \(rows.reduce(0) { $0 + $1.grams })g · " + L("Đạm", "Protein") + " \(Int(rows.reduce(0) { $0 + $1.protein }))g · "
-                             + L("Bột", "Carbs") + " \(Int(rows.reduce(0) { $0 + $1.carbs }))g · " + L("Béo", "Fat") + " \(Int(rows.reduce(0) { $0 + $1.fat }))g")
+                        Text(totalsLine(kcal))
                     }
                 }
                 Section(L("Thêm thành phần", "Add ingredient")) {

@@ -62,3 +62,55 @@ https://calocare-api.calocare-api.workers.dev/privacy
 - Identifiers → Device ID: có (mã băm identifierForVendor để đếm lượt AI), App Functionality, không liên kết danh tính.
 - User Content → Other: có (sửa tên món, món tự tạo), App Functionality, không liên kết danh tính.
 - Không dùng dữ liệu để theo dõi (Tracking: No).
+
+---
+
+# English (U.S.) localisation
+
+App Store Connect → CaloCare → App Information → **Localizable Information**: pick **English (U.S.)** in the language menu (top right) → Add, then fill the version page in English too. Add English (U.K.), English (Australia) and English (Canada) the same way; the text can be identical.
+
+**Name (≤30)**
+CaloCare: Calorie Counter & AI
+
+**Subtitle (≤30)**
+Snap a meal, get the calories
+
+**Promotional Text (≤170)**
+Snap a photo of your meal and AI counts the calories in seconds. A personal nutrition coach suggests your next meal for weight loss, muscle or running.
+
+**Keywords (≤100)**
+calorie counter,food diary,diet,weight loss,macro,nutrition,meal planner,fitness,keto,protein,ai
+
+**Description**
+
+CaloCare shows how much you eat, how much you burn and what to eat next — without typing every meal.
+
+● Log a meal in one tap
+Over 240 everyday foods and drinks: eggs, oatmeal, salads, burgers, pizza, pasta, sushi, ramen, curries, lattes, smoothies… plus Vietnamese favourites like phở and bánh mì. Tap once to add a serving, create your own foods, and the app suggests the foods you eat most.
+
+● Snap your meal
+Fit the plate inside the circle and the AI identifies each item, estimating calories, protein, carbs, fat, fibre, sugar and sodium. Adjust the size or amount before saving, or rebuild a dish from its ingredients in grams.
+
+● A coach that knows you
+Ask what to eat tonight, get a menu for tomorrow or a review of your week. Suggestions follow your calories left and your goal: lose weight, maintain, gain, build muscle or run.
+
+● Health mode
+Tell the app about diabetes, high blood pressure, gout, high cholesterol, food allergies or a vegetarian, vegan, keto or halal diet. It warns you about foods that don't suit you.
+
+● Apple Watch and smartwatches
+Reads active calories, steps, exercise minutes, sleep and weight from Apple Health (Apple Watch, Garmin, Fitbit, Mi Fitness, Zepp…) and compares calories in with calories out every day.
+
+● Private
+No account needed. Your data stays on your iPhone, and Apple Health data never leaves it. No ads.
+
+Note: CaloCare provides estimates and general suggestions. It is not a substitute for medical diagnosis or your doctor's advice.
+
+**Support URL / Privacy Policy URL (English)**
+https://calocare-api.calocare-api.workers.dev/privacy?lang=en
+
+**What's New**
+English edition: the app now speaks English, with over 90 new international foods and drinks and an English-speaking AI coach.
+
+**Screenshots:** the en-01 … en-05 files in `play-store/ios-screenshots/` (1320×2868).
+
+**Availability:** Pricing and Availability → Countries or Regions → select all, or start with the United States, United Kingdom, Canada, Australia, Singapore and Vietnam.
