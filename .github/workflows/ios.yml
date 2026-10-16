@@ -273,22 +273,19 @@ jobs:
           python3 -c 'import json, os; json.dump({"key_id": os.environ["KEY_ID"], "issuer_id": os.environ["ISSUER"], "key": os.environ["KEY_P8"], "in_house": False}, open(os.environ["RUNNER_TEMP"] + "/asc.json", "w"))'
           gem install fastlane --no-document --user-install > /dev/null
           export PATH="$(ruby -e 'print Gem.user_dir')/bin:$PATH"
-          fastlane deliver --api_key_path "$RUNNER_TEMP/asc.json" --app_identifier com.calocare.app --platform ios \
+          # SPACESHIP_DEBUG prints the App Store Connect requests and answers, so a failure shows Apple's own message.
+          # The log then holds an access token: it is filtered below and never kept as an artifact.
+          SPACESHIP_DEBUG=1 fastlane deliver --api_key_path "$RUNNER_TEMP/asc.json" --app_identifier com.calocare.app --platform ios \
             --app_version "$(grep -E 'MARKETING_VERSION' project.yml | grep -oE '[0-9][0-9.]*')" \
             --metadata_path fastlane/metadata --screenshots_path fastlane/screenshots \
             --skip_binary_upload true --overwrite_screenshots true --force true --run_precheck_before_submit false \
             --submit_for_review false --automatic_release false > deliver.log 2>&1 || {
             # The step fastlane was on when it stopped, and its message; the backtrace lines carry no information.
-            sed 's/\x1b\[[0-9;]*m//g' deliver.log | grep -vE "^\s*(/Users|from )|gems/" | grep -v "^\s*$" | tail -40 > problems.txt
+            sed 's/\x1b\[[0-9;]*m//g' deliver.log | grep -viE "authorization|bearer" > clean.log
+            { grep -E '"(detail|title|code|status)"' clean.log | tail -12 | cut -c1-700; grep -vE "^\s*(/Users|from )|gems/|^[A-Z]|^\s*$" clean.log | grep -E "^\[" | tail -8; } > problems.txt
             echo "::error title=TestFlight::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' problems.txt)"
             exit 1
           }
           tail -5 deliver.log
           echo "::notice title=TestFlight::App Store listing and screenshots uploaded for vi and en-US."
-      - name: Keep the deliver log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: listing-log
-          path: ios/deliver.log
 
