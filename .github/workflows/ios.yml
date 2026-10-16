@@ -20,6 +20,78 @@ on:
   workflow_dispatch:
     inputs:
       testflight:
+        description: Sign and upload to TestFlight
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: macos-15
+    # Publishing the .ipa as a release needs write access to the repository's releases.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Backend config
+        env:
+          BACKEND_HOST: ${{ secrets.BACKEND_HOST }}
+          BACKEND_APP_KEY: ${{ secrets.BACKEND_APP_KEY }}
+        run: printf 'BACKEND_HOST = %s\nBACKEND_APP_KEY = %s\n' "$BACKEND_HOST" "$BACKEND_APP_KEY" > ios/Config/Backend.xcconfig
+      - name: Generate project
+        working-directory: ios
+        run: xcodegen generate
+      - name: Compile for the simulator
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build > build.log 2>&1 || true
+          # Compiler errors, once each, as one annotation on the run so they can be read without opening the log.
+          grep -E "error:" build.log | sed "s#$GITHUB_WORKSPACE/##" | sort -u | head -80 > errors.txt || true
+          if [ -s errors.txt ]; then
+            cat errors.txt
+            echo "::error title=Swift errors::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' errors.txt)"
+          fi
+          grep -q "BUILD SUCCEEDED" build.log
+      # An unsigned .ipa for trying the app on one's own iPhone without the App Store: a sideloading
+      # tool (Sideloadly, AltStore) signs it with a free Apple ID and installs it over USB.
+      - name: Build the unsigned .ipa
+        if: github.ref == 'refs/heads/main'
+        working-directory: ios
+        run: |
+          xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath device \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build > device.log 2>&1 || true
+          grep -E "error:" device.log | sed "s#$GITHUB_WORKSPACE/##" | sort -u | head -40 > device-errors.txt || true
+          if [ -s device-errors.txt ]; then
+            echo "::error title=Swift errors::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' device-errors.txt)"
+          fi
+          grep -q "BUILD SUCCEEDED" device.log
+          mkdir Payload
+          cp -R device/Build/Products/Release-iphoneos/CaloCare.app Payload/
+          zip -qry CaloCare-unsigned.ipa Payload
+          ls -la CaloCare-unsigned.ipa
+      - name: Publish the .ipa as the "ios-latest" release
+        if: github.ref == 'refs/heads/main'
+        working-directory: ios
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete ios-latest --yes --cleanup-tag || true
+          gh release create ios-latest CaloCare-unsigned.ipa --prerelease --target "$GITHUB_SHA" \
+            --title "CaloCare iOS – bản thử nghiệm mới nhất" \
+            --notes "File .ipa chưa ký, build từ commit $GITHUB_SHA. Cài lên iPhone bằng Sideloadly hoặc AltStore với Apple ID của bạn; bản cài bằng Apple ID miễn phí hết hạn sau 7 ngày."
+      - name: Keep the build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-log
+          path: ios/build.log
+
+  testflight:
     # Run by hand with "testflight" ticked, or push a commit whose message contains [testflight].
     if: ${{ inputs.testflight || contains(github.event.head_commit.message, '[testflight]') }}
     needs: build
