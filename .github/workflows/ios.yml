@@ -37,6 +37,14 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      # App Store Connect only accepts builds made with the iOS 26 SDK (Xcode 26) or later.
+      - name: Use Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | tr '
+' ' ')"; exit 1; fi
+          sudo xcode-select -s "$X"
+          xcodebuild -version
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Backend config
@@ -105,6 +113,14 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      # App Store Connect only accepts builds made with the iOS 26 SDK (Xcode 26) or later.
+      - name: Use Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | tr '
+' ' ')"; exit 1; fi
+          sudo xcode-select -s "$X"
+          xcodebuild -version
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Backend config
@@ -182,6 +198,14 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      # App Store Connect only accepts builds made with the iOS 26 SDK (Xcode 26) or later.
+      - name: Use Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | tr '
+' ' ')"; exit 1; fi
+          sudo xcode-select -s "$X"
+          xcodebuild -version
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate project

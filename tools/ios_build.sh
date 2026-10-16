@@ -16,5 +16,5 @@ for j in json.load(sys.stdin).get('jobs',[]):
     print(j['name'], '->', j['conclusion'], '; failed steps:', [s['name'] for s in j['steps'] if s['conclusion'] == 'failure'])
     notes = json.load(urllib.request.urlopen('https://api.github.com/repos/$REPO/check-runs/%d/annotations' % j['id']))
     for n in notes:
-        if n.get('title') in ('Swift errors', 'TestFlight'): print('[' + n['title'] + ']', n['message'])
+        if n.get('title') in ('Swift errors', 'TestFlight', 'Xcode'): print('[' + n['title'] + ']', n['message'])
 "
