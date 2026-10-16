@@ -32,6 +32,10 @@ on:
         description: Upload the App Store listing (texts and screenshots in ios/fastlane)
         type: boolean
         default: false
+      submit:
+        description: Submit the prepared version and its subscriptions for App Review
+        type: boolean
+        default: false
 
 # One run at a time: two runs finishing out of order would publish the older screenshots last.
 concurrency:
@@ -272,4 +276,20 @@ jobs:
           python3 -m pip install --quiet --break-system-packages pyjwt cryptography
           python3 tools/asc_listing.py "$(grep -E 'MARKETING_VERSION' ios/project.yml | grep -oE '[0-9][0-9.]*')"
           echo "::notice title=TestFlight::App Store listing and screenshots uploaded for vi and en-US."
+
+  submit:
+    # Submits the version being prepared, with the newest processed build and the CaloCare Pro subscriptions,
+    # for App Review (tools/asc_submit.py). Run by hand with "submit" ticked, or a commit message with [submit].
+    if: ${{ inputs.submit || contains(github.event.head_commit.message, '[submit]') }}
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Submit for App Review
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography
+          python3 tools/asc_submit.py "$(grep -E 'MARKETING_VERSION' ios/project.yml | grep -oE '[0-9][0-9.]*')"
 
