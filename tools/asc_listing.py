@@ -131,4 +131,11 @@ def main(version_string):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    try:
+        main(sys.argv[1])
+    except SystemExit:
+        raise
+    except Exception:
+        # Anything unexpected becomes a run annotation, readable without opening the log.
+        import traceback
+        fail(traceback.format_exc()[-1500:])
