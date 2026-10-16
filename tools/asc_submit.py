@@ -22,7 +22,8 @@ def call_ok(method, path, body=None, allow=()):
     except urllib.error.HTTPError as e:
         text = asc.describe(e)
         if e.code in allow:
-            print(f'  ({method} {path.split("?")[0]}: {e.code} {text}; continuing)')
+            # Shown as a run annotation: a conflict here can explain a later refusal.
+            print(f'::warning title=TestFlight::{method} {path.split("?")[0]}: {e.code} ' + text.replace('\n', '%0A'))
             return None
         fail(f'{method} {path.split("?")[0]} -> {e.code} {text}')
 
@@ -59,9 +60,19 @@ def main(version_string):
         subs = call('GET', f'/v1/subscriptionGroups/{group["id"]}/subscriptions')['data']
         for sub in subs:
             print('subscription', sub['attributes']['productId'], sub['attributes'].get('state'))
-        call_ok('POST', '/v1/subscriptionGroupSubmissions',
-                {'data': {'type': 'subscriptionGroupSubmissions', 'relationships': {'subscriptionGroup': {'data': {'type': 'subscriptionGroups', 'id': group['id']}}}}},
-                allow=(409,))
+        # A group can only be reviewed with a display name in at least one language.
+        names = call('GET', f'/v1/subscriptionGroups/{group["id"]}/subscriptionGroupLocalizations')['data']
+        have = {n['attributes']['locale'] for n in names}
+        for locale in ('en-US', 'vi'):
+            if locale not in have:
+                call('POST', '/v1/subscriptionGroupLocalizations', {'data': {'type': 'subscriptionGroupLocalizations',
+                     'attributes': {'locale': locale, 'name': 'CaloCare Pro'},
+                     'relationships': {'subscriptionGroup': {'data': {'type': 'subscriptionGroups', 'id': group['id']}}}}})
+                print('group name added for', locale)
+        result = call_ok('POST', '/v1/subscriptionGroupSubmissions',
+                         {'data': {'type': 'subscriptionGroupSubmissions', 'relationships': {'subscriptionGroup': {'data': {'type': 'subscriptionGroups', 'id': group['id']}}}}},
+                         allow=(409,))
+        print('subscription group', group['attributes'].get('referenceName'), 'added' if result is not None else 'already added')
         for sub in subs:
             if sub['attributes'].get('state') in ('READY_TO_SUBMIT', 'DEVELOPER_ACTION_NEEDED', 'REJECTED'):
                 call_ok('POST', '/v1/subscriptionSubmissions',
