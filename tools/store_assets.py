@@ -56,7 +56,7 @@ def privacy():
 <style>body{font:16px/1.6 system-ui,sans-serif;max-width:720px;margin:0 auto;padding:24px 16px;color:#1b1f1c}
 h1{color:#1f9d61}h2{font-size:1.1rem;margin-top:1.6em}</style></head><body>
 <h1>CaloCare – Chính sách quyền riêng tư</h1>
-<p>Cập nhật: 13/10/2026</p>
+<p>Cập nhật: 16/10/2026</p>
 %s
 <h2>Liên hệ</h2><p>%s</p>
 </body></html>

@@ -9,6 +9,7 @@ struct HomeView: View {
         let eaten = store.totals(entries)
         let target = Double(Nutrition.targetKcal(profile))
         let macros = Nutrition.macroTargets(profile)
+        let out = Nutrition.kcalOut(profile, store.activity)
 
         NavigationStack {
             ScrollView {
@@ -21,10 +22,12 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 10) {
                                 Stat(label: "Nạp vào", value: Int(eaten.kcal), color: Palette.green)
                                 Stat(label: "Mục tiêu", value: Int(target), color: .secondary)
-                                Stat(label: "Trao đổi chất cơ bản", value: Int(Nutrition.bmr(profile)), color: Palette.orange)
+                                Stat(label: out.measured ? "Tiêu hao (đồng hồ)" : "Tiêu hao ước tính", value: out.total, color: Palette.orange)
                             }
                         }
                     }
+
+                    ActivityCard(eaten: eaten.kcal, out: out)
 
                     Card("Dinh dưỡng đa lượng") {
                         MacroBar(label: "Đạm", value: eaten.protein, target: macros.protein, color: Palette.protein)
@@ -44,8 +47,56 @@ struct HomeView: View {
                 .padding(16)
             }
             .background(Color(.systemGroupedBackground))
+            .refreshable { await store.refreshHealth() }
+            .task(id: dayKey(store.date)) { await store.refreshHealth() }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                Task { await store.refreshHealth() }
+            }
             .navigationTitle(profile.name.isEmpty ? "Xin chào 👋" : "Xin chào, \(profile.name) 👋")
         }
+    }
+}
+
+/// Calories in against calories out, and what the watch recorded; offers to link Apple Health when it is not.
+private struct ActivityCard: View {
+    @EnvironmentObject var store: AppStore
+    var eaten: Double
+    var out: (total: Int, active: Int, measured: Bool)
+
+    var body: some View {
+        if store.healthLinked {
+            let a = store.activity ?? DayActivity()
+            let balance = Int(eaten.rounded()) - out.total
+            Card("⌚ Vận động hôm nay") {
+                HStack(spacing: 0) {
+                    tile("🔥", "\(Int(a.activeKcal))", "kcal vận động")
+                    tile("👟", a.steps.formatted(), "bước")
+                    tile("⏱️", "\(a.exerciseMinutes)", "phút tập")
+                    tile("😴", a.sleepHours.map { String(format: "%.1f", $0) } ?? "–", "giờ ngủ")
+                }
+                Text(balance <= 0 ? "Cân bằng: thâm hụt \(-balance) kcal so với tiêu hao" : "Cân bằng: dư \(balance) kcal so với tiêu hao")
+                    .font(.subheadline.weight(.medium)).foregroundColor(balance <= 0 ? Palette.green : Palette.orange)
+                if let sleep = a.sleepHours, sleep < 6 {
+                    Text("Ngủ chưa đủ 6 tiếng: dễ thèm ngọt hơn. Ưu tiên đạm và rau, tập nhẹ hôm nay.").font(.caption).foregroundColor(.secondary)
+                }
+            }
+        } else {
+            Card("⌚ Kết nối đồng hồ") {
+                Text("Đọc calo vận động, bước chân, giấc ngủ và cân nặng từ Apple Health. Apple Watch ghi trực tiếp; Garmin, Mi Fitness, Zepp, Huawei Health… đồng bộ vào Apple Health từ cài đặt của app đồng hồ.")
+                    .font(.caption).foregroundColor(.secondary)
+                Button { Task { await store.linkHealth() } } label: { Label("Kết nối Apple Health", systemImage: "heart.fill") }
+                    .buttonStyle(.borderedProminent)
+            }
+        }
+    }
+
+    private func tile(_ icon: String, _ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(icon)
+            Text(value).font(.headline)
+            Text(label).font(.caption2).foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

@@ -24,6 +24,10 @@ on:
         description: Sign and upload to TestFlight
         type: boolean
         default: false
+      screenshots:
+        description: Take App Store screenshots on the 6.9" iPhone simulator
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -73,6 +77,8 @@ jobs:
           grep -q "BUILD SUCCEEDED" device.log
           mkdir Payload
           cp -R device/Build/Products/Release-iphoneos/CaloCare.app Payload/
+          # Ad-hoc signature carrying the entitlements (Apple Health), so the sideloading tool keeps them when it re-signs.
+          codesign -f -s - --entitlements CaloCare/CaloCare.entitlements Payload/CaloCare.app
           zip -qry CaloCare-unsigned.ipa Payload
           ls -la CaloCare-unsigned.ipa
       - name: Publish the .ipa as the "ios-latest" release
@@ -140,6 +146,9 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             archive > archive.log 2>&1 || report archive.log
           grep -q "ARCHIVE SUCCEEDED" archive.log || report archive.log
+          # An unsigned app carries no entitlements, and the export signs with the ones it finds in the app:
+          # an ad-hoc signature with them keeps Apple Health in the uploaded build.
+          codesign -f -s - --entitlements CaloCare/CaloCare.entitlements "$RUNNER_TEMP/CaloCare.xcarchive/Products/Applications/CaloCare.app"
 
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -163,3 +172,50 @@ jobs:
           path: |
             ios/archive.log
             ios/export.log
+
+  screenshots:
+    # Run by hand with "screenshots" ticked, or push a commit whose message contains [screenshots].
+    if: ${{ inputs.screenshots || contains(github.event.head_commit.message, '[screenshots]') }}
+    needs: build
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        working-directory: ios
+        run: |
+          cp Config/Backend.xcconfig.example Config/Backend.xcconfig
+          xcodegen generate
+      - name: Take the screenshots
+        working-directory: ios
+        run: |
+          # The largest iPhone the runner has: a 6.9" model gives the 1320x2868 screenshots App Store Connect asks for.
+          DEVICE=$(xcrun simctl list devices available | grep -E "iPhone 1[6-9] Pro Max" | tail -1 | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')
+          echo "Simulator: $(xcrun simctl list devices available | grep "$DEVICE")"
+          xcrun simctl boot "$DEVICE"
+          xcrun simctl spawn "$DEVICE" defaults write -g AppleLanguages -array vi
+          xcrun simctl spawn "$DEVICE" defaults write -g AppleLocale vi_VN
+          xcrun simctl shutdown "$DEVICE" && xcrun simctl boot "$DEVICE"
+          xcrun simctl status_bar "$DEVICE" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcodebuild -project CaloCare.xcodeproj -scheme CaloCare -configuration Debug -sdk iphonesimulator             -destination "id=$DEVICE" -derivedDataPath sim CODE_SIGNING_ALLOWED=NO build > sim.log 2>&1 || { tail -40 sim.log; exit 1; }
+          xcrun simctl install "$DEVICE" sim/Build/Products/Debug-iphonesimulator/CaloCare.app
+          mkdir -p shots
+          n=1
+          for screen in home food scan coach profile; do
+            xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
+            xcrun simctl launch "$DEVICE" com.calocare.app -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg"
+            sleep 6
+            xcrun simctl io "$DEVICE" screenshot "shots/0$n-$screen.png"
+            n=$((n+1))
+          done
+          ls -la shots
+      - name: Publish as the "ios-screenshots" release
+        working-directory: ios
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete ios-screenshots --yes --cleanup-tag || true
+          gh release create ios-screenshots shots/*.png --prerelease --target "$GITHUB_SHA"             --title "CaloCare iOS – ảnh chụp màn hình" --notes "Chụp trên máy ảo iPhone 6.9\" từ commit $GITHUB_SHA, dữ liệu mẫu."

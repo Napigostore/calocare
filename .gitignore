@@ -30,3 +30,4 @@ play-store/*.aab
 play-store/raw-screenshots/
 play-store/screenshots/
 play-store/*.apk
+ios/CaloCare/CaloCare.entitlements

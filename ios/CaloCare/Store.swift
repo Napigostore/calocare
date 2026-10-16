@@ -10,6 +10,10 @@ final class AppStore: ObservableObject {
     @Published var meal = Meal.forHour(Calendar.current.component(.hour, from: Date()))
     /// One-line message shown briefly at the bottom of the screen.
     @Published var toast: String?
+    /// Apple Health is linked; kept outside AppData so older saved files still load.
+    @Published var healthLinked = UserDefaults.standard.bool(forKey: "healthLinked")
+    /// Activity for the selected day, from Apple Health.
+    @Published var activity: DayActivity?
 
     private var libraryVersion: Int
     private let folder: URL
@@ -23,6 +27,16 @@ final class AppStore: ObservableObject {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         folder = dir
+        if Demo.active {
+            data = Demo.data
+            library = Bundle.main.url(forResource: "seed", withExtension: "json").flatMap { try? Data(contentsOf: $0) }
+                .flatMap { try? JSONDecoder().decode([Food].self, from: $0) } ?? []
+            libraryVersion = Int.max
+            healthLinked = true
+            activity = Demo.activity
+            meal = "breakfast"
+            return
+        }
         data = (try? JSONDecoder().decode(AppData.self, from: Data(contentsOf: dir.appendingPathComponent("calocare.json")))) ?? AppData()
         if let cache = try? JSONDecoder().decode(LibraryCache.self, from: Data(contentsOf: dir.appendingPathComponent("library.json"))), !cache.foods.isEmpty {
             library = cache.foods
@@ -36,6 +50,7 @@ final class AppStore: ObservableObject {
     }
 
     private func save() {
+        guard !Demo.active else { return }
         if let encoded = try? JSONEncoder().encode(data) {
             try? encoded.write(to: folder.appendingPathComponent("calocare.json"), options: .atomic)
         }
@@ -64,6 +79,7 @@ final class AppStore: ObservableObject {
 
     /// Picks up dishes added or corrected in the library since the last sync; no app update needed.
     func syncLibrary() async {
+        guard !Demo.active else { return }
         guard let update = await API.shared.library(since: libraryVersion), update.version > libraryVersion else { return }
         var merged = libraryVersion == 0 ? [] : library
         for dish in update.dishes {
@@ -76,6 +92,34 @@ final class AppStore: ObservableObject {
         if let encoded = try? JSONEncoder().encode(LibraryCache(version: update.version, foods: merged)) {
             try? encoded.write(to: folder.appendingPathComponent("library.json"), options: .atomic)
         }
+    }
+
+    // MARK: Apple Health
+
+    func linkHealth() async {
+        guard HealthService.shared.available else { say("Thiết bị này không có Apple Health"); return }
+        guard await HealthService.shared.requestAccess() else { say("Chưa kết nối được Apple Health"); return }
+        healthLinked = true
+        UserDefaults.standard.set(true, forKey: "healthLinked")
+        await refreshHealth()
+        say("Đã kết nối Apple Health")
+    }
+
+    func unlinkHealth() {
+        healthLinked = false
+        activity = nil
+        UserDefaults.standard.set(false, forKey: "healthLinked")
+    }
+
+    /// Reads the selected day's activity, and takes a newer weight or height from Health into the profile.
+    func refreshHealth() async {
+        guard healthLinked, !Demo.active else { return }
+        activity = await HealthService.shared.activity(on: date)
+        let body = await HealthService.shared.latestBody()
+        var profile = data.profile
+        if let kg = body.weightKg, (25...300).contains(kg) { profile.weightKg = (kg * 10).rounded() / 10 }
+        if let cm = body.heightCm, (100...230).contains(cm) { profile.heightCm = cm.rounded() }
+        if profile != data.profile { update { $0.profile = profile } }
     }
 
     // MARK: Diary

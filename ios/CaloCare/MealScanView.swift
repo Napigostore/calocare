@@ -42,6 +42,15 @@ final class MealScan: ObservableObject, Identifiable {
     func run(store: AppStore) async {
         guard !started else { return }
         started = true
+        if Demo.active, let analysis = Demo.analysis {
+            dishes = analysis.items.map { MealScan.ground($0, foods: store.foods) }
+            title = analysis.title ?? ""
+            score = analysis.score ?? -1
+            pros = analysis.pros ?? []
+            cons = analysis.cons ?? []
+            loading = false
+            return
+        }
         guard let jpeg = image.jpegData(compressionQuality: 0.8) else { error = "Không xử lý được ảnh."; loading = false; return }
         do {
             let analysis = try await API.shared.analyzePhoto(jpeg: jpeg, context: store.photoContext)

@@ -24,6 +24,17 @@ enum Nutrition {
 
     static func tdee(_ p: Profile) -> Double { bmr(p) * p.activity }
 
+    /// Energy out for a day, as on Android: BMR plus the watch's active energy, or plus a light
+    /// daily-living allowance (20% of BMR) when there is no watch data.
+    static func kcalOut(_ p: Profile, _ activity: DayActivity?) -> (total: Int, active: Int, measured: Bool) {
+        let base = bmr(p)
+        let active: Double
+        if let a = activity, a.activeKcal > 0 { active = a.activeKcal }
+        else if let a = activity, a.steps > 0 { active = Double(a.steps) * 0.04 * p.weightKg / 70 }
+        else { return (Int((base * 1.2).rounded()), Int((base * 0.2).rounded()), false) }
+        return (Int((base + active).rounded()), Int(active.rounded()), true)
+    }
+
     static func bmi(_ p: Profile) -> Double {
         let h = p.heightCm / 100
         return h > 0 ? p.weightKg / (h * h) : 0

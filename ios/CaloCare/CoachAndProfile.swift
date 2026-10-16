@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CoachView: View {
     @EnvironmentObject var store: AppStore
-    @State private var turns: [(fromUser: Bool, text: String)] = []
+    @State private var turns: [(fromUser: Bool, text: String)] = Demo.coachTurns
     @State private var input = ""
     @State private var busy = false
 
@@ -84,6 +84,18 @@ struct ProfileView: View {
                 Section {
                     NavigationLink("Sửa hồ sơ, mục tiêu và sức khỏe") { ProfileForm(title: "Hồ sơ", saveLabel: "Lưu thay đổi") }
                 }
+                Section {
+                    if store.healthLinked {
+                        Label("Đã kết nối Apple Health", systemImage: "checkmark.circle.fill").foregroundColor(Palette.green)
+                        Text("CaloCare chỉ đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng và chiều cao. Đổi quyền trong Cài đặt → Sức khỏe → Truy cập dữ liệu & thiết bị → CaloCare.")
+                            .font(.caption).foregroundColor(.secondary)
+                        Button("Ngừng dùng dữ liệu Apple Health", role: .destructive) { store.unlinkHealth() }
+                    } else {
+                        Button { Task { await store.linkHealth() } } label: { Label("Kết nối Apple Health", systemImage: "heart.fill") }
+                        Text("Apple Watch ghi thẳng vào Apple Health. Garmin Connect, Mi Fitness, Zepp, Huawei Health, Samsung Health… bật đồng bộ sang Apple Health trong cài đặt của app đồng hồ.")
+                            .font(.caption).foregroundColor(.secondary)
+                    }
+                } header: { Text("⌚ Đồng hồ & Apple Health") }
                 Section("✨ Trợ lý AI") {
                     if let quota {
                         Text("📷 Còn \(quota.photos_left_today) ảnh hôm nay" + (quota.trial_photos_left > 0 ? " · \(quota.trial_photos_left) ảnh dùng thử" : ""))
@@ -94,7 +106,7 @@ struct ProfileView: View {
                     Text("Dùng thử 100 ảnh (tối đa 30 ảnh/ngày) và 100 câu hỏi. Sau đó mỗi ngày có 6 ảnh và 10 câu hỏi.").font(.caption).foregroundColor(.secondary)
                 }
                 Section("Quyền riêng tư & dữ liệu") {
-                    Text("Hồ sơ và nhật ký chỉ nằm trên thiết bị này. Ảnh, câu hỏi và tên món bạn tạo được gửi tới máy chủ CaloCare khi bạn dùng tính năng AI.").font(.caption)
+                    Text("Hồ sơ và nhật ký chỉ nằm trên thiết bị này. Ảnh, câu hỏi và tên món bạn tạo được gửi tới máy chủ CaloCare khi bạn dùng tính năng AI. Dữ liệu Apple Health chỉ được đọc và dùng trên máy này, không gửi đi đâu.").font(.caption)
                     Button("Xóa toàn bộ dữ liệu", role: .destructive) { confirmWipe = true }
                 }
                 Section {
@@ -102,7 +114,7 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Hồ sơ")
-            .task { quota = await API.shared.refreshQuota() }
+            .task { if !Demo.active { quota = await API.shared.refreshQuota() } }
             .confirmationDialog("Xóa hồ sơ, nhật ký và món tự tạo khỏi thiết bị? Không thể khôi phục.", isPresented: $confirmWipe, titleVisibility: .visible) {
                 Button("Xóa", role: .destructive) { store.wipe() }
                 Button("Giữ lại", role: .cancel) {}

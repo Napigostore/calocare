@@ -26,11 +26,11 @@ object Privacy {
             "• Sức khỏe do bạn tự khai: bệnh lý cần lưu ý, dị ứng, chế độ ăn.\n" +
             "• Nhật ký ăn uống, buổi tập, lịch sử cân nặng, món ăn bạn tự tạo.\n" +
             "Dữ liệu này nằm trong bộ nhớ riêng của ứng dụng và không được sao lưu ra ngoài.",
-        "Dữ liệu từ đồng hồ, vòng tay (Health Connect)" to
+        "Dữ liệu từ đồng hồ, vòng tay (Health Connect, Apple Health)" to
             "Khi bạn bấm kết nối và cấp quyền, CaloCare chỉ ĐỌC: calo vận động, tổng calo tiêu hao, số bước, giấc ngủ, cân nặng và chiều cao. " +
             "Dữ liệu này chỉ dùng để tính calo tiêu hao, vẽ biểu đồ tiến độ và đưa ra lời khuyên trong ứng dụng. " +
-            "CaloCare không ghi vào Health Connect, không gửi dữ liệu này ra khỏi thiết bị, không dùng cho quảng cáo. " +
-            "Bạn có thể thu hồi quyền bất cứ lúc nào trong Health Connect.",
+            "CaloCare không ghi vào Health Connect hay Apple Health, không gửi dữ liệu này ra khỏi thiết bị, không dùng cho quảng cáo. " +
+            "Bạn có thể thu hồi quyền bất cứ lúc nào trong Health Connect (Android) hoặc Cài đặt → Sức khỏe (iPhone).",
         "Tính năng AI" to
             "Khi bạn dùng tính năng AI, dữ liệu sau được gửi qua máy chủ của CaloCare tới nhà cung cấp AI Anthropic để xử lý:\n" +
             "• Chụp ảnh bữa ăn: ảnh và tóm tắt hồ sơ (giới tính, tuổi, chiều cao, cân nặng, mục tiêu, bệnh lý, dị ứng, chế độ ăn).\n" +

@@ -25,15 +25,16 @@ enum Palette {
 
 struct RootView: View {
     @EnvironmentObject var store: AppStore
+    @State private var tab = Demo.tab
 
     var body: some View {
         ZStack(alignment: .bottom) {
             if store.data.profile.onboarded {
-                TabView {
-                    HomeView().tabItem { Label("Hôm nay", systemImage: "house.fill") }
-                    FoodView().tabItem { Label("Ăn uống", systemImage: "fork.knife") }
-                    CoachView().tabItem { Label("Coach", systemImage: "bubble.left.and.bubble.right.fill") }
-                    ProfileView().tabItem { Label("Hồ sơ", systemImage: "person.fill") }
+                TabView(selection: $tab) {
+                    HomeView().tabItem { Label("Hôm nay", systemImage: "house.fill") }.tag(0)
+                    FoodView().tabItem { Label("Ăn uống", systemImage: "fork.knife") }.tag(1)
+                    CoachView().tabItem { Label("Coach", systemImage: "bubble.left.and.bubble.right.fill") }.tag(2)
+                    ProfileView().tabItem { Label("Hồ sơ", systemImage: "person.fill") }.tag(3)
                 }
             } else {
                 NavigationStack {

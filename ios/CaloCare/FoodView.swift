@@ -78,6 +78,9 @@ struct FoodView: View {
             }
         }
         .sheet(item: $scan) { scan in MealScanView(scan: scan) }
+        .onAppear {
+            if Demo.screen == "scan", scan == nil, let photo = Demo.photo { scan = MealScan(image: photo) }
+        }
         .sheet(item: $editing) { food in FoodEditor(food: food) }
     }
 
