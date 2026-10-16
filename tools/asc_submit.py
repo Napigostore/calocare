@@ -20,8 +20,7 @@ def call_ok(method, path, body=None, allow=()):
             raw = response.read()
             return asc.json.loads(raw) if raw else {}
     except urllib.error.HTTPError as e:
-        errors = asc.json.loads(e.read() or b'{}').get('errors', [])
-        text = '; '.join(f"{x.get('title', '')}: {x.get('detail', '')}" for x in errors)
+        text = asc.describe(e)
         if e.code in allow:
             print(f'  ({method} {path.split("?")[0]}: {e.code} {text}; continuing)')
             return None

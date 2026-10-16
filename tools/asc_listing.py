@@ -41,9 +41,19 @@ def call(method, path, body=None):
             raw = response.read()
             return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as e:
-        errors = json.loads(e.read() or b'{}').get('errors', [])
-        detail = '; '.join(f"{x.get('title', '')}: {x.get('detail', '')}" for x in errors) or str(e)
-        fail(f'{method} {path.split("?")[0]} -> {e.code} {detail}')
+        fail(f'{method} {path.split("?")[0]} -> {e.code} {describe(e)}')
+
+
+def describe(e):
+    """Apple's error text, including the "associated errors" that say which fields block a submission."""
+    errors = json.loads(e.read() or b'{}').get('errors', [])
+    lines = []
+    for x in errors:
+        lines.append(f"{x.get('title', '')}: {x.get('detail', '')}")
+        for where, more in (x.get('meta', {}).get('associatedErrors') or {}).items():
+            for m in more:
+                lines.append(f"  - {where.split('/')[-2] if '/' in where else where}: {m.get('detail') or m.get('title') or m.get('code')}")
+    return '\n'.join(lines) or str(e)
 
 
 def fail(message):

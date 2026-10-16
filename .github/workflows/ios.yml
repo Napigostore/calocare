@@ -279,7 +279,7 @@ jobs:
 
   submit:
     # Submits the version being prepared, with the newest processed build and the CaloCare Pro subscriptions,
-    # for App Review (tools/asc_submit.py); errors appear as run annotations. Run by hand with "submit" ticked, or a commit message with [submit].
+    # for App Review (tools/asc_submit.py); errors, with the fields Apple says are missing, appear as run annotations. Run by hand with "submit" ticked, or a commit message with [submit].
     if: ${{ inputs.submit || contains(github.event.head_commit.message, '[submit]') }}
     runs-on: macos-15
     steps:
