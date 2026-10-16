@@ -1,0 +1,27 @@
+CaloCare giúp bạn biết mình ăn bao nhiêu, tiêu hao bao nhiêu và nên ăn gì tiếp theo, lấy món ăn Việt Nam làm trung tâm.
+
+● Ghi bữa ăn bằng một chạm
+Hơn 240 món quen thuộc: phở, cơm tấm, bún chả, bánh mì, trà sữa… cùng các món quốc tế. Chạm một lần là thêm một phần. Tìm kiếm không cần gõ dấu, tự tạo món riêng.
+
+● Chụp ảnh bữa ăn
+Đưa món ăn vào vòng tròn, AI nhận diện từng món, ước tính calo, đạm, tinh bột, chất béo. Chỉnh khẩu phần (nhỏ, vừa, lớn) hoặc tính theo từng thành phần trước khi lưu.
+
+● Coach dinh dưỡng
+Gợi ý bữa tiếp theo dựa trên lượng calo còn lại, theo mục tiêu giảm cân, tăng cân, tăng cơ hay chạy bộ, kèm thứ tự ăn hợp lý trong bữa.
+
+● Chế độ sức khỏe
+Khai báo tiểu đường, cao huyết áp, gout, mỡ máu, dị ứng hoặc ăn chay, keto. App cảnh báo khi món ăn không phù hợp.
+
+● Kết nối Apple Watch và đồng hồ thông minh
+Đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng từ Apple Health (Apple Watch, Garmin, Mi Fitness, Zepp…), so calo nạp vào với calo tiêu hao mỗi ngày.
+
+● Riêng tư
+Không cần tài khoản. Dữ liệu nằm trên iPhone của bạn, dữ liệu Apple Health không rời khỏi máy. Không quảng cáo.
+
+● CaloCare Pro
+Miễn phí: 30 ảnh AI và 50 câu hỏi đầu tiên, sau đó mỗi ngày 2 ảnh và 5 câu hỏi. CaloCare Pro (theo tháng hoặc theo năm, gói năm có 7 ngày dùng thử) cho phép tới 40 ảnh và 100 câu hỏi mỗi ngày. Gói tự gia hạn qua Apple ID cho tới khi bạn hủy trong Cài đặt, ít nhất 24 giờ trước kỳ gia hạn.
+
+Lưu ý: CaloCare cung cấp ước tính và gợi ý tham khảo, không thay thế chẩn đoán hay chỉ định của bác sĩ.
+
+Điều khoản sử dụng: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Chính sách quyền riêng tư: https://calocare-api.calocare-api.workers.dev/privacy

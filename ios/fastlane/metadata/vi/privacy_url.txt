@@ -1,0 +1,1 @@
+https://calocare-api.calocare-api.workers.dev/privacy

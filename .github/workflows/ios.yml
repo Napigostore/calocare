@@ -28,6 +28,10 @@ on:
         description: Take App Store screenshots on the 6.9" iPhone simulator
         type: boolean
         default: false
+      listing:
+        description: Upload the App Store listing (texts and screenshots in ios/fastlane)
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -230,7 +234,7 @@ jobs:
             n=1
             for screen in home food scan coach profile; do
               xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
-              xcrun simctl launch "$DEVICE" com.calocare.app -AppleLanguages "($lang)" -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg"
+              xcrun simctl launch "$DEVICE" com.calocare.app -AppleLanguages "($lang)" -AppleLocale "$([ "$lang" = en ] && echo en_US || echo vi_VN)" -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg"
               sleep 6
               xcrun simctl io "$DEVICE" screenshot "shots/${prefix}0$n-$screen.png"
               n=$((n+1))
@@ -244,3 +248,40 @@ jobs:
         run: |
           gh release delete ios-screenshots --yes --cleanup-tag || true
           gh release create ios-screenshots shots/*.png --prerelease --target "$GITHUB_SHA"             --title "CaloCare iOS – ảnh chụp màn hình" --notes "Chụp trên máy ảo iPhone 6.9\" từ commit $GITHUB_SHA, dữ liệu mẫu."
+
+  listing:
+    # Uploads ios/fastlane/metadata and ios/fastlane/screenshots (made by tools/export_appstore.py) to the
+    # version being prepared in App Store Connect. Does not submit for review: that is done in App Store
+    # Connect, together with the subscriptions, App Privacy and the age rating.
+    # Run by hand with "listing" ticked, or push a commit whose message contains [listing].
+    if: ${{ inputs.listing || contains(github.event.head_commit.message, '[listing]') }}
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload the listing
+        working-directory: ios
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          python3 -c 'import json, os; json.dump({"key_id": os.environ["KEY_ID"], "issuer_id": os.environ["ISSUER"], "key": os.environ["KEY_P8"], "in_house": False}, open(os.environ["RUNNER_TEMP"] + "/asc.json", "w"))'
+          gem install fastlane --no-document --user-install > /dev/null
+          export PATH="$(ruby -e 'print Gem.user_dir')/bin:$PATH"
+          fastlane deliver --api_key_path "$RUNNER_TEMP/asc.json" --app_identifier com.calocare.app --platform ios \
+            --app_version "$(grep -E 'MARKETING_VERSION' project.yml | grep -oE '[0-9][0-9.]*')" \
+            --metadata_path fastlane/metadata --screenshots_path fastlane/screenshots \
+            --skip_binary_upload true --overwrite_screenshots true --force true --run_precheck_before_submit false \
+            --submit_for_review false --automatic_release false > deliver.log 2>&1 || {
+            grep -iE "error|invalid|could not|forbidden|exception" deliver.log | grep -v "^$" | awk '!seen[$0]++' | head -30 > problems.txt
+            echo "::error title=TestFlight::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' problems.txt)"
+            exit 1
+          }
+          tail -5 deliver.log
+      - name: Keep the deliver log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: listing-log
+          path: ios/deliver.log
+
