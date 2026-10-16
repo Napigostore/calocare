@@ -28,6 +28,31 @@ def call_ok(method, path, body=None, allow=()):
         fail(f'{method} {path.split("?")[0]} -> {e.code} {text}')
 
 
+def check():
+    """Says, for each subscription, which of the parts App Review needs are still missing."""
+    app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
+    for group in call('GET', f'/v1/apps/{app_id}/subscriptionGroups')['data']:
+        names = call('GET', f'/v1/subscriptionGroups/{group["id"]}/subscriptionGroupLocalizations')['data']
+        print(f'::notice title=TestFlight::Group "{group["attributes"].get("referenceName")}": names ' +
+              (', '.join(f'{n["attributes"]["locale"]} ({n["attributes"].get("state")})' for n in names) or 'MISSING'))
+        for sub in call('GET', f'/v1/subscriptionGroups/{group["id"]}/subscriptions')['data']:
+            a = sub['attributes']
+            sid = sub['id']
+            locs = call('GET', f'/v1/subscriptions/{sid}/subscriptionLocalizations')['data']
+            prices = call('GET', f'/v1/subscriptions/{sid}/prices?limit=200')['data']
+            avail = call_ok('GET', f'/v1/subscriptions/{sid}/subscriptionAvailability?include=availableTerritories', allow=(404,))
+            territories = len(((avail or {}).get('data') or {}).get('relationships', {}).get('availableTerritories', {}).get('data') or [])
+            shot = call_ok('GET', f'/v1/subscriptions/{sid}/appStoreReviewScreenshot', allow=(404,))
+            has_shot = bool(shot and shot.get('data'))
+            missing = [what for what, ok in (
+                ('duration', a.get('subscriptionPeriod')), ('display name + description (Localization)', locs),
+                ('price', prices), ('availability (countries)', territories), ('review screenshot', has_shot),
+                ('review notes', a.get('reviewNote'))) if not ok]
+            print(f'::notice title=TestFlight::{a.get("productId")} [{a.get("state")}]: period {a.get("subscriptionPeriod")}, '
+                  f'{len(locs)} localization(s), {len(prices)} price(s), {territories} countries, screenshot {"yes" if has_shot else "no"}'
+                  + (' — missing: ' + ', '.join(missing) if missing else ''))
+
+
 def reset():
     """Empties unsubmitted review submissions, so the version page can take its first subscriptions again."""
     app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
@@ -115,7 +140,7 @@ def main(version_string):
 
 if __name__ == '__main__':
     try:
-        reset() if sys.argv[1] == '--reset' else main(sys.argv[1])
+        {'--reset': reset, '--check': check}.get(sys.argv[1], lambda: main(sys.argv[1]))()
     except SystemExit:
         raise
     except Exception:

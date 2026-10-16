@@ -296,16 +296,16 @@ jobs:
           python3 tools/asc_submit.py "$(grep -E 'MARKETING_VERSION' ios/project.yml | grep -oE '[0-9][0-9.]*')"
 
   unsubmit:
-    # Empties draft review submissions (tools/asc_submit.py --reset). Commit message with [unsubmit].
-    if: ${{ contains(github.event.head_commit.message, '[unsubmit]') }}
+    # [unsubmit]: empties draft review submissions. [check]: lists what each subscription still lacks.
+    if: ${{ contains(github.event.head_commit.message, '[unsubmit]') || contains(github.event.head_commit.message, '[check]') }}
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Empty draft submissions
+      - name: Empty drafts or check subscriptions
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           python3 -m pip install --quiet --break-system-packages pyjwt cryptography
-          python3 tools/asc_submit.py --reset
+          python3 tools/asc_submit.py "$([ "${{ contains(github.event.head_commit.message, '[check]') }}" = true ] && echo --check || echo --reset)"
