@@ -28,6 +28,20 @@ def call_ok(method, path, body=None, allow=()):
         fail(f'{method} {path.split("?")[0]} -> {e.code} {text}')
 
 
+def reset():
+    """Empties unsubmitted review submissions, so the version page can take its first subscriptions again."""
+    app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
+    drafts = call('GET', f'/v1/apps/{app_id}/reviewSubmissions?filter[platform]=IOS&filter[state]=READY_FOR_REVIEW,UNRESOLVED_ISSUES')['data']
+    for draft in drafts:
+        items = call('GET', f'/v1/reviewSubmissions/{draft["id"]}/items')['data']
+        for item in items:
+            call_ok('DELETE', f'/v1/reviewSubmissionItems/{item["id"]}', allow=(409,))
+        call_ok('PATCH', f'/v1/reviewSubmissions/{draft["id"]}', {'data': {'type': 'reviewSubmissions', 'id': draft['id'], 'attributes': {'canceled': True}}}, allow=(409,))
+        print(f'::notice title=TestFlight::Draft submission {draft["id"]} emptied ({len(items)} items removed)')
+    if not drafts:
+        print('::notice title=TestFlight::No draft submissions to empty')
+
+
 def main(version_string):
     app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
     version = call('GET', f'/v1/apps/{app_id}/appStoreVersions?filter[platform]=IOS&filter[versionString]={version_string}')['data'][0]
@@ -101,7 +115,7 @@ def main(version_string):
 
 if __name__ == '__main__':
     try:
-        main(sys.argv[1])
+        reset() if sys.argv[1] == '--reset' else main(sys.argv[1])
     except SystemExit:
         raise
     except Exception:
