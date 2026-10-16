@@ -56,6 +56,10 @@ data class Quota(
     val trial_chats_left: Int = 0,
     val photos_left_today: Int = 0,
     val chats_left_today: Int = 0,
+    val pro: Boolean = false,
+    val pro_until: Long = 0,
+    val free_photos_per_day: Int = 2,
+    val free_chats_per_day: Int = 5,
 )
 
 /**
@@ -67,6 +71,7 @@ class HostedClient(
     private val appKey: String,
     private val deviceId: String,
     private val onQuota: (Quota) -> Unit,
+    private val onProRequired: () -> Unit = {},
 ) : AiClient {
     override val supportsPhotos = true
 
@@ -142,6 +147,10 @@ class HostedClient(
         runCatching { request("/v1/quota", null) }
     }
 
+    /** Sends a Google Play purchase to the server, which checks it with Google and turns Pro on for this device. */
+    suspend fun activatePro(purchaseToken: String): Boolean =
+        runCatching { request("/v1/pro", buildJsonObject { put("platform", "android"); put("token", purchaseToken) }) }.isSuccess
+
     private fun analysis(result: JsonElement): MealAnalysis = try {
         json.decodeFromJsonElement<MealAnalysis>(result)
     } catch (e: SerializationException) {
@@ -160,7 +169,9 @@ class HostedClient(
                 parsed?.get("quota")?.let { q -> runCatching { onQuota(json.decodeFromJsonElement<Quota>(q)) } }
                 if (!response.isSuccessful || parsed == null) {
                     // The server's messages are already written for the user (quota reached, busy, ...).
-                    throw AiException(parsed?.get("message")?.jsonPrimitive?.contentOrNull ?: L("Máy chủ AI đang gặp sự cố (${response.code}). Hãy thử lại sau.", "The AI server has a problem (${response.code}). Please try again later."))
+                    val code = parsed?.get("error")?.jsonPrimitive?.contentOrNull
+                    if (code == "pro_required") onProRequired()
+                    throw AiException(code = code, message = parsed?.get("message")?.jsonPrimitive?.contentOrNull ?: L("Máy chủ AI đang gặp sự cố (${response.code}). Hãy thử lại sau.", "The AI server has a problem (${response.code}). Please try again later."))
                 }
                 parsed
             }

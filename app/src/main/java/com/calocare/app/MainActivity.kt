@@ -1,5 +1,6 @@
 package com.calocare.app
 
+import com.calocare.app.ui.ProDialog
 import com.calocare.app.L
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -138,6 +139,7 @@ private fun MainScreen(vm: AppViewModel, data: AppData, showPrivacy: Boolean) {
     }
 
     vm.photo?.let { PhotoDialog(vm, data, it) }
+    if (vm.paywall) ProDialog(vm, onClose = { vm.paywall = false })
     if (profile) FullScreenDialog(L("Hồ sơ", "Profile"), onClose = { profile = false }) {
         ProfileScreen(vm, data, PaddingValues(0.dp), onPrivacy = { privacy = true })
     }

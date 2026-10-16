@@ -47,6 +47,10 @@ object Privacy {
             "Khi bạn bấm “Tìm trên mạng”, từ khóa tìm kiếm được gửi tới Open Food Facts (openfoodfacts.org). Không kèm thông tin cá nhân nào.",
         "Camera và ảnh" to
             "Ứng dụng chỉ dùng camera (quyền Camera) hoặc thư viện ảnh khi bạn chủ động chọn chụp bữa ăn. Chỉ phần ảnh trong vòng tròn hướng dẫn được gửi đi phân tích; ảnh không được lưu vào nhật ký hay thư viện của bạn.",
+        "Gói CaloCare Pro" to
+            "Khi bạn đăng ký Pro, Google Play hoặc App Store xử lý thanh toán; CaloCare không bao giờ thấy thông tin thẻ của bạn. " +
+            "Ứng dụng gửi biên nhận giao dịch của cửa hàng tới máy chủ CaloCare, máy chủ kiểm tra với cửa hàng rồi lưu, cùng mã thiết bị ẩn danh, gói bạn dùng và ngày hết hạn. " +
+            "Hủy gói trong Google Play hoặc Cài đặt → Apple ID → Đăng ký.",
         "Xóa dữ liệu" to
             "Vào Hồ sơ → “Xóa toàn bộ dữ liệu” để xóa hồ sơ, nhật ký và API key khỏi thiết bị. Gỡ ứng dụng cũng xóa toàn bộ dữ liệu.",
         "Trẻ em" to
@@ -85,6 +89,10 @@ object Privacy {
             "When you tap “Find product”, your search words are sent to Open Food Facts (openfoodfacts.org), with no personal information.",
         "Camera and photos" to
             "The app uses the camera (Camera permission) or your photo library only when you choose to photograph a meal. Only the part of the picture inside the guide circle is sent for analysis; the photo is not saved to your log or gallery.",
+        "CaloCare Pro" to
+            "When you subscribe to Pro, Google Play or the App Store handles the payment; CaloCare never sees your card details. " +
+            "The app sends the store's purchase receipt to CaloCare's server, which checks it with the store and keeps, with the anonymous device code, your plan and its end date. " +
+            "Cancel in Google Play or in Settings → Apple ID → Subscriptions.",
         "Deleting your data" to
             "Go to Profile → “Delete all data” to remove your profile, log and API key from the device. Uninstalling the app also deletes all its data.",
         "Children" to

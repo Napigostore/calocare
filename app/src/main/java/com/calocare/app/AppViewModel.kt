@@ -1,5 +1,6 @@
 package com.calocare.app
 
+import com.calocare.app.billing.ProBilling
 import com.calocare.app.servingLabel
 import com.calocare.app.label
 import com.calocare.app.L
@@ -138,7 +139,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val androidId = Settings.Secure.getString(getApplication<Application>().contentResolver, Settings.Secure.ANDROID_ID).orEmpty()
         MessageDigest.getInstance("SHA-256").digest("calocare:$androidId".toByteArray()).joinToString("") { "%02x".format(it) }
     }
-    private val hosted by lazy { HostedClient(BuildConfig.BACKEND_URL, BuildConfig.BACKEND_APP_KEY, deviceId) { quota = it } }
+    private val hosted by lazy { HostedClient(BuildConfig.BACKEND_URL, BuildConfig.BACKEND_APP_KEY, deviceId, onQuota = { quota = it }, onProRequired = { paywall = true }) }
+
+    /** The CaloCare Pro offer is on screen: opened by the user, or when the free AI allowance runs out. */
+    var paywall by mutableStateOf(false)
+    val isPro get() = quota?.pro == true
+    val billing by lazy { ProBilling(getApplication(), viewModelScope) { token -> hosted.activatePro(token) } }
 
     private var aiClient: Pair<String, AiClient>? = null
     private fun ai(): AiClient {
@@ -694,6 +700,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         syncLibrary()
+        // Re-sends an existing subscription, so renewals and reinstalls keep Pro on.
+        if (hostedConfigured) billing.refresh()
     }
 
     companion object {

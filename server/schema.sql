@@ -1,4 +1,16 @@
 -- One row per device (and one reserved row, device = '*', whose chats_day counts all calls today).
+-- CaloCare Pro, per device: until when it is paid. ref is a hash of the store purchase, so one
+-- subscription can be shared by a few devices of its owner but no more.
+CREATE TABLE IF NOT EXISTS pro (
+  device   TEXT PRIMARY KEY,
+  platform TEXT NOT NULL,
+  ref      TEXT NOT NULL,
+  product  TEXT NOT NULL,
+  expires  INTEGER NOT NULL,
+  updated  INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS pro_ref ON pro (ref);
+
 CREATE TABLE IF NOT EXISTS usage (
   device       TEXT PRIMARY KEY,
   day          TEXT NOT NULL,

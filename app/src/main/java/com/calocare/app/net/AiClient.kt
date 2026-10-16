@@ -80,7 +80,8 @@ data class Ingredient(
 
 data class ChatTurn(val fromUser: Boolean, val text: String)
 
-class AiException(message: String) : Exception(message)
+/** [code] is the server's error code when it gave one, e.g. "pro_required" when the free allowance is used up. */
+class AiException(message: String, val code: String? = null) : Exception(message)
 
 /** AI features: meal photo analysis, calorie estimates for unknown dishes, nutrition coach. */
 interface AiClient {

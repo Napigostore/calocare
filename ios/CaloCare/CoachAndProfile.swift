@@ -68,6 +68,7 @@ struct CoachView: View {
 
 struct ProfileView: View {
     @EnvironmentObject var store: AppStore
+    @EnvironmentObject var pro: ProStore
     @State private var quota: Quota?
     @State private var confirmWipe = false
 
@@ -103,7 +104,13 @@ struct ProfileView: View {
                     } else if !API.shared.configured {
                         Text(L("Bản này chưa được cấu hình máy chủ AI.", "This build has no AI server configured.")).foregroundColor(.secondary)
                     }
-                    Text(L("Dùng thử 100 ảnh (tối đa 30 ảnh/ngày) và 100 câu hỏi. Sau đó mỗi ngày có 6 ảnh và 10 câu hỏi.", "Trial: 100 photos (up to 30 a day) and 100 questions. After that, 6 photos and 10 questions a day.")).font(.caption).foregroundColor(.secondary)
+                    if quota?.pro == true || pro.isPro {
+                        Button(L("✨ Bạn đang dùng Pro", "✨ You're on Pro")) { pro.showPaywall = true }
+                    } else {
+                        Text(L("Miễn phí: 30 ảnh AI và 50 câu hỏi đầu tiên, sau đó mỗi ngày \(quota?.free_photos_per_day ?? 2) ảnh và \(quota?.free_chats_per_day ?? 5) câu hỏi.",
+                               "Free: your first 30 AI photos and 50 questions, then \(quota?.free_photos_per_day ?? 2) photos and \(quota?.free_chats_per_day ?? 5) questions a day.")).font(.caption).foregroundColor(.secondary)
+                        Button(L("✨ Nâng cấp Pro · chụp mọi bữa ăn", "✨ Upgrade to Pro · snap every meal")) { pro.showPaywall = true }.bold()
+                    }
                 }
                 Section(L("Quyền riêng tư & dữ liệu", "Privacy & data")) {
                     Text(L("Hồ sơ và nhật ký chỉ nằm trên thiết bị này. Ảnh, câu hỏi và tên món bạn tạo được gửi tới máy chủ CaloCare khi bạn dùng tính năng AI. Dữ liệu Apple Health chỉ được đọc và dùng trên máy này, không gửi đi đâu.", "Your profile and log stay on this device. Photos, questions and names of foods you create go to CaloCare's server when you use AI features. Apple Health data is only read and used on this device and is never sent anywhere.")).font(.caption)

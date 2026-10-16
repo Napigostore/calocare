@@ -26,8 +26,8 @@ android {
         applicationId = "com.calocare.app"
         minSdk = 26 // Health Connect + java.time
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
 
         buildConfigField("String", "BACKEND_URL", "\"${backendProps.getProperty("url", "")}\"")
         buildConfigField("String", "BACKEND_APP_KEY", "\"${backendProps.getProperty("appKey", "")}\"")
@@ -109,6 +109,8 @@ dependencies {
 
     // Online food search (Open Food Facts, Wikipedia thumbnails) and remote images
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    // CaloCare Pro subscription.
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // In-app camera with the guide circle

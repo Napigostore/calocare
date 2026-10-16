@@ -5,17 +5,38 @@
 // Starts `wrangler dev` itself; needs .dev.vars (written below if missing).
 import { execSync, spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { existsSync, writeFileSync } from "node:fs";
-import { randomBytes } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
+import { createPrivateKey, randomBytes, sign } from "node:crypto";
 
 const FAKE_PORT = 8788;
 const PORT = 8787;
 const APP_KEY = "test-app-key";
 const ADMIN_KEY = "test-admin-key";
 
-if (!existsSync(".dev.vars")) {
-  writeFileSync(".dev.vars", `ANTHROPIC_API_KEY=test\nAPP_KEY=${APP_KEY}\nADMIN_KEY=${ADMIN_KEY}\nANTHROPIC_BASE_URL=http://127.0.0.1:${FAKE_PORT}\n`);
+// Test-only store credentials from test/fixtures (bash test/fixtures/make.sh): our own "Apple" root and a
+// fake Google service account, both answered by the fake server below.
+const fixture = (name) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8").trim();
+writeFileSync(".dev.vars", [
+  "ANTHROPIC_API_KEY=test", `APP_KEY=${APP_KEY}`, `ADMIN_KEY=${ADMIN_KEY}`, `ANTHROPIC_BASE_URL=http://127.0.0.1:${FAKE_PORT}`,
+  `APPLE_ROOT_B64=${fixture("root.b64")}`, "GOOGLE_SA_EMAIL=test@calocare.iam.gserviceaccount.com",
+  `GOOGLE_SA_KEY=${fixture("google.pk8").replace(/\r?\n/g, "\\n")}`, `GOOGLE_API_BASE=http://127.0.0.1:${FAKE_PORT}`,
+].join("\n") + "\n");
+
+/** A StoreKit 2 signed transaction, signed like the App Store does but with the test chain. */
+function appleTransaction(payload, { tamper = false } = {}) {
+  const enc = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+  const header = enc({ alg: "ES256", x5c: ["leaf", "intermediate", "root"].map((c) => fixture(`${c}.b64`)) });
+  const body = enc(payload);
+  const signature = sign("sha256", Buffer.from(`${header}.${body}`), { key: createPrivateKey(fixture("leaf.pk8")), dsaEncoding: "ieee-p1363" }).toString("base64url");
+  return `${header}.${tamper ? enc({ ...payload, expiresDate: payload.expiresDate + 3e10 }) : body}.${signature}`;
 }
+
+/** What the fake Google Play says about each purchase token. */
+const playTokens = {
+  "play-active": { subscriptionState: "SUBSCRIPTION_STATE_ACTIVE", acknowledgementState: "ACKNOWLEDGEMENT_STATE_PENDING", lineItems: [{ productId: "calocare_pro", expiryTime: new Date(Date.now() + 30 * 864e5).toISOString() }] },
+  "play-expired": { subscriptionState: "SUBSCRIPTION_STATE_EXPIRED", lineItems: [{ productId: "calocare_pro", expiryTime: new Date(Date.now() - 864e5).toISOString() }] },
+};
+let acknowledged = [];
 
 let failNext = false;
 /** The last request the worker sent to the fake API, to check what the model was asked. */
@@ -24,6 +45,19 @@ const fake = createServer((req, res) => {
   let raw = "";
   req.on("data", (c) => (raw += c));
   req.on("end", () => {
+    // Fake Google: sign-in, subscription lookup and acknowledgement.
+    if (req.url === "/token") {
+      res.writeHead(200, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ access_token: "fake-google-token", expires_in: 3600 }));
+    }
+    if (req.url.startsWith("/androidpublisher/")) {
+      if (req.headers.authorization !== "Bearer fake-google-token") { res.writeHead(401); return res.end("{}"); }
+      const token = decodeURIComponent(req.url.split("/tokens/")[1].split(":")[0]);
+      if (req.url.endsWith(":acknowledge")) { acknowledged.push(token); res.writeHead(200); return res.end("{}"); }
+      const sub = playTokens[token];
+      res.writeHead(sub ? 200 : 404, { "content-type": "application/json" });
+      return res.end(JSON.stringify(sub ?? { error: { code: 404 } }));
+    }
     if (failNext) {
       failNext = false;
       res.writeHead(400, { "content-type": "application/json" });
@@ -84,30 +118,30 @@ try {
 
   const a = device();
   r = await call("/v1/quota", a);
-  check("new device starts with the full trial", r.body.quota?.trial_photos_left === 100 && r.body.quota?.trial_chats_left === 100 && r.body.quota?.photos_left_today === 30, JSON.stringify(r.body));
+  check("new device starts with the welcome allowance", r.body.quota?.trial_photos_left === 30 && r.body.quota?.trial_chats_left === 50 && r.body.quota?.photos_left_today === 30 && r.body.quota?.pro === false, JSON.stringify(r.body));
 
   r = await call("/v1/photo", a, photo);
-  check("photo returns the analysis", r.status === 200 && r.body.result?.items?.[0]?.kcal === 450 && r.body.quota.trial_photos_left === 99, JSON.stringify(r));
+  check("photo returns the analysis", r.status === 200 && r.body.result?.items?.[0]?.kcal === 450 && r.body.quota.trial_photos_left === 29, JSON.stringify(r));
   r = await call("/v1/chat", a, chat);
-  check("chat returns text", r.status === 200 && typeof r.body.result?.text === "string" && r.body.quota.trial_chats_left === 99, JSON.stringify(r));
+  check("chat returns text", r.status === 200 && typeof r.body.result?.text === "string" && r.body.quota.trial_chats_left === 49, JSON.stringify(r));
   // A name no earlier run can have left in the shared estimate cache, which answers without drawing on the allowance.
   r = await call("/v1/estimate", a, { name: `món thử ${Date.now()}` });
-  check("estimate draws on the chat allowance", r.status === 200 && r.body.quota.trial_chats_left === 98, JSON.stringify(r));
+  check("estimate draws on the chat allowance", r.status === 200 && r.body.quota.trial_chats_left === 48, JSON.stringify(r));
 
   failNext = true;
   r = await call("/v1/photo", a, photo);
   const after = await call("/v1/quota", a);
-  check("a failed AI call is refunded", r.status === 502 && after.body.quota.trial_photos_left === 99, JSON.stringify([r, after.body]));
+  check("a failed AI call is refunded", r.status === 502 && after.body.quota.trial_photos_left === 29, JSON.stringify([r, after.body]));
   check("upstream error text is not leaked", !JSON.stringify(r.body).includes("boom"), JSON.stringify(r.body));
 
-  // Trial: at most 30 photos a day.
+  // Welcome: 30 photos; after them, the 2 free photos of a day are already used up the same day.
   const b = device();
   let ok = 0;
   for (let i = 0; i < 30; i++) ok += (await call("/v1/photo", b, photo)).status === 200 ? 1 : 0;
   r = await call("/v1/photo", b, photo);
-  check("31st photo of the day is refused during the trial", ok === 30 && r.status === 429 && r.body.error === "quota", `ok=${ok} ${JSON.stringify(r)}`);
+  check("after the 30 welcome photos the app is asked to offer Pro", ok === 30 && r.status === 402 && r.body.error === "pro_required", `ok=${ok} ${JSON.stringify(r)}`);
 
-  // After the trial: 6 photos and 10 chats a day. Fast-forward the counters directly in the local DB.
+  // After the welcome allowance: 2 photos and 5 chats a day. Fast-forward the counters directly in the local DB.
   const sql = (q) => new Promise((res, rej) => {
     const p = spawn("npx", ["wrangler", "d1", "execute", "calocare", "--local", "--command", JSON.stringify(q)], { shell: true, stdio: "ignore" });
     p.on("exit", (c) => (c === 0 ? res() : rej(new Error("sql failed: " + q))));
@@ -116,17 +150,43 @@ try {
   await call("/v1/quota", c);
   await sql(`UPDATE usage SET photos_total = 100, chats_total = 100, photos_day = 0, chats_day = 0 WHERE device = '${c}'`);
   r = await call("/v1/quota", c);
-  check("after the trial the daily allowance is 6 photos and 10 chats", r.body.quota.photos_left_today === 6 && r.body.quota.chats_left_today === 10, JSON.stringify(r.body));
+  check("free users then get 2 photos and 5 chats a day", r.body.quota.photos_left_today === 2 && r.body.quota.chats_left_today === 5, JSON.stringify(r.body));
   ok = 0;
-  for (let i = 0; i < 6; i++) ok += (await call("/v1/photo", c, photo)).status === 200 ? 1 : 0;
+  for (let i = 0; i < 2; i++) ok += (await call("/v1/photo", c, photo)).status === 200 ? 1 : 0;
   r = await call("/v1/photo", c, photo);
-  check("7th photo of the day is refused after the trial", ok === 6 && r.status === 429, `ok=${ok} ${JSON.stringify(r)}`);
+  check("the 3rd free photo of the day offers Pro", ok === 2 && r.status === 402 && r.body.error === "pro_required", `ok=${ok} ${JSON.stringify(r)}`);
   ok = 0;
-  for (let i = 0; i < 10; i++) ok += (await call("/v1/chat", c, chat)).status === 200 ? 1 : 0;
+  for (let i = 0; i < 5; i++) ok += (await call("/v1/chat", c, chat)).status === 200 ? 1 : 0;
   r = await call("/v1/chat", c, chat);
-  check("11th chat of the day is refused after the trial", ok === 10 && r.status === 429, `ok=${ok} ${JSON.stringify(r)}`);
+  check("the 6th free chat of the day offers Pro", ok === 5 && r.status === 402, `ok=${ok} ${JSON.stringify(r)}`);
   r = await call("/v1/chat", c, chat, APP_KEY, "en");
-  check("an English app is told about its limit in English", r.status === 429 && r.body.message.startsWith("You've used all"), JSON.stringify(r));
+  check("an English app is told about its limit in English", r.status === 402 && r.body.message.startsWith("You've used today's"), JSON.stringify(r));
+
+  // CaloCare Pro bought on an iPhone: the signed transaction is checked against the root certificate.
+  const appleTx = { bundleId: "com.calocare.app", productId: "calocare.pro.yearly", originalTransactionId: `orig-${Date.now()}`, transactionId: "t1", expiresDate: Date.now() + 365 * 864e5, environment: "Sandbox" };
+  r = await call("/v1/pro", c, { platform: "ios", transaction: appleTransaction(appleTx, { tamper: true }) });
+  check("a tampered App Store transaction is refused", r.status === 400 && r.body.error === "bad_purchase", JSON.stringify(r));
+  r = await call("/v1/pro", c, { platform: "ios", transaction: appleTransaction({ ...appleTx, bundleId: "com.other.app" }) });
+  check("another app's transaction is refused", r.status === 400, JSON.stringify(r));
+  r = await call("/v1/pro", c, { platform: "ios", transaction: appleTransaction(appleTx) });
+  check("a valid App Store purchase turns on Pro", r.status === 200 && r.body.quota.pro === true && r.body.quota.photos_left_today === 38, JSON.stringify(r));
+  r = await call("/v1/photo", c, photo);
+  check("Pro photographs past the free limit", r.status === 200, JSON.stringify(r));
+  const lapsed = device();
+  r = await call("/v1/pro", lapsed, { platform: "ios", transaction: appleTransaction({ ...appleTx, originalTransactionId: "old", expiresDate: Date.now() - 864e5 }) });
+  check("an expired subscription does not give Pro", r.status === 200 && r.body.quota.pro === false, JSON.stringify(r));
+
+  // CaloCare Pro bought on Android: the token is checked with Google Play, and acknowledged.
+  const g = device();
+  r = await call("/v1/pro", g, { platform: "android", token: "play-active" });
+  check("an active Play subscription turns on Pro and is acknowledged", r.status === 200 && r.body.quota.pro === true && acknowledged.includes("play-active"), JSON.stringify(r));
+  r = await call("/v1/pro", device(), { platform: "android", token: "play-expired" });
+  check("an expired Play subscription does not give Pro", r.status === 200 && r.body.quota.pro === false, JSON.stringify(r));
+  r = await call("/v1/pro", device(), { platform: "android", token: "made-up" });
+  check("an unknown Play token is refused", r.status === 400, JSON.stringify(r));
+  for (let i = 0; i < 4; i++) await call("/v1/pro", device(), { platform: "android", token: "play-active" });
+  r = await call("/v1/pro", device(), { platform: "android", token: "play-active" });
+  check("one subscription unlocks at most 5 devices", r.status === 409 && r.body.error === "too_many_devices", JSON.stringify(r));
 
   // The language of the answer: one line in the request; the cached system prompt is the same for both languages.
   const e = device();
@@ -144,7 +204,7 @@ try {
   // A new day restores the daily allowance but not the trial.
   await sql(`UPDATE usage SET day = '2000-01-01' WHERE device = '${c}'`);
   r = await call("/v1/quota", c);
-  check("a new day restores the daily allowance", r.body.quota.photos_left_today === 6 && r.body.quota.chats_left_today === 10 && r.body.quota.trial_photos_left === 0, JSON.stringify(r.body));
+  check("a new day restores Pro's daily allowance", r.body.quota.photos_left_today === 40 && r.body.quota.chats_left_today === 100 && r.body.quota.pro === true, JSON.stringify(r.body));
 
   // Learning from corrections. The fake AI always answers "Phở bò".
   await sql(`DELETE FROM fix_votes; DELETE FROM fixes; UPDATE names SET seen = 4`);

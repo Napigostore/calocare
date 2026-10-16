@@ -12,6 +12,11 @@ struct Quota: Decodable {
     var trial_chats_left = 0
     var photos_left_today = 0
     var chats_left_today = 0
+    // Optional: servers before CaloCare Pro do not send them.
+    var pro: Bool?
+    var pro_until: Double?
+    var free_photos_per_day: Int?
+    var free_chats_per_day: Int?
 }
 
 /// One dish the AI found or worked out. kcal and the macros are for ONE serving; qty is how many.
@@ -101,6 +106,7 @@ private struct ChatResult: Decodable {
 }
 
 private struct ServerMessage: Decodable {
+    var error: String?
     var message: String?
 }
 
@@ -145,14 +151,22 @@ final class API {
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         guard (200..<300).contains(status) else {
             // The server's messages are already written for the user (allowance used up, busy, ...).
-            let message = (try? JSONDecoder().decode(ServerMessage.self, from: data))?.message
-            throw APIError(message: message ?? L("Máy chủ AI đang gặp sự cố (\(status)). Hãy thử lại sau.", "The AI server has a problem (\(status)). Please try again later."))
+            let server = try? JSONDecoder().decode(ServerMessage.self, from: data)
+            // The free AI allowance is used up: the app offers Pro.
+            if server?.error == "pro_required" { await MainActor.run { NotificationCenter.default.post(name: .proRequired, object: nil) } }
+            throw APIError(message: server?.message ?? L("Máy chủ AI đang gặp sự cố (\(status)). Hãy thử lại sau.", "The AI server has a problem (\(status)). Please try again later."))
         }
         return data
     }
 
     private func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
         do { return try JSONDecoder().decode(type, from: data) } catch { throw APIError(message: L("Không đọc được kết quả AI. Hãy thử lại.", "Couldn't read the AI's answer. Please try again.")) }
+    }
+
+    /// Sends an App Store transaction to the server, which checks Apple's signature and turns Pro on for this device.
+    func activatePro(transaction: String) async -> Quota? {
+        guard (try? await send("/v1/pro", body: ["platform": "ios", "transaction": transaction])) != nil else { return nil }
+        return lastQuota
     }
 
     func refreshQuota() async -> Quota? {

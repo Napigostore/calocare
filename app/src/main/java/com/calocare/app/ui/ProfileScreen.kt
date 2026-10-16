@@ -269,10 +269,16 @@ fun AiKeyCard(vm: AppViewModel) {
                     Text(L("📷 Còn ${q.photos_left_today} ảnh hôm nay", "📷 ${q.photos_left_today} photos left today") + if (q.trial_photos_left > 0) L(" · ${q.trial_photos_left} ảnh dùng thử", " · ${q.trial_photos_left} trial photos") else "", fontWeight = FontWeight.Medium)
                     Text(L("💬 Còn ${q.chats_left_today} câu hỏi", "💬 ${q.chats_left_today} questions left") + if (q.trial_chats_left > 0) L(" dùng thử", " (trial)") else L(" hôm nay", " today"), fontWeight = FontWeight.Medium)
                 }
-                Text(
-                    L("Dùng thử 100 ảnh (tối đa 30 ảnh/ngày) và 100 câu hỏi. Sau đó mỗi ngày có 6 ảnh và 10 câu hỏi.", "Trial: 100 photos (up to 30 a day) and 100 questions. After that, 6 photos and 10 questions a day."),
-                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                if (q?.pro == true) {
+                    FilledTonalButton(onClick = { vm.paywall = true }) { Text(L("✨ Bạn đang dùng Pro", "✨ You're on Pro")) }
+                } else {
+                    Text(
+                        L("Miễn phí: 30 ảnh AI và 50 câu hỏi đầu tiên, sau đó mỗi ngày ${q?.free_photos_per_day ?: 2} ảnh và ${q?.free_chats_per_day ?: 5} câu hỏi.",
+                            "Free: your first 30 AI photos and 50 questions, then ${q?.free_photos_per_day ?: 2} photos and ${q?.free_chats_per_day ?: 5} questions a day."),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Button(onClick = { vm.paywall = true }) { Text(L("✨ Nâng cấp Pro · chụp mọi bữa ăn", "✨ Upgrade to Pro · snap every meal")) }
+                }
             }
             if (!advanced) androidx.compose.material3.TextButton(onClick = { advanced = true }) { Text(L("Nâng cao: dùng API key riêng", "Advanced: use your own API key")) }
         }

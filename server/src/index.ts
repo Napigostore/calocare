@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ADMIN_PAGE } from "./admin";
 import { PRIVACY_PAGE, PRIVACY_PAGE_EN } from "./privacy";
+import { activate, ProError, proUntil, type ProEnv } from "./pro";
 import { adminAsked, adminList, adminSave, changesSince, loadLibrary, nameKey, physicallyPossible, submitDish, type Dish, type Nutrition } from "./library";
 
 /**
@@ -9,7 +10,7 @@ import { adminAsked, adminList, adminSave, changesSince, loadLibrary, nameKey, p
  * Holds the Anthropic API key so the app never ships one, exposes only the three things the app
  * does with AI (meal photo, food estimate, coach chat) and enforces per-device quotas.
  */
-export interface Env {
+export interface Env extends ProEnv {
   DB: D1Database;
   ANTHROPIC_API_KEY: string;
   /** Shared secret compiled into the app; keeps casual traffic out. Not a substitute for the quotas. */
@@ -28,12 +29,17 @@ export interface Env {
 }
 
 /** Trial pool first, then a daily allowance. */
+/**
+ * Free: a welcome allowance, then a little AI every day — enough to keep using it, too little for every meal.
+ * Pro: generous daily amounts; the cap only stops abuse.
+ */
 export const LIMITS = {
-  trialPhotos: 100,
-  trialChats: 100,
-  photosPerDayInTrial: 30,
-  photosPerDay: 6,
-  chatsPerDay: 10,
+  welcomePhotos: 30,
+  welcomeChats: 50,
+  freePhotosPerDay: 2,
+  freeChatsPerDay: 5,
+  proPhotosPerDay: 40,
+  proChatsPerDay: 100,
 };
 
 type Kind = "photo" | "chat";
@@ -164,16 +170,25 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json; charset=utf-8" } });
 }
 
-function quotaView(u: Usage) {
-  const photosInTrial = u.photos_total < LIMITS.trialPhotos;
-  const chatsInTrial = u.chats_total < LIMITS.trialChats;
-  const photoCap = photosInTrial ? LIMITS.photosPerDayInTrial : LIMITS.photosPerDay;
+function quotaView(u: Usage, proExpires: number) {
+  const pro = proExpires > 0;
+  const welcomePhotos = Math.max(0, LIMITS.welcomePhotos - u.photos_total);
+  const welcomeChats = Math.max(0, LIMITS.welcomeChats - u.chats_total);
   return {
-    trial_photos_left: Math.max(0, LIMITS.trialPhotos - u.photos_total),
-    trial_chats_left: Math.max(0, LIMITS.trialChats - u.chats_total),
-    photos_left_today: Math.max(0, Math.min(photoCap - u.photos_day, photosInTrial ? LIMITS.trialPhotos - u.photos_total : Infinity)),
-    chats_left_today: chatsInTrial ? LIMITS.trialChats - u.chats_total : Math.max(0, LIMITS.chatsPerDay - u.chats_day),
+    pro,
+    pro_until: proExpires,
+    // "trial_*" is the welcome allowance; the name is kept for apps released before Pro.
+    trial_photos_left: pro ? 0 : welcomePhotos,
+    trial_chats_left: pro ? 0 : welcomeChats,
+    photos_left_today: pro ? Math.max(0, LIMITS.proPhotosPerDay - u.photos_day) : welcomePhotos || Math.max(0, LIMITS.freePhotosPerDay - u.photos_day),
+    chats_left_today: pro ? Math.max(0, LIMITS.proChatsPerDay - u.chats_day) : welcomeChats || Math.max(0, LIMITS.freeChatsPerDay - u.chats_day),
+    free_photos_per_day: LIMITS.freePhotosPerDay,
+    free_chats_per_day: LIMITS.freeChatsPerDay,
   };
+}
+
+async function quotaFor(env: Env, device: string) {
+  return quotaView(await usage(env.DB, device), await proUntil(env.DB, device));
 }
 
 /** Creates the row on first contact and zeroes the daily counters when the day has changed. */
@@ -202,24 +217,30 @@ async function usage(db: D1Database, device: string): Promise<Usage> {
 async function reserve(env: Env, device: string, kind: Kind, lang: Lang): Promise<void> {
   const day = today();
   await touch(env.DB, device, day);
+  const pro = (await proUntil(env.DB, device)) > 0;
   const sql =
     kind === "photo"
-      ? `UPDATE usage SET photos_total = photos_total + 1, photos_day = photos_day + 1
-         WHERE device = ?1 AND photos_day < CASE WHEN photos_total < ${LIMITS.trialPhotos} THEN ${LIMITS.photosPerDayInTrial} ELSE ${LIMITS.photosPerDay} END
-         RETURNING photos_total`
-      : `UPDATE usage SET chats_total = chats_total + 1, chats_day = chats_day + 1
-         WHERE device = ?1 AND (chats_total < ${LIMITS.trialChats} OR chats_day < ${LIMITS.chatsPerDay})
-         RETURNING chats_total`;
+      ? pro
+        ? `UPDATE usage SET photos_total = photos_total + 1, photos_day = photos_day + 1 WHERE device = ?1 AND photos_day < ${LIMITS.proPhotosPerDay} RETURNING photos_total`
+        : `UPDATE usage SET photos_total = photos_total + 1, photos_day = photos_day + 1
+           WHERE device = ?1 AND (photos_total < ${LIMITS.welcomePhotos} OR photos_day < ${LIMITS.freePhotosPerDay}) RETURNING photos_total`
+      : pro
+        ? `UPDATE usage SET chats_total = chats_total + 1, chats_day = chats_day + 1 WHERE device = ?1 AND chats_day < ${LIMITS.proChatsPerDay} RETURNING chats_total`
+        : `UPDATE usage SET chats_total = chats_total + 1, chats_day = chats_day + 1
+           WHERE device = ?1 AND (chats_total < ${LIMITS.welcomeChats} OR chats_day < ${LIMITS.freeChatsPerDay}) RETURNING chats_total`;
   const row = await env.DB.prepare(sql).bind(device).first();
   if (!row) {
-    const u = await usage(env.DB, device);
-    const message =
-      kind === "photo"
-        ? u.photos_total < LIMITS.trialPhotos
-          ? t(lang, `Bạn đã chụp ${LIMITS.photosPerDayInTrial} ảnh hôm nay. Hãy quay lại vào ngày mai nhé.`, `You've taken ${LIMITS.photosPerDayInTrial} photos today. Come back tomorrow for more.`)
-          : t(lang, `Bạn đã dùng hết ${LIMITS.photosPerDay} ảnh của hôm nay. Lượt mới sẽ có vào ngày mai.`, `You've used all ${LIMITS.photosPerDay} photos for today. New ones arrive tomorrow.`)
-        : t(lang, `Bạn đã dùng hết ${LIMITS.chatsPerDay} câu hỏi của hôm nay. Lượt mới sẽ có vào ngày mai.`, `You've used all ${LIMITS.chatsPerDay} questions for today. New ones arrive tomorrow.`);
-    throw new HttpError(429, "quota", message);
+    if (pro) {
+      throw new HttpError(429, "quota", kind === "photo"
+        ? t(lang, `Bạn đã chụp ${LIMITS.proPhotosPerDay} ảnh hôm nay. Lượt mới sẽ có vào ngày mai.`, `You've taken ${LIMITS.proPhotosPerDay} photos today. More arrive tomorrow.`)
+        : t(lang, `Bạn đã hỏi ${LIMITS.proChatsPerDay} câu hôm nay. Lượt mới sẽ có vào ngày mai.`, `You've asked ${LIMITS.proChatsPerDay} questions today. More arrive tomorrow.`));
+    }
+    // 402 tells the app to offer Pro.
+    throw new HttpError(402, "pro_required", kind === "photo"
+      ? t(lang, `Bạn đã dùng hết ${LIMITS.freePhotosPerDay} ảnh AI miễn phí hôm nay. Nâng cấp CaloCare Pro để chụp thoải mái, hoặc quay lại vào ngày mai.`,
+          `You've used today's ${LIMITS.freePhotosPerDay} free AI photos. Upgrade to CaloCare Pro to snap every meal, or come back tomorrow.`)
+      : t(lang, `Bạn đã dùng hết ${LIMITS.freeChatsPerDay} câu hỏi miễn phí hôm nay. Nâng cấp CaloCare Pro để hỏi coach thoải mái, hoặc quay lại vào ngày mai.`,
+          `You've used today's ${LIMITS.freeChatsPerDay} free questions. Upgrade to CaloCare Pro to ask the coach as much as you like, or come back tomorrow.`));
   }
 
   // Global ceiling, stored in the same table under a reserved key.
@@ -573,7 +594,22 @@ export default {
       const device = request.headers.get("x-device") ?? "";
       if (!/^[0-9a-f]{64}$/.test(device)) throw new HttpError(400, "bad_request", "Invalid device");
 
-      if (request.method === "GET" && url.pathname === "/v1/quota") return json({ quota: quotaView(await usage(env.DB, device)) });
+      if (request.method === "GET" && url.pathname === "/v1/quota") return json({ quota: await quotaFor(env, device) });
+      // A purchase made in the app: checked with the store, then linked to this device.
+      if (request.method === "POST" && url.pathname === "/v1/pro") {
+        const body: any = await request.json().catch(() => null);
+        try {
+          await activate(env, device, body);
+        } catch (e) {
+          if (!(e instanceof ProError)) throw e;
+          const status = e.code === "store_unavailable" || e.code === "not_configured" ? 503 : e.code === "too_many_devices" ? 409 : 400;
+          throw new HttpError(status, e.code, e.code === "too_many_devices"
+            ? t(lang, "Gói Pro này đang dùng trên quá nhiều thiết bị.", "This Pro subscription is already in use on too many devices.")
+            : status === 503 ? t(lang, "Chưa kiểm tra được giao dịch với cửa hàng. Hãy thử lại sau.", "Couldn't check the purchase with the store. Please try again later.")
+            : t(lang, "Giao dịch không hợp lệ.", "This purchase isn't valid."));
+        }
+        return json({ quota: await quotaFor(env, device) });
+      }
       // The app keeps its own copy of the library and asks only for what changed since its last sync.
       if (request.method === "GET" && url.pathname === "/v1/dishes") return json(await changesSince(env.DB, Number(url.searchParams.get("since")) || 0));
 
@@ -601,7 +637,7 @@ export default {
       if (url.pathname === "/v1/estimate" && typeof body?.name === "string" && isPlainName(body.name)) {
         const hit = await cachedEstimate(env.DB, body.name, lang);
         // Costs nothing, so it does not draw on the user's allowance either.
-        if (hit) return json({ result: hit, quota: quotaView(await usage(env.DB, device)), usage: { input_tokens: 0, output_tokens: 0 }, cached: true });
+        if (hit) return json({ result: hit, quota: await quotaFor(env, device), usage: { input_tokens: 0, output_tokens: 0 }, cached: true });
       }
       await reserve(env, device, handler.kind, lang);
       try {
@@ -626,7 +662,7 @@ export default {
         const spend: Spend = { input_tokens: 0, output_tokens: 0, cache_read_tokens: 0, cache_write_tokens: 0 };
         const result = await handler.run(client, env, body, spend, lang);
         console.log("spend", url.pathname, spend);
-        return json({ result, quota: quotaView(await usage(env.DB, device)), usage: spend });
+        return json({ result, quota: await quotaFor(env, device), usage: spend });
       } catch (e) {
         await refund(env, device, handler.kind);
         throw e;

@@ -3,13 +3,16 @@ import SwiftUI
 @main
 struct CaloCareApp: App {
     @StateObject private var store = AppStore()
+    @StateObject private var pro = ProStore()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(store)
+                .environmentObject(pro)
                 .tint(Palette.green)
                 .task { await store.syncLibrary() }
+                .task { if !Demo.active { await pro.refresh() } }
         }
     }
 }
@@ -25,6 +28,7 @@ enum Palette {
 
 struct RootView: View {
     @EnvironmentObject var store: AppStore
+    @EnvironmentObject var pro: ProStore
     @State private var tab = Demo.tab
 
     var body: some View {
@@ -52,6 +56,7 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: store.toast)
+        .sheet(isPresented: $pro.showPaywall) { ProView() }
     }
 }
 
