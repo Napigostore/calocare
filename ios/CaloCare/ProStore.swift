@@ -26,8 +26,9 @@ final class ProStore: ObservableObject {
 
     var plans: [Plan] {
         if Demo.active {
-            return [Plan(id: "calocare.pro.yearly", yearly: true, displayPrice: Lang.en ? "$19.99" : "199.000 ₫", price: 19.99, trialDays: 7),
-                    Plan(id: "calocare.pro.monthly", yearly: false, displayPrice: Lang.en ? "$2.99" : "29.000 ₫", price: 2.99, trialDays: 0)]
+            // The prices set in App Store Connect (U.S. storefront).
+            return [Plan(id: "calocare.pro.yearly", yearly: true, displayPrice: "$19.99", price: 19.99, trialDays: 7),
+                    Plan(id: "calocare.pro.monthly", yearly: false, displayPrice: "$1.99", price: 1.99, trialDays: 0)]
         }
         return products.map { p in
             Plan(id: p.id, yearly: p.id == "calocare.pro.yearly", displayPrice: p.displayPrice, price: (p.price as NSDecimalNumber).doubleValue, trialDays: Self.trialDays(p))

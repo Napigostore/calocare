@@ -4,8 +4,10 @@
 
 | | Quốc tế (USD) | Việt Nam |
 |---|---|---|
-| Gói tháng | $2.99 | 29.000đ |
-| Gói năm | $19.99, dùng thử miễn phí 7 ngày | 199.000đ, dùng thử miễn phí 7 ngày |
+| Gói tháng | $1.99 | mức Apple/Google tự quy đổi |
+| Gói năm | $19.99, dùng thử miễn phí 7 ngày | mức tự quy đổi, dùng thử miễn phí 7 ngày |
+
+Apple không cho giá gói năm vượt quá một mức nhất định so với 12 tháng gói tháng, nên gói tháng là $1.99 (gói năm rẻ hơn khoảng 16%).
 
 **Miễn phí:**
 - 30 ảnh AI và 50 câu hỏi đầu tiên.
@@ -25,13 +27,13 @@ Bạn có thể đổi các con số này bất cứ lúc nào trong `server/src
    - **Gói cơ bản thứ nhất:**
      - Mã: `monthly`.
      - Tự động gia hạn, chu kỳ 1 tháng.
-     - Đặt giá 2,99 USD, bấm "Cập nhật giá cho mọi quốc gia".
-     - Sửa riêng Việt Nam thành 29.000 VND.
+     - Đặt giá 1,99 USD, bấm "Cập nhật giá cho mọi quốc gia".
+     - Giữ giá Việt Nam do Play tự quy đổi, hoặc sửa theo ý bạn.
      - Kích hoạt.
    - **Gói cơ bản thứ hai:**
      - Mã: `yearly`.
      - Chu kỳ 1 năm.
-     - Giá 19,99 USD, riêng Việt Nam 199.000 VND.
+     - Giá 19,99 USD.
      - Kích hoạt.
    - **Ưu đãi dùng thử:** trong gói `yearly`, chọn Thêm ưu đãi.
      - Mã ưu đãi: `trial7`.
@@ -68,11 +70,11 @@ Bạn có thể đổi các con số này bất cứ lúc nào trong `server/src
    - **Gói năm:**
      - Product ID: `calocare.pro.yearly` (phải đúng chính xác).
      - Thời hạn 1 năm, giá $19.99.
-     - Việt Nam chọn mức gần 199.000đ nhất.
+     - Việt Nam để Apple tự quy đổi.
    - **Gói tháng:**
      - Product ID: `calocare.pro.monthly`.
-     - Thời hạn 1 tháng, giá $2.99.
-     - Việt Nam chọn mức gần 29.000đ nhất.
+     - Thời hạn 1 tháng, giá $1.99.
+     - Việt Nam để Apple tự quy đổi.
    - **Với mỗi gói:**
      - Thêm Localization tiếng Anh và tiếng Việt: tên "CaloCare Pro" và mô tả ngắn, ví dụ "Chụp mọi bữa ăn, AI tính calo" / "Snap every meal, AI counts the calories".
      - Thêm ảnh chụp màn hình bảng nâng cấp Pro (Review Screenshot).
