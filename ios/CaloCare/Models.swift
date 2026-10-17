@@ -48,12 +48,50 @@ struct Profile: Codable, Hashable {
     var conditions: [String] = []
     var allergies: [String] = []
     var diet = Diet.none
+    // Optional: files saved by earlier versions do not have them.
+    var targetWeightKg: Double?
+    var region: String?
+    var kcalAdjust: Int?
+    var kcalAdjustDate: String?
+
+    var targetWeight: Double { targetWeightKg ?? weightKg }
+    /** Which cuisine menus and the food grid favour: "vn" or "intl". */
+    var cuisine: String { region ?? (Lang.en ? "intl" : "vn") }
+    var adjust: Int { kcalAdjust ?? 0 }
+}
+
+struct ExerciseEntry: Codable, Identifiable, Hashable {
+    var id: UUID
+    var date: String
+    var name: String
+    var emoji: String
+    var minutes: Int
+    var kcal: Int
+}
+
+struct WeightEntry: Codable, Hashable {
+    var date: String
+    var kg: Double
 }
 
 struct AppData: Codable {
     var profile = Profile()
     var customFoods: [Food] = []
     var entries: [LogEntry] = []
+    // Optional for the same reason as the new profile fields.
+    var exercises: [ExerciseEntry]?
+    var weights: [WeightEntry]?
+}
+
+enum Region {
+    static var all: [(id: String, label: String)] { [("vn", L("Việt Nam", "Vietnamese")), ("intl", L("Quốc tế / Âu Mỹ", "International / Western"))] }
+}
+
+enum Course {
+    static var labels: [String: String] {
+        ["soup": L("Canh / khai vị", "Soups & starters"), "veg": L("Rau", "Vegetables"), "protein": L("Đạm", "Protein"), "main": L("Món chính", "Mains"),
+         "fruit": L("Trái cây", "Fruit"), "dessert": L("Tráng miệng", "Desserts"), "drink": L("Đồ uống", "Drinks"), "snack": L("Ăn vặt", "Snacks")]
+    }
 }
 
 enum Goal {

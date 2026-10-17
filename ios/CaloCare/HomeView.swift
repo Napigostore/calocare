@@ -9,12 +9,28 @@ struct HomeView: View {
         let eaten = store.totals(entries)
         let target = Double(Nutrition.targetKcal(profile))
         let macros = Nutrition.macroTargets(profile)
-        let out = Nutrition.kcalOut(profile, store.activity)
+        let full = Nutrition.out(store.data, on: store.date, activity: store.activity)
+        let out = (total: full.total, active: full.active, measured: full.measured)
+        let cheer = Nutrition.cheer(store.data, on: store.date)
+        let streak = Nutrition.streak(store.data)
 
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
                     DayPicker()
+
+                    // Encouragement and the logging streak, as on Android.
+                    HStack(alignment: .top, spacing: 10) {
+                        Text(cheer.emoji).font(.title)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(cheer.text).font(.subheadline)
+                            if streak >= 2 { Text(L("🔥 Chuỗi \(streak) ngày ghi nhật ký", "🔥 \(streak)-day logging streak")).font(.caption).foregroundColor(.secondary) }
+                            if entries.isEmpty { Button(L("Thêm món", "Add food")) { store.tab = 1 }.buttonStyle(.borderedProminent).controlSize(.small) }
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(14)
+                    .background(Palette.green.opacity(0.12), in: RoundedRectangle(cornerRadius: 20))
 
                     Card {
                         HStack(spacing: 20) {
@@ -35,6 +51,13 @@ struct HomeView: View {
                         MacroBar(label: L("Chất béo", "Fat"), value: eaten.fat, target: macros.fat, color: Palette.fat)
                     }
 
+                    if Calendar.current.isDateInToday(store.date) { NextMealCard() }
+
+                    Card(L("🩺 Chuyên gia khuyên", "🩺 Expert tips")) {
+                        ForEach(Nutrition.tips(store.data, on: store.date, activity: store.activity).prefix(4), id: \.self) { Text("• " + $0).font(.subheadline) }
+                        Button(L("Hỏi AI", "Ask AI")) { store.tab = 4 }.buttonStyle(.bordered)
+                    }
+
                     Card(L("7 ngày gần đây", "Last 7 days")) { WeekBars(target: target) }
 
                     let flagged = entries.flatMap { e in Nutrition.warnings(tags: e.tags, profile: profile).map { HealthWarning(danger: $0.danger, text: "\(e.label): \($0.text)") } }
@@ -53,6 +76,33 @@ struct HomeView: View {
                 Task { await store.refreshHealth() }
             }
             .navigationTitle(profile.name.isEmpty ? L("Xin chào 👋", "Hi 👋") : L("Xin chào, \(profile.name) 👋", "Hi, \(profile.name) 👋"))
+            .toolbar { Button { store.showProfile = true } label: { Image(systemName: "person.crop.circle").font(.title3) }.accessibilityLabel(L("Hồ sơ", "Profile")) }
+        }
+    }
+}
+
+/// "What to eat next": the next meal not yet logged, sized from the calories left, with one-tap logging.
+private struct NextMealCard: View {
+    @EnvironmentObject var store: AppStore
+    @State private var seed = 0
+
+    var body: some View {
+        let next = MenuPlanner.nextMeal(store.data, foods: store.foods, seed: seed + Calendar.current.component(.hour, from: Date()))
+        Card(L("🍽️ Bữa tiếp theo nên ăn · ", "🍽️ What to eat next · ") + Meal.label(next.meal.meal)) {
+            Text(next.note).font(.caption).foregroundColor(.secondary)
+            ForEach(next.meal.items, id: \.self) { item in
+                HStack {
+                    Text("\(item.food.emoji) \(item.food.label) × \(formatQty(item.qty))").font(.subheadline)
+                    Spacer()
+                    Text("\(Int((Double(item.food.kcal) * item.qty).rounded())) kcal").font(.caption).foregroundColor(.secondary)
+                }
+            }
+            HStack {
+                if !next.meal.items.isEmpty {
+                    Button(L("Tôi ăn bữa này · \(next.meal.kcal) kcal", "I'll eat this · \(next.meal.kcal) kcal")) { store.addPlanned(next.meal) }.buttonStyle(.borderedProminent)
+                }
+                Button(L("Đổi món", "Shuffle")) { seed += 1 }.buttonStyle(.bordered)
+            }
         }
     }
 }

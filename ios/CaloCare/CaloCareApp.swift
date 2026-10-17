@@ -29,17 +29,19 @@ enum Palette {
 struct RootView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var pro: ProStore
-    @State private var tab = Demo.tab
 
     var body: some View {
         ZStack(alignment: .bottom) {
             if store.data.profile.onboarded {
-                TabView(selection: $tab) {
+                // Same five tabs as the Android app; the profile opens from the Today screen.
+                TabView(selection: $store.tab) {
                     HomeView().tabItem { Label(L("Hôm nay", "Today"), systemImage: "house.fill") }.tag(0)
                     FoodView().tabItem { Label(L("Ăn uống", "Food"), systemImage: "fork.knife") }.tag(1)
-                    CoachView().tabItem { Label("Coach", systemImage: "bubble.left.and.bubble.right.fill") }.tag(2)
-                    ProfileView().tabItem { Label(L("Hồ sơ", "Profile"), systemImage: "person.fill") }.tag(3)
+                    MenuView().tabItem { Label(L("Thực đơn", "Menu"), systemImage: "menucard.fill") }.tag(2)
+                    ProgressScreen().tabItem { Label(L("Tiến độ", "Progress"), systemImage: "chart.xyaxis.line") }.tag(3)
+                    CoachView().tabItem { Label("Coach", systemImage: "bubble.left.and.bubble.right.fill") }.tag(4)
                 }
+                .sheet(isPresented: $store.showProfile) { ProfileView() }
             } else {
                 NavigationStack {
                     ProfileForm(title: "🥗 CaloCare", saveLabel: L("Bắt đầu", "Get started"))

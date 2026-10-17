@@ -14,6 +14,9 @@ final class AppStore: ObservableObject {
     @Published var healthLinked = UserDefaults.standard.bool(forKey: "healthLinked")
     /// Activity for the selected day, from Apple Health.
     @Published var activity: DayActivity?
+    /// The tab on screen, so one screen can send the user to another (e.g. "Ask AI" opens the coach).
+    @Published var tab = Demo.tab
+    @Published var showProfile = Demo.screen == "profile"
 
     private var libraryVersion: Int
     private let folder: URL
@@ -98,6 +101,56 @@ final class AppStore: ObservableObject {
         if let encoded = try? JSONEncoder().encode(LibraryCache(version: update.version, foods: merged)) {
             try? encoded.write(to: folder.appendingPathComponent("library.json"), options: .atomic)
         }
+    }
+
+    // MARK: Weight, workouts, adaptive target
+
+    func logWeight(_ kg: Double) {
+        let key = dayKey(Date())
+        update { d in
+            var weights = d.weights ?? []
+            weights.removeAll { $0.date == key }
+            weights.append(WeightEntry(date: key, kg: kg))
+            d.weights = weights.sorted { $0.date < $1.date }
+            d.profile.weightKg = kg
+        }
+        say(L("Đã lưu \(formatQty(kg)) kg", "Saved \(formatQty(kg)) kg"))
+    }
+
+    func addExercise(name: String, emoji: String, met: Double, minutes: Int) {
+        let kcal = Nutrition.exerciseKcal(met: met, weightKg: data.profile.weightKg, minutes: minutes)
+        update { d in d.exercises = (d.exercises ?? []) + [ExerciseEntry(id: UUID(), date: dayKey(date), name: name, emoji: emoji, minutes: minutes, kcal: kcal)] }
+        say("\(emoji) \(name) \(minutes) " + L("phút", "min") + " · −\(kcal) kcal")
+    }
+
+    func removeExercise(_ id: UUID) {
+        update { d in d.exercises?.removeAll { $0.id == id } }
+    }
+
+    func applyAdaptive(_ delta: Int) {
+        update { d in
+            d.profile.kcalAdjust = d.profile.adjust + delta
+            d.profile.kcalAdjustDate = dayKey(Date())
+        }
+        say(L("Đã điều chỉnh mục tiêu \(delta > 0 ? "+" : "")\(delta) kcal/ngày", "Target adjusted by \(delta > 0 ? "+" : "")\(delta) kcal/day"))
+    }
+
+    /// Logs a suggested meal in one go.
+    func addPlanned(_ meal: MenuPlanner.PlannedMeal) {
+        for item in meal.items { add(item.food, qty: item.qty, to: meal.meal, quiet: true) }
+        say(L("Đã thêm \(meal.items.count) món vào bữa \(Meal.label(meal.meal).lowercased())", "Added \(meal.items.count) item(s) to \(Meal.label(meal.meal).lowercased())"))
+    }
+
+    /// The foods this person logs most at this meal, for the "your usual foods" row.
+    func frequentFoods(for meal: String, limit: Int = 8) -> [Food] {
+        var counts: [String: Int] = [:]
+        for e in data.entries.suffix(400) where e.meal == meal { counts[e.foodId, default: 0] += 1 }
+        let byId = Dictionary(foods.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        return counts.filter { $0.value >= 2 }.sorted { $0.value > $1.value }.prefix(limit).compactMap { byId[$0.key] }
+    }
+
+    func course(of entry: LogEntry) -> String {
+        foods.first { $0.id == entry.foodId }?.course ?? "main"
     }
 
     // MARK: Apple Health

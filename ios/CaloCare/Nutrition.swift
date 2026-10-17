@@ -50,7 +50,7 @@ enum Nutrition {
         default: break
         }
         // Never recommend a crash diet: below these floors micronutrient needs are hard to meet.
-        return Int(max(raw, p.male ? 1500 : 1200).rounded())
+        return Int(max(raw + Double(p.adjust), p.male ? 1500 : 1200).rounded())
     }
 
     static func macroTargets(_ p: Profile) -> Macros {
@@ -59,16 +59,23 @@ enum Nutrition {
             Macros(protein: Int((kcal * pr / 4).rounded()), carbs: Int((kcal * c / 4).rounded()), fat: Int((kcal * f / 9).rounded()))
         }
         if p.diet == "keto" { return split(0.25, 0.08, 0.67) }
+        let m: Macros
         switch p.goal {
-        case Goal.lose: return split(0.30, 0.40, 0.30)
-        case Goal.gain: return split(0.20, 0.55, 0.25)
-        case Goal.run: return split(0.18, 0.60, 0.22)
+        case Goal.lose: m = split(0.30, 0.40, 0.30)
+        case Goal.gain: m = split(0.20, 0.55, 0.25)
+        case Goal.run: m = split(0.18, 0.60, 0.22)
         case Goal.gym:
             let protein = Int((2 * p.weightKg).rounded())
             let fat = Int((kcal * 0.25 / 9).rounded())
-            return Macros(protein: protein, carbs: max(0, (Int(kcal) - protein * 4 - fat * 9) / 4), fat: fat)
-        default: return split(0.20, 0.50, 0.30)
+            m = Macros(protein: protein, carbs: max(0, (Int(kcal) - protein * 4 - fat * 9) / 4), fat: fat)
+        default: m = split(0.20, 0.50, 0.30)
         }
+        // Diabetes: keep carbohydrate at or below ~45% of energy and move the rest to protein.
+        if p.conditions.contains("diabetes"), Double(m.carbs * 4) > kcal * 0.45 {
+            let carbs = Int((kcal * 0.45 / 4).rounded())
+            return Macros(protein: m.protein + (m.carbs - carbs), carbs: carbs, fat: m.fat)
+        }
+        return m
     }
 
     /// Conflicts between what a food contains and what this person declared.

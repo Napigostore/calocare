@@ -12,16 +12,36 @@ struct FoodView: View {
     @State private var scan: MealScan?
     @State private var editing: Food?
 
+    @State private var category = "all"
+    @State private var online: [Food] = []
+    @State private var onlineBusy = false
+
     private let columns = [GridItem(.adaptive(minimum: 100), spacing: 10)]
+
+    private static var categories: [(id: String, label: String)] {
+        [("all", L("Tất cả", "All")), ("main", L("Món chính", "Mains")), ("protein", L("Đạm", "Protein")), ("veg", L("Rau & canh", "Veg & soups")),
+         ("fruit", L("Trái cây", "Fruit")), ("drink", L("Đồ uống", "Drinks")), ("snack", L("Ăn vặt", "Snacks")), ("mine", L("Của tôi", "Mine"))]
+    }
+
+    private func inCategory(_ food: Food) -> Bool {
+        switch category {
+        case "all": return true
+        case "veg": return food.course == "veg" || food.course == "soup"
+        case "snack": return food.course == "snack" || food.course == "dessert"
+        case "mine": return food.custom
+        default: return food.course == category
+        }
+    }
 
     var body: some View {
         let searching = !query.trimmingCharacters(in: .whitespaces).isEmpty
         let folded = FoodMatcher.fold(query)
-        let matches = searching ? store.foods.filter { FoodMatcher.fold($0.name).contains(folded) || FoodMatcher.fold($0.label).contains(folded) } : store.foods
+        let matches = searching ? store.foods.filter { FoodMatcher.fold($0.name).contains(folded) || FoodMatcher.fold($0.label).contains(folded) } : store.foods.filter(inCategory)
+        let usual = searching || category != "all" ? [] : store.frequentFoods(for: store.meal)
         let matchIds = Set(matches.map { $0.id })
         let similar = searching ? FoodMatcher.ranked(query, in: store.foods).filter { $0.score >= 0.3 && !matchIds.contains($0.food.id) }.prefix(6).map { $0.food } : []
         let mealEntries = store.todaysEntries.filter { $0.meal == store.meal }
-        let counts = Dictionary(grouping: mealEntries, by: { $0.foodId }).mapValues { $0.reduce(0) { $0 + $1.qty } }
+        let counts: [String: Double] = Dictionary(grouping: mealEntries, by: { $0.foodId }).mapValues { $0.reduce(0) { $0 + $1.qty } }
 
         NavigationStack {
             ScrollView {
@@ -45,20 +65,43 @@ struct FoodView: View {
 
                     if !searching && !mealEntries.isEmpty { MealLog(entries: mealEntries) }
 
-                    Text(searching ? L("Món khớp tên", "Matching foods") : L("Đang chọn cho bữa \(Meal.label(store.meal).lowercased()) · chạm = +1 phần", "Adding to \(Meal.label(store.meal).lowercased()) · tap = +1 serving"))
+                    if !searching {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(Self.categories, id: \.id) { c in
+                                    Button(c.label) { category = c.id }
+                                        .buttonStyle(.bordered).tint(category == c.id ? Palette.green : .secondary)
+                                }
+                            }
+                        }
+                    }
+                    if !usual.isEmpty {
+                        Text(L("⭐ Món quen của bạn", "⭐ Your usual foods")).font(.headline)
+                        LazyVGrid(columns: columns, spacing: 10) {
+                            ForEach(usual) { food in FoodTile(food: food, count: counts[food.id] ?? 0) { editing = $0 } }
+                        }
+                    }
+
+                    Text(searching ? L("Món khớp tên", "Matching foods") : L("Đang chọn cho bữa \(Meal.label(store.meal).lowercased()) · chạm = +1 phần · giữ để sửa", "Adding to \(Meal.label(store.meal).lowercased()) · tap = +1 serving · hold to edit"))
                         .font(.caption).foregroundColor(.secondary)
                     LazyVGrid(columns: columns, spacing: 10) {
-                        ForEach(matches) { food in FoodTile(food: food, count: counts[food.id] ?? 0) }
+                        ForEach(matches) { food in FoodTile(food: food, count: counts[food.id] ?? 0) { editing = $0 } }
                     }
 
                     if searching {
                         if !similar.isEmpty {
                             Text(L("Món gần giống", "Similar foods")).font(.headline)
                             LazyVGrid(columns: columns, spacing: 10) {
-                                ForEach(similar) { food in FoodTile(food: food, count: counts[food.id] ?? 0) }
+                                ForEach(similar) { food in FoodTile(food: food, count: counts[food.id] ?? 0) { editing = $0 } }
                             }
                         }
                         newDishCard
+                        if !online.isEmpty {
+                            Text(L("🌐 Sản phẩm trên Open Food Facts", "🌐 Products on Open Food Facts")).font(.headline)
+                            LazyVGrid(columns: columns, spacing: 10) {
+                                ForEach(online) { food in FoodTile(food: food, count: counts[food.id] ?? 0) { editing = $0 } }
+                            }
+                        }
                     }
                 }
                 .padding(16)
@@ -96,8 +139,9 @@ struct FoodView: View {
                                    protein: 0, carbs: 0, fat: 0, course: "main", tags: [], region: "all", custom: true)
                 }
                 .buttonStyle(.bordered)
-                if busy { ProgressView() }
+                if busy || onlineBusy { ProgressView() }
             }
+            Button(L("🌐 Tìm sản phẩm đóng gói", "🌐 Find packaged product")) { searchOnline() }.buttonStyle(.bordered).disabled(onlineBusy)
             if let food = suggestion {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("\(food.emoji) \(food.label)").font(.headline)
@@ -114,6 +158,21 @@ struct FoodView: View {
                 .background(Palette.green.opacity(0.15), in: RoundedRectangle(cornerRadius: 14))
             }
             if !note.isEmpty { Text(note).font(.caption).foregroundColor(.secondary) }
+        }
+    }
+
+    private func searchOnline() {
+        let text = query.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty else { return }
+        onlineBusy = true
+        Task {
+            do {
+                online = try await FoodSearch.search(text)
+                if online.isEmpty { note = L("Không thấy sản phẩm nào trên Open Food Facts. Thử “AI gợi ý calo”.", "Nothing found on Open Food Facts. Try “AI calorie estimate”.") }
+            } catch {
+                note = L("Không tìm được trên mạng. Kiểm tra kết nối.", "Online search failed. Check your connection.")
+            }
+            onlineBusy = false
         }
     }
 
@@ -156,6 +215,7 @@ private struct FoodTile: View {
     @EnvironmentObject var store: AppStore
     var food: Food
     var count: Double
+    var onEdit: (Food) -> Void = { _ in }
 
     var body: some View {
         Button { store.add(food) } label: {
@@ -177,6 +237,11 @@ private struct FoodTile: View {
             }
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            Button { store.add(food) } label: { Label(L("Thêm 1 phần", "Add a serving"), systemImage: "plus") }
+            Button { store.add(food, qty: 0.5) } label: { Label(L("Thêm nửa phần", "Add half a serving"), systemImage: "circle.lefthalf.filled") }
+            Button { onEdit(food) } label: { Label(L("Sửa thông tin món", "Edit food"), systemImage: "pencil") }
+        }
     }
 }
 
@@ -184,6 +249,7 @@ private struct FoodTile: View {
 private struct MealLog: View {
     @EnvironmentObject var store: AppStore
     var entries: [LogEntry]
+    @State private var showOrder = false
 
     var body: some View {
         Card(L("Bữa \(Meal.label(store.meal).lowercased()) · \(Int(store.totals(entries).kcal)) kcal", "\(Meal.label(store.meal)) · \(Int(store.totals(entries).kcal)) kcal")) {
@@ -200,6 +266,18 @@ private struct MealLog: View {
                     Button { store.changeQty(entry, by: 0.5) } label: { Image(systemName: "plus.circle.fill") }.buttonStyle(.plain)
                 }
                 .foregroundColor(.primary)
+            }
+            if entries.count >= 2 {
+                Button(showOrder ? L("Ẩn thứ tự", "Hide order") : L("🍽️ Nên ăn theo thứ tự", "🍽️ Best eating order")) { showOrder.toggle() }.font(.subheadline)
+                if showOrder {
+                    let steps = Nutrition.eatingOrder(entries, courseOf: store.course(of:), profile: store.data.profile)
+                    ForEach(steps.indices, id: \.self) { i in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(i + 1). \(steps[i].emoji) \(steps[i].name)").font(.subheadline.weight(.medium))
+                            Text(steps[i].why).font(.caption).foregroundColor(.secondary)
+                        }
+                    }
+                }
             }
         }
     }

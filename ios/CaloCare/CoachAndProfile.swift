@@ -71,6 +71,9 @@ struct ProfileView: View {
     @EnvironmentObject var pro: ProStore
     @State private var quota: Quota?
     @State private var confirmWipe = false
+    // The profile is itself a sheet, so the Pro offer is presented from here rather than from the root.
+    @State private var showPro = false
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         let p = store.data.profile
@@ -105,15 +108,19 @@ struct ProfileView: View {
                         Text(L("Bản này chưa được cấu hình máy chủ AI.", "This build has no AI server configured.")).foregroundColor(.secondary)
                     }
                     if quota?.pro == true || pro.isPro {
-                        Button(L("✨ Bạn đang dùng Pro", "✨ You're on Pro")) { pro.showPaywall = true }
+                        Button(L("✨ Bạn đang dùng Pro", "✨ You're on Pro")) { showPro = true }
                     } else {
                         Text(L("Miễn phí: 30 ảnh AI và 50 câu hỏi đầu tiên, sau đó mỗi ngày \(quota?.free_photos_per_day ?? 2) ảnh và \(quota?.free_chats_per_day ?? 5) câu hỏi.",
                                "Free: your first 30 AI photos and 50 questions, then \(quota?.free_photos_per_day ?? 2) photos and \(quota?.free_chats_per_day ?? 5) questions a day.")).font(.caption).foregroundColor(.secondary)
-                        Button(L("✨ Nâng cấp Pro · chụp mọi bữa ăn", "✨ Upgrade to Pro · snap every meal")) { pro.showPaywall = true }.bold()
+                        Button(L("✨ Nâng cấp Pro · chụp mọi bữa ăn", "✨ Upgrade to Pro · snap every meal")) { showPro = true }.bold()
                     }
                 }
                 Section(L("Quyền riêng tư & dữ liệu", "Privacy & data")) {
                     Text(L("Hồ sơ và nhật ký chỉ nằm trên thiết bị này. Ảnh, câu hỏi và tên món bạn tạo được gửi tới máy chủ CaloCare khi bạn dùng tính năng AI. Dữ liệu Apple Health chỉ được đọc và dùng trên máy này, không gửi đi đâu.", "Your profile and log stay on this device. Photos, questions and names of foods you create go to CaloCare's server when you use AI features. Apple Health data is only read and used on this device and is never sent anywhere.")).font(.caption)
+                    Link(L("Chính sách quyền riêng tư", "Privacy policy"),
+                         destination: URL(string: "https://calocare-api.calocare-api.workers.dev/privacy" + (Lang.en ? "?lang=en" : ""))!)
+                    Text(L("Dữ liệu sản phẩm đóng gói: Open Food Facts (openfoodfacts.org), giấy phép ODbL.", "Packaged product data: Open Food Facts (openfoodfacts.org), ODbL licence."))
+                        .font(.caption2).foregroundColor(.secondary)
                     Button(L("Xóa toàn bộ dữ liệu", "Delete all data"), role: .destructive) { confirmWipe = true }
                 }
                 Section {
@@ -121,6 +128,8 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle(L("Hồ sơ", "Profile"))
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("Xong", "Done")) { dismiss() } } }
+            .sheet(isPresented: $showPro) { ProView() }
             .task { if !Demo.active { quota = await API.shared.refreshQuota() } }
             .confirmationDialog(L("Xóa hồ sơ, nhật ký và món tự tạo khỏi thiết bị? Không thể khôi phục.", "Delete your profile, log and custom foods from this device? This can't be undone."), isPresented: $confirmWipe, titleVisibility: .visible) {
                 Button(L("Xóa", "Delete"), role: .destructive) { store.wipe() }
@@ -157,6 +166,7 @@ struct ProfileForm: View {
             }
             Section(L("Mục tiêu", "Goal")) {
                 Picker(L("Mục tiêu", "Goal"), selection: $draft.goal) { ForEach(Goal.all, id: \.id) { Text($0.label).tag($0.id) } }
+                numberRow(L("Cân nặng mục tiêu (kg)", "Target weight (kg)"), Binding(get: { draft.targetWeight }, set: { draft.targetWeightKg = $0 }))
                 if draft.goal == Goal.lose || draft.goal == Goal.gain {
                     Picker(L("Tốc độ mỗi tuần", "Rate per week"), selection: $draft.weeklyRateKg) { Text(L("0,25 kg", "0.25 kg")).tag(0.25); Text(L("0,5 kg", "0.5 kg")).tag(0.5); Text(L("0,75 kg", "0.75 kg")).tag(0.75) }.pickerStyle(.segmented)
                 }
@@ -169,6 +179,9 @@ struct ProfileForm: View {
             }
             Section(L("Chế độ ăn", "Diet")) {
                 Picker(L("Chế độ ăn", "Diet"), selection: $draft.diet) { ForEach(Diet.all, id: \.id) { Text($0.label).tag($0.id) } }
+                Picker(L("Ẩm thực vùng", "Cuisine"), selection: Binding(get: { draft.cuisine }, set: { draft.region = $0 })) {
+                    ForEach(Region.all, id: \.id) { Text($0.label).tag($0.id) }
+                }
             }
             Section {
                 Button(saveLabel) {
