@@ -53,6 +53,21 @@ def check():
                   + (' — missing: ' + ', '.join(missing) if missing else ''))
 
 
+def notes_only():
+    """Updates the App Review notes (ios/fastlane/review_notes.txt) and turns off the demo-login requirement."""
+    app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
+    version = call('GET', f'/v1/apps/{app_id}/appStoreVersions?filter[platform]=IOS')['data'][0]
+    detail = call('GET', f'/v1/appStoreVersions/{version["id"]}/appStoreReviewDetail').get('data')
+    text = open(asc.os.path.join(asc.ROOT, 'review_notes.txt'), encoding='utf-8').read().strip()[:4000]
+    attributes = {'demoAccountRequired': False, 'notes': text}
+    if detail:
+        call('PATCH', f'/v1/appStoreReviewDetails/{detail["id"]}', {'data': {'type': 'appStoreReviewDetails', 'id': detail['id'], 'attributes': attributes}})
+    else:
+        call('POST', '/v1/appStoreReviewDetails', {'data': {'type': 'appStoreReviewDetails', 'attributes': attributes,
+             'relationships': {'appStoreVersion': {'data': {'type': 'appStoreVersions', 'id': version['id']}}}}})
+    print(f'::notice title=TestFlight::App Review notes updated ({len(text)} characters) for version {version["attributes"]["versionString"]}')
+
+
 def reset():
     """Empties unsubmitted review submissions, so the version page can take its first subscriptions again."""
     app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
@@ -96,10 +111,7 @@ def main(version_string):
 
     # App Review details: CaloCare has no accounts, so no demo login; notes tell the reviewer where things are.
     detail = call('GET', f'/v1/appStoreVersions/{version["id"]}/appStoreReviewDetail').get('data')
-    notes = ('No account or sign-in is needed. Meal photo analysis: Food tab, camera button. CaloCare Pro subscriptions: '
-             'Profile tab, "Upgrade to Pro" (also shown when the free daily AI allowance is used up). Apple Health is optional: '
-             'Profile tab, "Connect Apple Health"; it is read only and never leaves the device. The app is in English or Vietnamese '
-             'following the device language.')
+    notes = open(asc.os.path.join(asc.ROOT, 'review_notes.txt'), encoding='utf-8').read().strip()[:4000]
     attributes = {'demoAccountRequired': False, 'notes': notes}
     if detail:
         call('PATCH', f'/v1/appStoreReviewDetails/{detail["id"]}', {'data': {'type': 'appStoreReviewDetails', 'id': detail['id'], 'attributes': attributes}})
@@ -156,7 +168,7 @@ def main(version_string):
 
 if __name__ == '__main__':
     try:
-        {'--reset': reset, '--check': check}.get(sys.argv[1], lambda: main(sys.argv[1]))()
+        {'--reset': reset, '--check': check, '--notes': notes_only}.get(sys.argv[1], lambda: main(sys.argv[1]))()
     except SystemExit:
         raise
     except Exception:

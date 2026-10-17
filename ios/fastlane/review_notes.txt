@@ -1,0 +1,22 @@
+PURPOSE AND AUDIENCE
+CaloCare is a calorie and nutrition tracker for adults who want to lose, maintain or gain weight, build muscle or train for running. Mainstream trackers rarely know Vietnamese dishes and make logging tedious. CaloCare has a built-in table of 240+ Vietnamese and international foods logged with one tap, estimates a meal's calories from a photo, gives health warnings for declared conditions and allergies (diabetes, high blood pressure, gout, high cholesterol, food allergies, vegetarian/keto/halal diets), and offers an AI nutrition coach. It gives general wellness estimates only; it is not a medical device and does not diagnose or treat anything.
+
+HOW TO USE (no account, no login, no sample files needed)
+1. First launch: fill in the short profile (name optional, sex, birth year, height, weight, activity, goal) and tap "Get started".
+2. Today tab: calories eaten vs target and burned, macros, 7-day chart.
+3. Food tab: tap any food to add a serving to the selected meal; search by name; the camera button photographs a meal and the AI lists the dishes with calories, which can be adjusted before adding them.
+4. Coach tab: ask nutrition or training questions; answers use the profile and the last 7 days of logs.
+5. Profile tab: "Connect Apple Health" (optional, read-only: active energy, steps, exercise minutes, sleep, weight, height; the data stays on the device). "Upgrade to Pro" opens the subscription screen.
+Free use includes the first 30 AI photos and 50 coach questions, then 2 photos and 5 questions a day. CaloCare Pro (auto-renewable subscriptions com.napigo.calocare.pro.Monthly and com.napigo.calocare.pro.yearly, yearly with a 7-day free trial) raises this to 40 photos and 100 questions a day. Manual logging, menus, charts and Apple Health are always free.
+
+EXTERNAL SERVICES
+- CaloCare server (Cloudflare Workers, our own): forwards AI requests, counts the daily allowance per anonymous device hash, serves the shared food library, and verifies App Store transactions with Apple's signature. It stores no photos, chats or profiles.
+- Anthropic Claude API (AI provider): recognises foods in meal photos, estimates foods described in text, and answers coach questions. Reached only through our server.
+- Apple StoreKit (subscriptions) and Apple HealthKit (optional, on-device).
+No accounts, advertising or analytics SDKs.
+
+REGIONS
+The app works the same in every region. Its interface is in English or Vietnamese following the device language; English-speaking users see international foods first, Vietnamese users see Vietnamese dishes first.
+
+REGULATION AND THIRD-PARTY MATERIAL
+The app is not in a regulated industry and is not a medical device. It contains no protected third-party material; nutrition values are our own estimates based on public nutrition tables. Photos analysed are taken by the user.
