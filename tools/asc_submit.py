@@ -72,6 +72,20 @@ def main(version_string):
     version = call('GET', f'/v1/apps/{app_id}/appStoreVersions?filter[platform]=IOS&filter[versionString]={version_string}')['data'][0]
     print('version', version_string, version['attributes'].get('appStoreState'))
 
+    # A submission still waiting for review without the subscriptions is withdrawn first, so the version can be
+    # sent again with them.
+    waiting = call('GET', f'/v1/apps/{app_id}/reviewSubmissions?filter[platform]=IOS&filter[state]=WAITING_FOR_REVIEW')['data']
+    for old in waiting:
+        call_ok('PATCH', f'/v1/reviewSubmissions/{old["id"]}', {'data': {'type': 'reviewSubmissions', 'id': old['id'], 'attributes': {'canceled': True}}}, allow=(409,))
+        print(f'::notice title=TestFlight::Withdrew submission {old["id"]} to resend it with the subscriptions')
+    if waiting:
+        for _ in range(30):
+            state = call('GET', f'/v1/appStoreVersions/{version["id"]}')['data']['attributes'].get('appStoreState')
+            if state not in ('WAITING_FOR_REVIEW', 'IN_REVIEW'):
+                break
+            asc.time.sleep(10)
+        print('version state now', state)
+
     # The newest processed build of this version.
     builds = call('GET', f'/v1/builds?filter[app]={app_id}&filter[preReleaseVersion.version]={version_string}&filter[processingState]=VALID&sort=-uploadedDate&limit=1')['data']
     if not builds:
