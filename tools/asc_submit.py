@@ -53,6 +53,25 @@ def check():
                   + (' — missing: ' + ', '.join(missing) if missing else ''))
 
 
+def attach_build():
+    """Puts the newest processed build on the version being prepared, waiting up to an hour for processing,
+    and refreshes the App Review notes."""
+    app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
+    version = call('GET', f'/v1/apps/{app_id}/appStoreVersions?filter[platform]=IOS')['data'][0]
+    newest = call('GET', f'/v1/builds?filter[app]={app_id}&sort=-uploadedDate&limit=1')['data'][0]
+    for _ in range(60):
+        state = newest['attributes'].get('processingState')
+        if state != 'PROCESSING':
+            break
+        asc.time.sleep(60)
+        newest = call('GET', f'/v1/builds/{newest["id"]}')['data']
+    if newest['attributes'].get('processingState') != 'VALID':
+        fail(f'Build {newest["attributes"]["version"]} is {newest["attributes"].get("processingState")}, not ready to attach')
+    call('PATCH', f'/v1/appStoreVersions/{version["id"]}/relationships/build', {'data': {'type': 'builds', 'id': newest['id']}})
+    print(f'::notice title=TestFlight::Build {newest["attributes"]["version"]} attached to version {version["attributes"]["versionString"]}')
+    notes_only()
+
+
 def notes_only():
     """Updates the App Review notes (ios/fastlane/review_notes.txt) and turns off the demo-login requirement."""
     app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
@@ -168,7 +187,7 @@ def main(version_string):
 
 if __name__ == '__main__':
     try:
-        {'--reset': reset, '--check': check, '--notes': notes_only}.get(sys.argv[1], lambda: main(sys.argv[1]))()
+        {'--reset': reset, '--check': check, '--notes': notes_only, '--build': attach_build}.get(sys.argv[1], lambda: main(sys.argv[1]))()
     except SystemExit:
         raise
     except Exception:

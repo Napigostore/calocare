@@ -313,7 +313,8 @@ jobs:
   unsubmit:
     # [unsubmit]: empties draft review submissions. [check]: lists what each subscription still lacks.
     # [notes]: updates the App Review notes from ios/fastlane/review_notes.txt.
-    if: ${{ contains(github.event.head_commit.message, '[unsubmit]') || contains(github.event.head_commit.message, '[check]') || contains(github.event.head_commit.message, '[notes]') }}
+    # [attach]: puts the newest processed build on the version, then updates the notes.
+    if: ${{ contains(github.event.head_commit.message, '[unsubmit]') || contains(github.event.head_commit.message, '[check]') || contains(github.event.head_commit.message, '[notes]') || contains(github.event.head_commit.message, '[attach]') }}
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -324,4 +325,4 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           python3 -m pip install --quiet --break-system-packages pyjwt cryptography
-          python3 tools/asc_submit.py "$([ "${{ contains(github.event.head_commit.message, '[check]') }}" = true ] && echo --check || { [ "${{ contains(github.event.head_commit.message, '[notes]') }}" = true ] && echo --notes || echo --reset; })"
+          python3 tools/asc_submit.py "$([ "${{ contains(github.event.head_commit.message, '[check]') }}" = true ] && echo --check || { [ "${{ contains(github.event.head_commit.message, '[notes]') }}" = true ] && echo --notes || { [ "${{ contains(github.event.head_commit.message, '[attach]') }}" = true ] && echo --build || echo --reset; }; })"
