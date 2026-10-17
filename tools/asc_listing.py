@@ -66,10 +66,17 @@ def read(*parts):
     return open(path, encoding='utf-8').read().strip() if os.path.exists(path) else None
 
 
-def upsert(kind, existing, parent_rel, parent_type, parent_id, locale, attributes):
+def upsert(kind, existing, parent_rel, parent_type, parent_id, locale, attributes, list_path=None):
     """PATCH the localization for `locale` if it exists, otherwise create it."""
     attributes = {k: v for k, v in attributes.items() if v}
-    found = next((x for x in existing if x['attributes']['locale'] == locale), None)
+    same = lambda x: x['attributes']['locale'].lower().split('-')[0] == locale.lower().split('-')[0] if '-' not in locale else x['attributes']['locale'] == locale
+    found = next((x for x in existing if same(x)), None)
+    if not found and list_path:
+        # The first listing can lag behind a localization made moments ago in App Store Connect: ask again.
+        again = call('GET', list_path + '?limit=200')['data']
+        found = next((x for x in again if same(x)), None)
+        if not found:
+            print(f'::notice title=TestFlight::{kind}: no {locale} among ' + ', '.join(x['attributes']['locale'] for x in again))
     if found:
         call('PATCH', f'/v1/{kind}/{found["id"]}', {'data': {'type': kind, 'id': found['id'], 'attributes': attributes}})
         return found['id']
@@ -129,9 +136,9 @@ def main(version_string):
     for locale in sorted(os.listdir(os.path.join(ROOT, 'metadata'))):
         if not os.path.isdir(os.path.join(ROOT, 'metadata', locale)):
             continue
-        upsert('appInfoLocalizations', info_locs, 'appInfo', 'appInfos', info['id'], locale, {
+        upsert('appInfoLocalizations', info_locs, 'appInfo', 'appInfos', info['id'], locale, list_path=f'/v1/appInfos/{info["id"]}/appInfoLocalizations', attributes={
             'name': read(locale, 'name.txt'), 'subtitle': read(locale, 'subtitle.txt'), 'privacyPolicyUrl': read(locale, 'privacy_url.txt')})
-        loc_id = upsert('appStoreVersionLocalizations', version_locs, 'appStoreVersion', 'appStoreVersions', version['id'], locale, {
+        loc_id = upsert('appStoreVersionLocalizations', version_locs, 'appStoreVersion', 'appStoreVersions', version['id'], locale, list_path=f'/v1/appStoreVersions/{version["id"]}/appStoreVersionLocalizations', attributes={
             'description': read(locale, 'description.txt'), 'keywords': read(locale, 'keywords.txt'),
             'promotionalText': read(locale, 'promotional_text.txt'), 'supportUrl': read(locale, 'support_url.txt'),
             # "What's New" cannot be set on an app's first version.
