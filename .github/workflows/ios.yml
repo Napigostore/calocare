@@ -257,9 +257,12 @@ jobs:
             n=1
             for screen in home food scan menu progress coach profile pro; do
               xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
-              xcrun simctl launch "$DEVICE" com.calocare.app -AppleLanguages "($lang)" -AppleLocale "$([ "$lang" = en ] && echo en_US || echo vi_VN)" -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg"
+              xcrun simctl launch "$DEVICE" com.calocare.app -AppleLanguages "($lang)" -AppleLocale "$([ "$lang" = en ] && echo en_US || echo vi_VN)" -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg" \
+                || echo "::error title=Swift errors::Launching the $lang $screen screen failed"
               sleep 6
-              xcrun simctl io "$DEVICE" screenshot "shots/${prefix}0$n-$screen.png"
+              # A crash on this screen shows up as the app no longer running.
+              xcrun simctl spawn "$DEVICE" launchctl list | grep -q com.calocare.app || echo "::error title=Swift errors::The app crashed on the $lang $screen screen"
+              xcrun simctl io "$DEVICE" screenshot "shots/${prefix}0$n-$screen.png" || echo "::error title=Swift errors::No screenshot of the $lang $screen screen"
               n=$((n+1))
             done
           done
