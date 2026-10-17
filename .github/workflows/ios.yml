@@ -331,7 +331,7 @@ jobs:
   unsubmit:
     # [unsubmit]: empties draft review submissions. [check]: lists what each subscription still lacks.
     # [notes]: updates the App Review notes from ios/fastlane/review_notes.txt.
-    # [attach]: puts the newest processed build on the version, then updates the notes.
+    # [attach]: puts the newest processed build on the version (waiting for processing), then updates the notes.
     if: ${{ contains(github.event.head_commit.message, '[unsubmit]') || contains(github.event.head_commit.message, '[check]') || contains(github.event.head_commit.message, '[notes]') || contains(github.event.head_commit.message, '[attach]') }}
     runs-on: macos-15
     steps:
