@@ -167,7 +167,9 @@ jobs:
           # Problems are published as one annotation on the run, so they can be read without opening the log.
           report() {
             grep -iE "error|failed|invalid|denied|no profiles|no account|missing" "$1" | grep -viE "^\s*$|warning:" | sed "s#$GITHUB_WORKSPACE/##" | awk '!seen[$0]++' | head -40 > problems.txt || true
-            [ -s problems.txt ] && echo "::error title=TestFlight::$(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' problems.txt)"
+            # Nothing matched: the end of the log usually says what went wrong.
+            [ -s problems.txt ] || tail -15 "$1" | sed "s#$GITHUB_WORKSPACE/##" > problems.txt
+            echo "::error title=TestFlight::$1: $(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' problems.txt)"
             exit 1
           }
           missing=""
