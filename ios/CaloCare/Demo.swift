@@ -56,6 +56,12 @@ enum Demo {
                                           kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat, tags: f.tags, qty: qty))
             }
         }
+        // A month of weigh-ins trending down, and a workout today, for the Progress screen.
+        d.weights = (0..<9).reversed().map { i in
+            WeightEntry(date: dayKey(Calendar.current.date(byAdding: .day, value: -i * 4, to: Date()) ?? Date()), kg: 72 + Double(i) * 0.3 - (i % 2 == 0 ? 0 : 0.2))
+        }
+        d.profile.targetWeightKg = 68
+        d.exercises = [ExerciseEntry(id: UUID(), date: dayKey(Date()), name: Lang.en ? "Running" : "Chạy bộ", emoji: "🏃", minutes: 30, kcal: 353)]
         return d
     }
 

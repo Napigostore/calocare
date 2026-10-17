@@ -168,6 +168,8 @@ IOS_CAPTIONS = {
     'home': 'Biết ngay hôm nay\nnạp và tiêu bao nhiêu calo',
     'food': 'Chạm một lần\nlà ghi xong món ăn',
     'scan': 'Chụp ảnh bữa ăn,\nAI tính calo giúp bạn',
+    'menu': 'Thực đơn hợp mục tiêu\nvà sức khỏe của bạn',
+    'progress': 'Theo dõi cân nặng\nvà calo mỗi tuần',
     'coach': 'Coach dinh dưỡng\ngợi ý bữa tiếp theo',
     'profile': 'Kết nối Apple Watch\nqua Apple Health',
 }
@@ -175,6 +177,8 @@ IOS_CAPTIONS_EN = {
     'home': 'See what you eat\nand burn today',
     'food': 'Log a meal\nwith one tap',
     'scan': 'Snap your meal,\nAI counts the calories',
+    'menu': 'Menus that fit your\ngoal and your health',
+    'progress': 'Track your weight\nand calories every week',
     'coach': 'A nutrition coach\nfor your next meal',
     'profile': 'Works with Apple Watch\nthrough Apple Health',
 }
