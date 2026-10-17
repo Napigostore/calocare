@@ -65,7 +65,10 @@ jobs:
         env:
           BACKEND_HOST: ${{ secrets.BACKEND_HOST }}
           BACKEND_APP_KEY: ${{ secrets.BACKEND_APP_KEY }}
-        run: printf 'BACKEND_HOST = %s\nBACKEND_APP_KEY = %s\n' "$BACKEND_HOST" "$BACKEND_APP_KEY" > ios/Config/Backend.xcconfig
+        run: |
+          printf 'BACKEND_HOST = %s\nBACKEND_APP_KEY = %s\n' "$BACKEND_HOST" "$BACKEND_APP_KEY" > ios/Config/Backend.xcconfig
+          # Fingerprint of the app key (never the key itself), to compare with the server's when the app gets "Unauthorized".
+          echo "::notice title=TestFlight::Backend $BACKEND_HOST, app key fingerprint $(printf '%s' "$BACKEND_APP_KEY" | shasum -a 256 | cut -c1-8), length ${#BACKEND_APP_KEY}"
       - name: Generate project
         working-directory: ios
         run: xcodegen generate
@@ -140,7 +143,10 @@ jobs:
         env:
           BACKEND_HOST: ${{ secrets.BACKEND_HOST }}
           BACKEND_APP_KEY: ${{ secrets.BACKEND_APP_KEY }}
-        run: printf 'BACKEND_HOST = %s\nBACKEND_APP_KEY = %s\n' "$BACKEND_HOST" "$BACKEND_APP_KEY" > ios/Config/Backend.xcconfig
+        run: |
+          printf 'BACKEND_HOST = %s\nBACKEND_APP_KEY = %s\n' "$BACKEND_HOST" "$BACKEND_APP_KEY" > ios/Config/Backend.xcconfig
+          # Fingerprint of the app key (never the key itself), to compare with the server's when the app gets "Unauthorized".
+          echo "::notice title=TestFlight::Backend $BACKEND_HOST, app key fingerprint $(printf '%s' "$BACKEND_APP_KEY" | shasum -a 256 | cut -c1-8), length ${#BACKEND_APP_KEY}"
       - name: Generate project
         working-directory: ios
         run: xcodegen generate
