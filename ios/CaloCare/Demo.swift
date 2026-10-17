@@ -19,6 +19,16 @@ enum Demo {
 
     static let activity = DayActivity(activeKcal: 486, steps: 9_240, sleepHours: 7.3, exerciseMinutes: 42)
 
+    static var history: [String: DayActivity] {
+        var out: [String: DayActivity] = [:]
+        for back in 0..<30 {
+            let day = Calendar.current.date(byAdding: .day, value: -back, to: Date()) ?? Date()
+            let wave = Double((back * 37) % 11) / 10
+            out[dayKey(day)] = back == 0 ? activity : DayActivity(activeKcal: 320 + 260 * wave, steps: 6_000 + Int(5_500 * wave), sleepHours: 6.2 + 1.6 * wave, exerciseMinutes: 15 + Int(40 * wave))
+        }
+        return out
+    }
+
     static var photo: UIImage? {
         UserDefaults.standard.string(forKey: "demoPhoto").flatMap { UIImage(contentsOfFile: $0) }
     }

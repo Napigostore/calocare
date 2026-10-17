@@ -125,6 +125,14 @@ struct FoodView: View {
             if Demo.screen == "scan", scan == nil, let photo = Demo.photo { scan = MealScan(image: photo) }
         }
         .sheet(item: $editing) { food in FoodEditor(food: food) }
+        // A food that conflicts with a declared allergy is only added once the user confirms.
+        .confirmationDialog(L("Cảnh báo dị ứng", "Allergy warning"), isPresented: Binding(get: { store.pendingDanger != nil }, set: { if !$0 { store.pendingDanger = nil } }),
+                            titleVisibility: .visible, presenting: store.pendingDanger) { food in
+            Button(L("Vẫn thêm", "Add anyway"), role: .destructive) { store.add(food); store.pendingDanger = nil }
+            Button(L("Không thêm", "Don't add"), role: .cancel) { store.pendingDanger = nil }
+        } message: { food in
+            Text("\(food.emoji) \(food.label)\n" + Nutrition.warnings(tags: food.tags, profile: store.data.profile).filter { $0.danger }.map { $0.text }.joined(separator: "\n"))
+        }
     }
 
     /// For a dish the app does not have yet: the AI suggests its calories, the user adds or adjusts it.
@@ -218,7 +226,7 @@ private struct FoodTile: View {
     var onEdit: (Food) -> Void = { _ in }
 
     var body: some View {
-        Button { store.add(food) } label: {
+        Button { store.tap(food) } label: {
             VStack(spacing: 4) {
                 Text(food.emoji).font(.system(size: 34))
                 Text(food.label).font(.caption.weight(.medium)).multilineTextAlignment(.center).lineLimit(2, reservesSpace: true)
@@ -322,7 +330,17 @@ struct FoodEditor: View {
                     }
                     .disabled(food.name.trimmingCharacters(in: .whitespaces).isEmpty || food.kcal <= 0)
                 }
+                if store.isCustom(food) {
+                    ToolbarItem(placement: .bottomBar) {
+                        Button(store.library.contains { $0.id == food.id } ? L("Khôi phục món gốc", "Restore original") : L("Xóa món này", "Delete this food"), role: .destructive) {
+                            store.removeCustom(food)
+                            dismiss()
+                        }
+                    }
+                }
             }
+            // A built-in dish opens under the name the user reads.
+            .onAppear { if !food.custom && Lang.en { food.name = food.label; food.serving = food.servingLabel } }
             .sheet(isPresented: $showIngredients) {
                 IngredientEditor(title: food.name, description: "\(food.name): \(food.serving)") { totals in
                     food.kcal = totals.kcal
@@ -373,6 +391,35 @@ extension UIImage {
 }
 
 /// The system camera. The photo is cropped to its centre square, so frame the meal in the middle.
+/// A green circle over the camera preview, as in the Android app: only the centre of the frame is analysed.
+final class GuideOverlay: UIView {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        backgroundColor = .clear
+        let label = UILabel()
+        label.text = L("Đưa món ăn vào trong vòng tròn xanh", "Fit the food inside the green circle")
+        label.textColor = .white
+        label.font = .boldSystemFont(ofSize: 17)
+        label.textAlignment = .center
+        label.shadowColor = .black
+        label.frame = CGRect(x: 16, y: frame.height * 0.12, width: frame.width - 32, height: 24)
+        addSubview(label)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func draw(_ rect: CGRect) {
+        // The camera preview sits above the shutter controls; the circle is centred on it.
+        let side = rect.width * 0.88
+        let centre = CGPoint(x: rect.midX, y: (rect.height - 150) / 2 + 20)
+        let circle = UIBezierPath(ovalIn: CGRect(x: centre.x - side / 2, y: centre.y - side / 2, width: side, height: side))
+        UIColor(red: 0.2, green: 0.85, blue: 0.5, alpha: 1).setStroke()
+        circle.lineWidth = 4
+        circle.stroke()
+    }
+}
+
 struct CameraPicker: UIViewControllerRepresentable {
     var onImage: (UIImage) -> Void
     @Environment(\.dismiss) private var dismiss
@@ -381,6 +428,7 @@ struct CameraPicker: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.sourceType = UIImagePickerController.isSourceTypeAvailable(.camera) ? .camera : .photoLibrary
         picker.delegate = context.coordinator
+        if picker.sourceType == .camera { picker.cameraOverlayView = GuideOverlay(frame: UIScreen.main.bounds) }
         return picker
     }
 

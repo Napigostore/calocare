@@ -81,6 +81,10 @@ struct AppData: Codable {
     // Optional for the same reason as the new profile fields.
     var exercises: [ExerciseEntry]?
     var weights: [WeightEntry]?
+    /// Dish names the AI got wrong and the food the user picked instead: AI name (lower case) → food id.
+    var nameFixes: [String: String]?
+    /// How much more or less than the AI's estimate this user usually eats of a dish: AI name → factor.
+    var portionBias: [String: Double]?
 }
 
 enum Region {

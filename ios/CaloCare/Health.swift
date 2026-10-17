@@ -47,6 +47,19 @@ final class HealthService {
         return DayActivity(activeKcal: await active, steps: Int(await steps), sleepHours: await sleep, exerciseMinutes: Int(await exercise))
     }
 
+    /// The last `days` days, keyed by yyyy-MM-dd.
+    func history(days: Int) async -> [String: DayActivity] {
+        await withTaskGroup(of: (String, DayActivity).self) { group in
+            for back in 0..<days {
+                let day = Calendar.current.date(byAdding: .day, value: -back, to: Date()) ?? Date()
+                group.addTask { (dayKey(day), await self.activity(on: day)) }
+            }
+            var out: [String: DayActivity] = [:]
+            for await (key, value) in group { out[key] = value }
+            return out
+        }
+    }
+
     /// The newest weight (kg) and height (cm) on record, if any.
     func latestBody() async -> (weightKg: Double?, heightCm: Double?) {
         async let weight = latest(.bodyMass, .gramUnit(with: .kilo))

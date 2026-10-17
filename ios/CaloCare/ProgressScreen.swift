@@ -86,6 +86,7 @@ struct ProgressScreen: View {
                     }
 
                     activityCard(data)
+                    watchCard()
                 }
                 .padding(16)
             }
@@ -148,6 +149,36 @@ struct ProgressScreen: View {
             if store.healthLinked {
                 Text(L("Lưu ý: nếu Apple Watch đã ghi buổi tập này thì không cần nhập tay, tránh tính hai lần.", "Note: if your Apple Watch already recorded this workout, don't add it by hand or it counts twice."))
                     .font(.caption).foregroundColor(Palette.warn)
+            }
+        }
+    }
+
+    /// Steps and sleep from Apple Health over the chosen range, as on Android.
+    @ViewBuilder private func watchCard() -> some View {
+        let days: [(date: Date, a: DayActivity)] = (0..<range).reversed().compactMap { back in
+            let day = Nutrition.day(back)
+            return store.history[dayKey(day)].map { (day, $0) }
+        }
+        let stepDays = days.filter { $0.a.steps > 0 }
+        let sleeps = days.compactMap { $0.a.sleepHours }.filter { $0 > 0 }
+        if store.healthLinked && (!stepDays.isEmpty || !sleeps.isEmpty) {
+            Card(L("Vận động & phục hồi", "Activity & recovery")) {
+                if !stepDays.isEmpty {
+                    Chart {
+                        ForEach(stepDays.indices, id: \.self) { i in
+                            BarMark(x: .value("Day", stepDays[i].date, unit: .day), y: .value("Steps", stepDays[i].a.steps)).foregroundStyle(Palette.fat)
+                        }
+                        RuleMark(y: .value("Goal", 8000)).foregroundStyle(.secondary).lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                    }
+                    .frame(height: 140)
+                    let avg = stepDays.reduce(0) { $0 + $1.a.steps } / stepDays.count
+                    Text(L("👟 Trung bình \(avg.formatted()) bước/ngày (đường kẻ: 8.000 bước)", "👟 Average \(avg.formatted()) steps/day (line: 8,000 steps)")).font(.subheadline)
+                }
+                if !sleeps.isEmpty {
+                    let avg = sleeps.reduce(0, +) / Double(sleeps.count)
+                    Text(L("😴 Ngủ trung bình \(String(format: "%.1f", avg)) giờ mỗi đêm", "😴 Average sleep \(String(format: "%.1f", avg)) hours a night")
+                         + (avg < 6.5 ? L(" — dưới mức 7 giờ khuyến nghị", " — below the recommended 7 hours") : "")).font(.subheadline)
+                }
             }
         }
     }

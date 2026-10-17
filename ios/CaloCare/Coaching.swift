@@ -34,10 +34,14 @@ extension Nutrition {
     /// Energy out for a day: BMR plus the watch's active energy (today) or a light daily-living allowance,
     /// plus workouts logged by hand.
     static func out(_ data: AppData, on date: Date, activity: DayActivity?) -> (total: Int, bmr: Int, active: Int, exercise: Int, measured: Bool) {
-        let base = kcalOut(data.profile, Calendar.current.isDateInToday(date) ? activity : nil)
+        let base = kcalOut(data.profile, Calendar.current.isDateInToday(date) ? activity : historyFor(date))
         let exercise = exercises(data, on: date).reduce(0) { $0 + $1.kcal }
         return (base.total + exercise, Int(bmr(data.profile).rounded()), base.active, exercise, base.measured)
     }
+
+    /// Apple Health's numbers for a past day, set by the store when it reads the month's history.
+    nonisolated(unsafe) static var history: [String: DayActivity] = Demo.active ? Demo.history : [:]
+    static func historyFor(_ date: Date) -> DayActivity? { history[dayKey(date)] }
 
     static func onTarget(_ data: AppData, on date: Date) -> Bool {
         let eaten = totals(entries(data, on: date)).kcal

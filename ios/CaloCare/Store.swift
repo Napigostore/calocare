@@ -14,6 +14,10 @@ final class AppStore: ObservableObject {
     @Published var healthLinked = UserDefaults.standard.bool(forKey: "healthLinked")
     /// Activity for the selected day, from Apple Health.
     @Published var activity: DayActivity?
+    /// The last 30 days from Apple Health, keyed by day.
+    @Published var history: [String: DayActivity] = Demo.active ? Demo.history : [:]
+    /// A food that conflicts with a declared allergy, waiting for the user to confirm adding it.
+    @Published var pendingDanger: Food?
     /// The tab on screen, so one screen can send the user to another (e.g. "Ask AI" opens the coach).
     @Published var tab = Demo.tab
     @Published var showProfile = Demo.screen == "profile"
@@ -174,6 +178,8 @@ final class AppStore: ObservableObject {
     func refreshHealth() async {
         guard healthLinked, !Demo.active else { return }
         activity = await HealthService.shared.activity(on: date)
+        history = await HealthService.shared.history(days: 30)
+        Nutrition.history = history
         let body = await HealthService.shared.latestBody()
         var profile = data.profile
         if let kg = body.weightKg, (25...300).contains(kg) { profile.weightKg = (kg * 10).rounded() / 10 }
@@ -207,6 +213,36 @@ final class AppStore: ObservableObject {
         if !quiet {
             let warning = Nutrition.warnings(tags: food.tags, profile: data.profile).first.map { "\n⚠️ \($0.text)" } ?? ""
             say("+\(formatQty(qty)) \(food.label) · \(Int((Double(food.kcal) * qty).rounded())) kcal\(warning)")
+        }
+    }
+
+    /// A tap on a food: added at once, unless it contains something the user is allergic to.
+    func tap(_ food: Food) {
+        if Nutrition.warnings(tags: food.tags, profile: data.profile).contains(where: { $0.danger }) { pendingDanger = food } else { add(food) }
+    }
+
+    /// The user's own dish: deleted. A built-in dish they edited: back to the original.
+    func removeCustom(_ food: Food) {
+        update { d in d.customFoods.removeAll { $0.id == food.id } }
+        say(library.contains { $0.id == food.id } ? L("Đã khôi phục món gốc", "Original restored") : L("Đã xóa \(food.label)", "Deleted \(food.label)"))
+    }
+
+    func isCustom(_ food: Food) -> Bool { data.customFoods.contains { $0.id == food.id } }
+
+    /// Remembers a photo correction for this user: next time the AI says this name, the chosen food is used, and
+    /// the amount follows what they usually eat.
+    func learn(aiName: String, aiQty: Double, foodId: String?, amount: Double) {
+        let key = aiName.lowercased().trimmingCharacters(in: .whitespaces)
+        update { d in
+            if let foodId { var fixes = d.nameFixes ?? [:]; fixes[key] = foodId; d.nameFixes = fixes }
+            if aiQty > 0 {
+                let ratio = min(3, max(0.5, amount / aiQty))
+                var bias = d.portionBias ?? [:]
+                // A running average, so one unusual meal does not decide the next estimate.
+                bias[key] = ((bias[key] ?? 1) * 2 + ratio) / 3
+                if abs(bias[key]! - 1) < 0.05 { bias[key] = nil }
+                d.portionBias = bias
+            }
         }
     }
 

@@ -14,6 +14,8 @@ struct ScanDish: Identifiable {
     var alternatives: [String]
     var corrected = false
     var userBuilt = false
+    /// The amount follows what this user usually eats of the dish.
+    var learned = false
 
     static let sizes: [(id: String, label: String, factor: Double)] = [("small", L("Nhỏ", "Small"), 0.75), ("medium", L("Vừa", "Medium"), 1.0), ("large", L("To", "Large"), 1.3)]
 
@@ -43,7 +45,7 @@ final class MealScan: ObservableObject, Identifiable {
         guard !started else { return }
         started = true
         if Demo.active, let analysis = Demo.analysis {
-            dishes = analysis.items.map { MealScan.ground($0, foods: store.foods) }
+            dishes = analysis.items.map { MealScan.ground($0, foods: store.foods, fixes: store.data.nameFixes ?? [:], bias: store.data.portionBias ?? [:]) }
             title = analysis.title ?? ""
             score = analysis.score ?? -1
             pros = analysis.pros ?? []
@@ -54,7 +56,7 @@ final class MealScan: ObservableObject, Identifiable {
         guard let jpeg = image.jpegData(compressionQuality: 0.8) else { error = L("Không xử lý được ảnh.", "Couldn't process the photo."); loading = false; return }
         do {
             let analysis = try await API.shared.analyzePhoto(jpeg: jpeg, context: store.photoContext)
-            dishes = analysis.items.map { MealScan.ground($0, foods: store.foods) }
+            dishes = analysis.items.map { MealScan.ground($0, foods: store.foods, fixes: store.data.nameFixes ?? [:], bias: store.data.portionBias ?? [:]) }
             title = analysis.title ?? ""
             score = analysis.score ?? -1
             pros = analysis.pros ?? []
@@ -67,11 +69,16 @@ final class MealScan: ObservableObject, Identifiable {
     }
 
     /// The AI says what the dish is and how much; the calories come from the app's table whenever the dish is in it.
-    static func ground(_ ai: DetectedItem, foods: [Food]) -> ScanDish {
-        let food = FoodMatcher.best(ai.name, in: foods)
-        let qty = max(0.5, (min(max(ai.qty ?? 1, 0.5), 10) * 2).rounded() / 2)
+    /// A name this user corrected before is corrected the same way again, and the amount follows their habits.
+    static func ground(_ ai: DetectedItem, foods: [Food], fixes: [String: String] = [:], bias: [String: Double] = [:]) -> ScanDish {
+        let key = ai.name.lowercased().trimmingCharacters(in: .whitespaces)
+        let food = fixes[key].flatMap { id in foods.first { $0.id == id } } ?? FoodMatcher.best(ai.name, in: foods)
+        let ratio = bias[key]
+        let qty = max(0.5, (min(max(ai.qty ?? 1, 0.5), 10) * (ratio ?? 1) * 2).rounded() / 2)
         let size = ScanDish.sizes.contains { $0.id == ai.size } ? (ai.size ?? "medium") : "medium"
-        return ScanDish(ai: ai, item: food.map { ai.like($0) } ?? ai, food: food, qty: qty, size: size, alternatives: ai.alternatives ?? [])
+        var dish = ScanDish(ai: ai, item: food.map { ai.like($0) } ?? ai, food: food, qty: qty, size: size, alternatives: ai.alternatives ?? [])
+        dish.learned = ratio != nil
+        return dish
     }
 }
 
@@ -204,6 +211,9 @@ struct MealScanView: View {
                 Picker(L("Cỡ", "Size"), selection: $scan.dishes[index].size) { ForEach(ScanDish.sizes, id: \.id) { Text($0.label).tag($0.id) } }.pickerStyle(.segmented)
                 Stepper("× \(formatQty(dish.qty))", value: $scan.dishes[index].qty, in: 0.5...20, step: 0.5).fixedSize()
             }
+            if dish.learned {
+                Text(L("Số lượng theo thói quen của bạn", "Amount based on your habits")).font(.caption2).foregroundColor(.secondary)
+            }
             if !dish.alternatives.isEmpty {
                 // One tap instead of typing when the AI picked the wrong look-alike.
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -242,6 +252,10 @@ struct MealScanView: View {
                 Task { await API.shared.sendCorrection(ai: dish.ai, chosen: dish.item.name) }
             }
             if dish.userBuilt && dish.food == nil { Task { await API.shared.submitDish(food) } }
+            // This user's own corrections and amounts shape their next photos.
+            if dish.corrected || abs(dish.amount - (dish.ai.qty ?? 1)) >= 0.25 {
+                store.learn(aiName: dish.ai.name, aiQty: dish.ai.qty ?? 1, foodId: dish.corrected ? dish.food?.id : nil, amount: dish.amount)
+            }
         }
         store.say(L("Đã thêm \(picked.count) món vào bữa \(Meal.label(store.meal).lowercased())", "Added \(picked.count) item(s) to \(Meal.label(store.meal).lowercased())"))
         dismiss()

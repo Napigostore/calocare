@@ -84,6 +84,13 @@ struct ProfileView: View {
                     Text(L("🎯 Mục tiêu nạp: \(Nutrition.targetKcal(p)) kcal/ngày", "🎯 Daily target: \(Nutrition.targetKcal(p)) kcal")).bold()
                     Text("BMR \(Int(Nutrition.bmr(p))) kcal · TDEE \(Int(Nutrition.tdee(p))) kcal · BMI \(String(format: "%.1f", Nutrition.bmi(p)))")
                     Text(L("Đạm \(macros.protein)g · Tinh bột \(macros.carbs)g · Béo \(macros.fat)g", "Protein \(macros.protein)g · Carbs \(macros.carbs)g · Fat \(macros.fat)g")).foregroundColor(.secondary)
+                    if p.adjust != 0 {
+                        HStack {
+                            Text(L("Gồm \(p.adjust > 0 ? "+" : "")\(p.adjust) kcal điều chỉnh theo cân nặng thực tế", "Includes \(p.adjust > 0 ? "+" : "")\(p.adjust) kcal adjusted to your actual weight")).font(.caption)
+                            Spacer()
+                            Button(L("Đặt lại", "Reset")) { store.update { $0.profile.kcalAdjust = 0 } }.font(.caption)
+                        }
+                    }
                 }
                 Section {
                     NavigationLink(L("Sửa hồ sơ, mục tiêu và sức khỏe", "Edit profile, goal and health")) { ProfileForm(title: L("Hồ sơ", "Profile"), saveLabel: L("Lưu thay đổi", "Save changes")) }
