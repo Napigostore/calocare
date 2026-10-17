@@ -266,6 +266,19 @@ jobs:
               n=$((n+1))
             done
           done
+          # An English walkthrough video on the same simulator, with sample data: the app launched from the home
+          # screen, then each main screen in turn. For App Review it must be described as a Simulator recording.
+          xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
+          xcrun simctl io "$DEVICE" recordVideo --codec h264 --force shots/en-walkthrough-simulator.mp4 &
+          RECORDER=$!
+          sleep 3
+          for screen in home food scan menu progress coach profile pro; do
+            xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
+            xcrun simctl launch "$DEVICE" com.calocare.app -AppleLanguages "(en)" -AppleLocale en_US -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg" > /dev/null
+            sleep 5
+          done
+          kill -INT $RECORDER
+          wait $RECORDER || true
           ls -la shots
       - name: Publish as the "ios-screenshots" release
         working-directory: ios
@@ -273,7 +286,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete ios-screenshots --yes --cleanup-tag || true
-          gh release create ios-screenshots shots/*.png --prerelease --target "$GITHUB_SHA"             --title "CaloCare iOS – ảnh chụp màn hình" --notes "Chụp trên máy ảo iPhone 6.9\" từ commit $GITHUB_SHA, dữ liệu mẫu."
+          gh release create ios-screenshots shots/*.png shots/*.mp4 --prerelease --target "$GITHUB_SHA"             --title "CaloCare iOS – ảnh chụp màn hình" --notes "Chụp trên máy ảo iPhone 6.9\" từ commit $GITHUB_SHA, dữ liệu mẫu."
 
   listing:
     # Uploads ios/fastlane/metadata and ios/fastlane/screenshots (made by tools/export_appstore.py) to the
