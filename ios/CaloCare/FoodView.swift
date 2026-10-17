@@ -124,6 +124,9 @@ struct FoodView: View {
         .onAppear {
             if Demo.screen == "scan", scan == nil, let photo = Demo.photo { scan = MealScan(image: photo) }
         }
+        .onChange(of: store.demoScan) { on in
+            if on, let photo = Demo.photo { scan = MealScan(image: photo) } else if !on { scan = nil }
+        }
         .sheet(item: $editing) { food in FoodEditor(food: food) }
         // A food that conflicts with a declared allergy is only added once the user confirms.
         .confirmationDialog(L("Cảnh báo dị ứng", "Allergy warning"), isPresented: Binding(get: { store.pendingDanger != nil }, set: { if !$0 { store.pendingDanger = nil } }),

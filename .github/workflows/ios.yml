@@ -266,17 +266,20 @@ jobs:
               n=$((n+1))
             done
           done
-          # An English walkthrough video on the same simulator, with sample data: the app launched from the home
-          # screen, then each main screen in turn. For App Review it must be described as a Simulator recording.
+          # An English walkthrough video on the same simulator, with sample data: the home screen, then one app
+          # session touring the screens on its own (-demo tour). For App Review it must be described as a
+          # Simulator recording. The whole simulator is switched to English first, home screen included.
           xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
+          xcrun simctl spawn "$DEVICE" defaults write -g AppleLanguages -array en
+          xcrun simctl spawn "$DEVICE" defaults write -g AppleLocale en_US
+          xcrun simctl shutdown "$DEVICE" && xcrun simctl boot "$DEVICE"
+          xcrun simctl status_bar "$DEVICE" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          sleep 15
           xcrun simctl io "$DEVICE" recordVideo --codec h264 --force shots/en-walkthrough-simulator.mp4 &
           RECORDER=$!
           sleep 3
-          for screen in home food scan menu progress coach profile pro; do
-            xcrun simctl terminate "$DEVICE" com.calocare.app 2>/dev/null || true
-            xcrun simctl launch "$DEVICE" com.calocare.app -AppleLanguages "(en)" -AppleLocale en_US -demo "$screen" -demoPhoto "$PWD/Screenshots/meal.jpg" > /dev/null
-            sleep 5
-          done
+          xcrun simctl launch "$DEVICE" com.calocare.app -demo tour -demoPhoto "$PWD/Screenshots/meal.jpg" > /dev/null
+          sleep 52
           kill -INT $RECORDER
           wait $RECORDER || true
           ls -la shots

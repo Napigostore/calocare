@@ -59,6 +59,25 @@ struct RootView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: store.toast)
         .sheet(isPresented: $pro.showPaywall) { ProView() }
+        .task { if Demo.screen == "tour" { await tour() } }
+    }
+}
+
+extension RootView {
+    /// Demo tour for the walkthrough video: one session moving through the app's screens on its own.
+    @MainActor func tour() async {
+        func wait(_ seconds: Double) async { try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000)) }
+        await wait(4)
+        store.tab = 1; await wait(4)
+        store.demoScan = true; await wait(7)
+        store.demoScan = false; await wait(1.5)
+        store.tab = 2; await wait(5)
+        store.tab = 3; await wait(5)
+        store.tab = 4; await wait(5)
+        store.tab = 0; store.showProfile = true; await wait(5)
+        store.showProfile = false; await wait(1.5)
+        pro.showPaywall = true; await wait(6)
+        pro.showPaywall = false
     }
 }
 

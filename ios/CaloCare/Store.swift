@@ -21,6 +21,8 @@ final class AppStore: ObservableObject {
     /// The tab on screen, so one screen can send the user to another (e.g. "Ask AI" opens the coach).
     @Published var tab = Demo.tab
     @Published var showProfile = Demo.screen == "profile"
+    /// Demo tour only: the photo result is on screen.
+    @Published var demoScan = false
 
     private var libraryVersion: Int
     private let folder: URL
