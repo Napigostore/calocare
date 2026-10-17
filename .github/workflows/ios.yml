@@ -68,7 +68,10 @@ jobs:
         run: |
           printf 'BACKEND_HOST = %s\nBACKEND_APP_KEY = %s\n' "$BACKEND_HOST" "$BACKEND_APP_KEY" > ios/Config/Backend.xcconfig
           # Fingerprint of the app key (never the key itself), to compare with the server's when the app gets "Unauthorized".
-          echo "::notice title=TestFlight::Backend $BACKEND_HOST, app key fingerprint $(printf '%s' "$BACKEND_APP_KEY" | shasum -a 256 | cut -c1-8), length ${#BACKEND_APP_KEY}"
+          FINGERPRINT=$(printf '%s' "$BACKEND_APP_KEY" | shasum -a 256 | cut -c1-8)
+          echo "::notice title=TestFlight::Backend $BACKEND_HOST, app key fingerprint $FINGERPRINT, length ${#BACKEND_APP_KEY}"
+          # The server's app key (appKey in backend.properties) has this fingerprint; any other key makes every AI call "Unauthorized".
+          if [ "$FINGERPRINT" != "fbd417e9" ]; then echo "::error title=TestFlight::BACKEND_APP_KEY is not the server's app key (fingerprint $FINGERPRINT, expected fbd417e9). Copy appKey from backend.properties into the secret."; exit 1; fi
       - name: Generate project
         working-directory: ios
         run: xcodegen generate
@@ -146,7 +149,10 @@ jobs:
         run: |
           printf 'BACKEND_HOST = %s\nBACKEND_APP_KEY = %s\n' "$BACKEND_HOST" "$BACKEND_APP_KEY" > ios/Config/Backend.xcconfig
           # Fingerprint of the app key (never the key itself), to compare with the server's when the app gets "Unauthorized".
-          echo "::notice title=TestFlight::Backend $BACKEND_HOST, app key fingerprint $(printf '%s' "$BACKEND_APP_KEY" | shasum -a 256 | cut -c1-8), length ${#BACKEND_APP_KEY}"
+          FINGERPRINT=$(printf '%s' "$BACKEND_APP_KEY" | shasum -a 256 | cut -c1-8)
+          echo "::notice title=TestFlight::Backend $BACKEND_HOST, app key fingerprint $FINGERPRINT, length ${#BACKEND_APP_KEY}"
+          # The server's app key (appKey in backend.properties) has this fingerprint; any other key makes every AI call "Unauthorized".
+          if [ "$FINGERPRINT" != "fbd417e9" ]; then echo "::error title=TestFlight::BACKEND_APP_KEY is not the server's app key (fingerprint $FINGERPRINT, expected fbd417e9). Copy appKey from backend.properties into the secret."; exit 1; fi
       - name: Generate project
         working-directory: ios
         run: xcodegen generate
