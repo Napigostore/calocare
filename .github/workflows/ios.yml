@@ -4,6 +4,7 @@ name: iOS
 #  - Every push that touches ios/: compiles for the simulator, to catch errors (no Apple account needed).
 #  - Run by hand with "testflight" ticked, or push a commit touching ios/ or this file whose message
 #    contains [testflight] (an empty commit does not start a run): signs and uploads to TestFlight.
+#    The commit must change a file under ios/, tools/asc_*.py or this file; the message is only the switch.
 #
 # Secrets (repository Settings → Secrets and variables → Actions):
 #   BACKEND_HOST      server host without https://, e.g. calocare-api.xxx.workers.dev
