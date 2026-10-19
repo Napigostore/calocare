@@ -123,6 +123,7 @@ def main():
         '',
         '    /** The bundled photo of a food, or null when it has none (the emoji is shown instead). */',
         '    fun url(id: String): String? = if (id in ids) "file:///android_asset/foodphotos/$id.jpg" else null',
+        '}',
     ]
     kotlin = '\n'.join(lines) + '\n'
     io.open(os.path.join(ROOT, 'app/src/main/java/com/calocare/app/data/FoodPhotos.kt'), 'w', encoding='utf-8', newline='\n').write(kotlin)

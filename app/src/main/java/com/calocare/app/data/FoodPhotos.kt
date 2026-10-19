@@ -173,3 +173,4 @@ object FoodPhotos {
 
     /** The bundled photo of a food, or null when it has none (the emoji is shown instead). */
     fun url(id: String): String? = if (id in ids) "file:///android_asset/foodphotos/$id.jpg" else null
+}
