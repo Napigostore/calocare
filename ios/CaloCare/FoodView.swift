@@ -231,7 +231,7 @@ private struct FoodTile: View {
     var body: some View {
         Button { store.tap(food) } label: {
             VStack(spacing: 4) {
-                Text(food.emoji).font(.system(size: 34))
+                FoodPhoto(id: food.id, emoji: food.emoji, size: 64)
                 Text(food.label).font(.caption.weight(.medium)).multilineTextAlignment(.center).lineLimit(2, reservesSpace: true)
                 Text("\(food.kcal) kcal").font(.caption2.weight(.semibold)).foregroundColor(Palette.green)
                 Text(food.servingLabel).font(.caption2).foregroundColor(.secondary).lineLimit(1)
@@ -266,7 +266,7 @@ private struct MealLog: View {
         Card(L("Bữa \(Meal.label(store.meal).lowercased()) · \(Int(store.totals(entries).kcal)) kcal", "\(Meal.label(store.meal)) · \(Int(store.totals(entries).kcal)) kcal")) {
             ForEach(entries) { entry in
                 HStack {
-                    Text(entry.emoji).font(.title3)
+                    FoodPhoto(id: entry.foodId, emoji: entry.emoji, size: 40)
                     VStack(alignment: .leading) {
                         Text(entry.label).font(.subheadline.weight(.medium)).lineLimit(1)
                         Text("\(Int(entry.totalKcal)) kcal · \(entry.servingLabel)").font(.caption).foregroundColor(.secondary).lineLimit(1)
@@ -448,5 +448,26 @@ struct CameraPicker: UIViewControllerRepresentable {
         }
 
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) { parent.dismiss() }
+    }
+}
+
+/// A real photo of the dish when the app ships one (FoodPhotos, with credits in CREDITS.tsv), else its emoji.
+struct FoodPhoto: View {
+    var id: String
+    var emoji: String
+    var size: CGFloat
+
+    var body: some View {
+        // Xcode copies the photos to the bundle root; a folder reference keeps the folder, so both are tried.
+        let path = Bundle.main.path(forResource: id, ofType: "jpg") ?? Bundle.main.path(forResource: id, ofType: "jpg", inDirectory: "FoodPhotos")
+        if let path, let image = UIImage(contentsOfFile: path) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: size / 4))
+        } else {
+            Text(emoji).font(.system(size: size * 0.55)).frame(width: size, height: size)
+        }
     }
 }

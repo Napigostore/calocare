@@ -1,5 +1,6 @@
 package com.calocare.app.ui
 
+import com.calocare.app.data.FoodPhotos
 import com.calocare.app.label
 import com.calocare.app.L
 import androidx.compose.animation.core.animateFloatAsState
@@ -203,7 +204,7 @@ fun NextMealCard(vm: AppViewModel, data: AppData) {
         Text(next.note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         next.meal.items.forEach { item ->
             Row(verticalAlignment = Alignment.CenterVertically) {
-                FoodImage(item.food.emoji, item.food.imageUrl, 32.dp)
+                FoodImage(item.food.emoji, item.food.imageUrl ?: FoodPhotos.url(item.food.id), 32.dp)
                 Spacer(Modifier.width(10.dp))
                 Text("${item.food.label} × ${AppViewModel.fmtQty(item.qty)}", modifier = Modifier.weight(1f))
                 Text("${(item.food.kcal * item.qty).roundToInt()} kcal", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

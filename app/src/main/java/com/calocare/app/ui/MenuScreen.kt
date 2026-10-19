@@ -1,5 +1,6 @@
 package com.calocare.app.ui
 
+import com.calocare.app.data.FoodPhotos
 import com.calocare.app.label
 import com.calocare.app.L
 import androidx.compose.foundation.horizontalScroll
@@ -108,7 +109,7 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
                     val item = meal.items.first { it.food.name == step.name }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("${i + 1}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.width(20.dp))
-                        FoodImage(item.food.emoji, item.food.imageUrl, 36.dp)
+                        FoodImage(item.food.emoji, item.food.imageUrl ?: FoodPhotos.url(item.food.id), 36.dp)
                         Spacer(Modifier.width(10.dp))
                         Column(Modifier.weight(1f)) {
                             Text("${item.food.label} × ${AppViewModel.fmtQty(item.qty)}", fontWeight = FontWeight.Medium)

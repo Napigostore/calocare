@@ -1,5 +1,6 @@
 package com.calocare.app.ui
 
+import com.calocare.app.data.FoodPhotos
 import com.calocare.app.servingLabel
 import com.calocare.app.label
 import com.calocare.app.L
@@ -362,7 +363,7 @@ private fun FoodTile(food: Food, count: Float, flagged: Int, onTap: () -> Unit, 
                 .padding(vertical = 10.dp, horizontal = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            FoodImage(food.emoji, food.imageUrl, 56.dp)
+            FoodImage(food.emoji, food.imageUrl ?: FoodPhotos.url(food.id), 56.dp)
             Spacer(Modifier.height(6.dp))
             Text(
                 food.label, style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center,
@@ -391,7 +392,7 @@ private fun MealLog(vm: AppViewModel, data: AppData, entries: List<LogEntry>) {
     ) {
         entries.forEach { e ->
             Row(verticalAlignment = Alignment.CenterVertically) {
-                FoodImage(e.emoji, e.imageUrl, 36.dp)
+                FoodImage(e.emoji, e.imageUrl ?: FoodPhotos.url(e.foodId), 36.dp)
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(e.label, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
@@ -433,7 +434,7 @@ private fun FoodDetailDialog(food: Food, vm: AppViewModel, data: AppData, onDism
         onDismissRequest = onDismiss,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                FoodImage(food.emoji, food.imageUrl, 48.dp)
+                FoodImage(food.emoji, food.imageUrl ?: FoodPhotos.url(food.id), 48.dp)
                 Spacer(Modifier.width(12.dp))
                 Text(food.label, style = MaterialTheme.typography.titleMedium)
             }
