@@ -118,7 +118,7 @@ List each distinct dish or drink once, with qty for the amount visible. Count co
 ${FIELD_GUIDE}
 
 A photo may show one dish or a whole table of them: list every dish, however many there are.
-The meal as a whole: title = a short Vietnamese name for it ("Mâm cỗ Tết truyền thống", "Cơm văn phòng"); score = how healthy it is for this person from 0 to 100, weighing balance, vegetables, frying, sugar and salt against their goal and conditions; pros and cons = up to three short Vietnamese points each, most important first, specific to what is on the table.
+The meal as a whole: title = a short Vietnamese name for it ("Mâm cỗ Tết truyền thống", "Cơm văn phòng"); score = how healthy it is for this person from 0 to 100, weighing balance, vegetables, frying, sugar and salt against their goal and conditions; pros and cons = up to two short Vietnamese points each (a few words, not sentences), most important first, specific to what is on the table.
 
 Naming. KNOWN DISHES is the app's food table. When a dish in the photo is one of them, use that exact name: the app then applies its own calorie data for it. Write a different name only when the dish is genuinely not in the list, and never force a listed name onto something that merely looks similar.
 alternatives: when you are not sure which dish it is, the one or two other dishes it could most plausibly be instead (listed names where possible), most likely first. When you are sure, leave it empty.
@@ -188,7 +188,8 @@ function quotaView(u: Usage, proExpires: number) {
 }
 
 async function quotaFor(env: Env, device: string) {
-  return quotaView(await usage(env.DB, device), await proUntil(env.DB, device));
+  const [u, pro] = await Promise.all([usage(env.DB, device), proUntil(env.DB, device)]);
+  return quotaView(u, pro);
 }
 
 /** Creates the row on first contact and zeroes the daily counters when the day has changed. */
@@ -268,6 +269,8 @@ interface Spend {
   cache_write_tokens: number;
   /** Tokens used by ESCALATE_MODEL, when a photo was escalated. */
   strong?: Spend;
+  /** Milliseconds spent waiting for the AI provider, for the Server-Timing header. */
+  ai_ms?: number;
 }
 
 function textOf(message: Anthropic.Message, spend: Spend, lang: Lang = "vi"): string {
@@ -390,6 +393,7 @@ async function photo(client: Anthropic, env: Env, body: any, spend: Spend, lang:
     system.push({ type: "text", text: `Users of this app corrected these identifications before; check for the same mistake: ${confusions.join("; ")}.` });
   }
   const recognise = async (model: string, into: Spend) => {
+    const started = Date.now();
     const message = await client.messages.create({
       model,
       max_tokens: 6000,
@@ -405,6 +409,7 @@ async function photo(client: Anthropic, env: Env, body: any, spend: Spend, lang:
         },
       ],
     });
+    spend.ai_ms = (spend.ai_ms ?? 0) + Date.now() - started;
     return JSON.parse(textOf(message, into, lang));
   };
 
@@ -425,6 +430,7 @@ async function photo(client: Anthropic, env: Env, body: any, spend: Spend, lang:
     }
   }
 
+  const seenNames: D1PreparedStatement[] = [];
   for (const item of Array.isArray(result.items) ? result.items : []) {
     if (typeof item?.name !== "string") continue;
     const key = nameKey(item.name);
@@ -438,11 +444,12 @@ async function photo(client: Anthropic, env: Env, body: any, spend: Spend, lang:
     }
     // Plausible corrections first; implausible ones need more agreement and always come last.
     for (const f of known) if (!f.far || f.devices >= MIN_DEVICES) alternatives.push(f.chosen);
-    const seenNames = new Set([nameKey(item.name)]);
-    item.alternatives = alternatives.filter((a) => !seenNames.has(nameKey(a)) && seenNames.add(nameKey(a))).slice(0, 3);
+    const used = new Set([nameKey(item.name)]);
+    item.alternatives = alternatives.filter((a) => !used.has(nameKey(a)) && used.add(nameKey(a))).slice(0, 3);
     // How often the AI uses each name is the denominator for "usually wrong".
-    await env.DB.prepare(`INSERT INTO names (ai_name, seen) VALUES (?1, 1) ON CONFLICT(ai_name) DO UPDATE SET seen = seen + 1`).bind(key).run();
+    seenNames.push(env.DB.prepare(`INSERT INTO names (ai_name, seen) VALUES (?1, 1) ON CONFLICT(ai_name) DO UPDATE SET seen = seen + 1`).bind(key));
   }
+  if (seenNames.length) await env.DB.batch(seenNames);
   return result;
 }
 
@@ -639,7 +646,9 @@ export default {
         // Costs nothing, so it does not draw on the user's allowance either.
         if (hit) return json({ result: hit, quota: await quotaFor(env, device), usage: { input_tokens: 0, output_tokens: 0 }, cached: true });
       }
+      const began = Date.now();
       await reserve(env, device, handler.kind, lang);
+      const reserved = Date.now();
       try {
         const client = new Anthropic({
           // Secrets pasted into a terminal can pick up stray whitespace or control characters, which
@@ -661,8 +670,13 @@ export default {
         });
         const spend: Spend = { input_tokens: 0, output_tokens: 0, cache_read_tokens: 0, cache_write_tokens: 0 };
         const result = await handler.run(client, env, body, spend, lang);
-        console.log("spend", url.pathname, spend);
-        return json({ result, quota: await quotaFor(env, device), usage: spend });
+        const quota = await quotaFor(env, device);
+        const done = Date.now();
+        const timing = `reserve;dur=${reserved - began}, ai;dur=${spend.ai_ms ?? 0}, other;dur=${done - reserved - (spend.ai_ms ?? 0)}, total;dur=${done - began}`;
+        console.log("spend", url.pathname, spend, timing);
+        const response = json({ result, quota, usage: spend });
+        response.headers.set("server-timing", timing);
+        return response;
       } catch (e) {
         await refund(env, device, handler.kind);
         throw e;

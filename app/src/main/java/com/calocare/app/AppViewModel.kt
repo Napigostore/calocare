@@ -446,7 +446,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         photo = state
         try {
             val jpeg = withContext(Dispatchers.Default) {
-                ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.JPEG, 80, it) }.toByteArray()
+                ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.JPEG, 65, it) }.toByteArray()
             }
             val analysis = (if (photosOnHosted) hosted else ai()).analyzePhoto(jpeg, photoContext(data.value))
             state.items.addAll(analysis.items.map { ground(it) })

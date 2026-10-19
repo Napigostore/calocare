@@ -53,7 +53,7 @@ final class MealScan: ObservableObject, Identifiable {
             loading = false
             return
         }
-        guard let jpeg = image.jpegData(compressionQuality: 0.8) else { error = L("Không xử lý được ảnh.", "Couldn't process the photo."); loading = false; return }
+        guard let jpeg = image.jpegData(compressionQuality: 0.65) else { error = L("Không xử lý được ảnh.", "Couldn't process the photo."); loading = false; return }
         do {
             let analysis = try await API.shared.analyzePhoto(jpeg: jpeg, context: store.photoContext)
             dishes = analysis.items.map { MealScan.ground($0, foods: store.foods, fixes: store.data.nameFixes ?? [:], bias: store.data.portionBias ?? [:]) }
