@@ -11,6 +11,9 @@ struct ProgressScreen: View {
     @State private var insights: InsightResult?
     @State private var insightsLoading = false
     @State private var insightsError: String?
+    @State private var customGoalExpanded = false
+    @State private var customMacros: MacroTargets?
+    @State private var customMacrosLoading = false
 
     private struct DayPoint: Identifiable {
         var id: String { key }
@@ -90,6 +93,8 @@ struct ProgressScreen: View {
 
                     activityCard(data)
                     watchCard()
+
+                    customGoalsCard(data)
 
                     if !logged.isEmpty {
                         insightsCardView(data, logged)
@@ -323,6 +328,95 @@ struct ProgressScreen: View {
             mealsPerDay: n > 0 ? Double(sums.meals) / n : 0,
             courseBreakdown: courseBreakdown
         )
+    }
+
+    @ViewBuilder private func customGoalsCard(_ data: AppData) -> some View {
+        let p = data.profile
+        Card(L("🎯 Mục tiêu riêng", "🎯 Custom goals")) {
+            VStack(spacing: 12) {
+                HStack {
+                    Text(L("Mục tiêu: ", "Goal: ")).font(.subheadline)
+                    Menu {
+                        ForEach(Goal.all, id: \.id) { g in
+                            Button(g.label) { store.data.profile.goal = g.id; customMacros = nil }
+                        }
+                    } label: {
+                        Label(Goal.label(p.goal), systemImage: "chevron.down").lineLimit(1)
+                    }
+                }
+
+                if p.goal == Goal.lose || p.goal == Goal.gain {
+                    HStack {
+                        Text(L("Mục tiêu: ", "Target: ") + String(format: "%.1f", p.weeklyRateKg) + L(" kg/tuần", " kg/week"))
+                            .font(.caption)
+                        Spacer()
+                        Stepper("", value: Binding(get: { p.weeklyRateKg }, set: { store.data.profile.weeklyRateKg = max(0.25, min(2, $0)) }), in: 0.25...2, step: 0.25)
+                            .labelsHidden()
+                    }
+                }
+
+                Button {
+                    loadCustomMacros(p)
+                } label: {
+                    Label(L("Tính lại macro", "Calculate macros"), systemImage: "arrow.clockwise")
+                }
+                .buttonStyle(.bordered)
+
+                if customMacrosLoading {
+                    ProgressView().frame(maxWidth: .infinity, alignment: .center)
+                } else if let macros = customMacros {
+                    VStack(spacing: 8) {
+                        Text(L("Mục tiêu đề xuất", "Recommended targets")).font(.subheadline.weight(.semibold))
+                        Text(macros.explanation).font(.caption).foregroundColor(.secondary)
+
+                        HStack(spacing: 12) {
+                            macroBox(L("Đạm", "Protein"), "\(macros.proteinG)g", Palette.protein)
+                            macroBox(L("Tinh bột", "Carbs"), "\(macros.carbsG)g", Palette.carbs)
+                            macroBox(L("Chất béo", "Fat"), "\(macros.fatG)g", Palette.fat)
+                            macroBox(L("Calo", "Kcal"), "\(macros.kcal)", .secondary)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func macroBox(_ label: String, _ value: String, _ color: Color) -> some View {
+        VStack(spacing: 4) {
+            Text(label).font(.caption2).foregroundColor(.secondary)
+            Text(value).font(.headline).foregroundColor(color)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(8)
+        .background(Color(UIColor.systemGray6))
+        .cornerRadius(8)
+    }
+
+    private func loadCustomMacros(_ profile: Profile) {
+        customMacrosLoading = true
+        Task {
+            do {
+                let metrics = UserMetrics(
+                    weightKg: profile.weightKg,
+                    heightCm: profile.heightCm,
+                    age: Nutrition.age(profile),
+                    male: profile.male,
+                    activityLevel: profile.activity,
+                    goal: profile.goal,
+                    weeklyRateKg: profile.weeklyRateKg,
+                    dietRestriction: profile.diet == Diet.none ? nil : profile.diet
+                )
+                let result = try await API.shared.macroTargets(metrics: metrics)
+                await MainActor.run {
+                    customMacros = result
+                    customMacrosLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    customMacrosLoading = false
+                }
+            }
+        }
     }
 }
 

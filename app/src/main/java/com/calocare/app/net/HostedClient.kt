@@ -92,6 +92,29 @@ data class InsightResult(
     val substitutionTip: String? = null,
 )
 
+/** User metrics for personalized macro calculation. */
+@Serializable
+data class UserMetrics(
+    val weightKg: Float,
+    val heightCm: Float,
+    val age: Int,
+    val male: Boolean,
+    val activityLevel: Float,
+    val goal: String, // "lose", "gain", "maintain", "gym", "run"
+    val weeklyRateKg: Float? = null,
+    val dietRestriction: String? = null,
+)
+
+/** Personalized macro targets. */
+@Serializable
+data class MacroTargets(
+    val proteinG: Int,
+    val carbsG: Int,
+    val fatG: Int,
+    val kcal: Int,
+    val explanation: String,
+)
+
 /**
  * The built-in AI: talks to the CaloCare server (see /server), which holds the provider key and
  * enforces the per-device allowance. No key is stored in the app.
@@ -206,6 +229,22 @@ class HostedClient(
         }
         val result = post("/v1/report/insights", buildJsonObject { put("summary", summaryJson) })
         json.decodeFromJsonElement<InsightResult>(result)
+    }.getOrNull()
+
+    /** Get personalized macro targets based on user metrics and goal. */
+    suspend fun macroTargets(metrics: UserMetrics): MacroTargets? = runCatching {
+        val metricsJson = buildJsonObject {
+            put("weightKg", metrics.weightKg)
+            put("heightCm", metrics.heightCm)
+            put("age", metrics.age)
+            put("male", metrics.male)
+            put("activityLevel", metrics.activityLevel)
+            put("goal", metrics.goal)
+            if (metrics.weeklyRateKg != null) put("weeklyRateKg", metrics.weeklyRateKg)
+            if (metrics.dietRestriction != null) put("dietRestriction", metrics.dietRestriction)
+        }
+        val result = post("/v1/macros", buildJsonObject { put("metrics", metricsJson) })
+        json.decodeFromJsonElement<MacroTargets>(result)
     }.getOrNull()
 
     private fun analysis(result: JsonElement): MealAnalysis = try {

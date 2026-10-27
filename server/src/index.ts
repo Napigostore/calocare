@@ -4,6 +4,7 @@ import { PRIVACY_PAGE, PRIVACY_PAGE_EN } from "./privacy";
 import { activate, ProError, proUntil, type ProEnv } from "./pro";
 import { adminAsked, adminList, adminSave, changesSince, loadLibrary, nameKey, physicallyPossible, submitDish, type Dish, type Nutrition } from "./library";
 import { insights, type NutritionSummary } from "./insights";
+import { macroTargets, type UserMetrics } from "./macros";
 
 /**
  * CaloCare AI gateway (Cloudflare Worker + D1).
@@ -603,6 +604,13 @@ export default {
       if (!/^[0-9a-f]{64}$/.test(device)) throw new HttpError(400, "bad_request", "Invalid device");
 
       if (request.method === "GET" && url.pathname === "/v1/quota") return json({ quota: await quotaFor(env, device) });
+      // Personalized macro targets for user's goal.
+      if (request.method === "POST" && url.pathname === "/v1/macros") {
+        const body: any = await request.json().catch(() => null);
+        if (!body?.metrics) throw new HttpError(400, "bad_request", "Missing metrics");
+        const targets = macroTargets(body.metrics as UserMetrics);
+        return json({ macros: targets });
+      }
       // A purchase made in the app: checked with the store, then linked to this device.
       if (request.method === "POST" && url.pathname === "/v1/pro") {
         const body: any = await request.json().catch(() => null);

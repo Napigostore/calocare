@@ -109,6 +109,25 @@ struct NutritionSummary: Encodable {
     var courseBreakdown: [String: Double] // e.g. { "main": 0.45, "soup": 0.20 }
 }
 
+struct MacroTargets: Decodable {
+    var proteinG: Int
+    var carbsG: Int
+    var fatG: Int
+    var kcal: Int
+    var explanation: String
+}
+
+struct UserMetrics: Encodable {
+    var weightKg: Double
+    var heightCm: Double
+    var age: Int
+    var male: Bool
+    var activityLevel: Double
+    var goal: String // "lose", "gain", "maintain", "gym", "run"
+    var weeklyRateKg: Double?
+    var dietRestriction: String?
+}
+
 struct LibraryUpdate: Decodable {
     var version: Int
     var dishes: [RemoteDish]
@@ -265,6 +284,27 @@ final class API {
         let data = try await send("/v1/report/insights", body: body)
         if let envelope = try JSONDecoder().decode(Envelope<InsightResult>?.self, from: data) {
             return envelope?.result
+        }
+        return nil
+    }
+
+    /// Get personalized macro targets based on user metrics and goal.
+    func macroTargets(metrics: UserMetrics) async throws -> MacroTargets? {
+        let body: [String: Any] = [
+            "metrics": [
+                "weightKg": metrics.weightKg,
+                "heightCm": metrics.heightCm,
+                "age": metrics.age,
+                "male": metrics.male,
+                "activityLevel": metrics.activityLevel,
+                "goal": metrics.goal,
+                "weeklyRateKg": metrics.weeklyRateKg as Any,
+                "dietRestriction": metrics.dietRestriction as Any,
+            ]
+        ]
+        let data = try await send("/v1/macros", body: body)
+        if let envelope = try JSONDecoder().decode(Envelope<MacroTargets>?.self, from: data) {
+            return envelope?.macros
         }
         return nil
     }
