@@ -301,6 +301,8 @@ struct FoodEditor: View {
     @Environment(\.dismiss) private var dismiss
     @State var food: Food
     @State private var showIngredients = false
+    @State private var substitution: Substitution?
+    @State private var loadingSubstitution = false
 
     var body: some View {
         NavigationStack {
@@ -317,6 +319,61 @@ struct FoodEditor: View {
                     Text(L("Đổi đạm, bột, béo thì calo tự tính lại.", "Change protein, carbs or fat and the calories update.")).font(.caption).foregroundColor(.secondary)
                     Button(L("🧮 Tính theo thành phần (thịt, rau… bao nhiêu gam)", "🧮 Work it out from ingredients (grams of meat, veg…)")) { showIngredients = true }
                         .disabled(food.name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+
+                if !food.custom {
+                    Section(L("💡 Gợi ý thay thế", "💡 Healthier swap")) {
+                        if let sub = substitution {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(sub.name).font(.headline)
+                                        Text(sub.reason).font(.caption).foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                }
+                                HStack(spacing: 12) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(L("Calo", "Kcal")).font(.caption2)
+                                        Text("\(sub.kcal)").font(.headline.monospacedDigit())
+                                            .foregroundColor(sub.kcal < food.kcal ? Palette.green : .secondary)
+                                    }
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(L("Đạm", "Protein")).font(.caption2)
+                                        Text("\(String(format: "%.1f", sub.protein_g))g").font(.caption.monospacedDigit())
+                                            .foregroundColor(sub.protein_g > food.protein ? Palette.protein : .secondary)
+                                    }
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(L("Chất xơ", "Fiber")).font(.caption2)
+                                        Text("✓").font(.headline).foregroundColor(Palette.green)
+                                    }
+                                    Spacer()
+                                }
+                                ForEach(sub.benefits, id: \.self) { b in
+                                    Text("• " + b).font(.caption).foregroundColor(.secondary)
+                                }
+                                Button(L("Chọn món này", "Use this swap")) {
+                                    food.name = sub.name
+                                    food.kcal = sub.kcal
+                                    food.protein = sub.protein_g
+                                    food.carbs = sub.carbs_g
+                                    food.fat = sub.fat_g
+                                    substitution = nil
+                                }
+                                .buttonStyle(.bordered)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                            .padding(.vertical, 8)
+                        } else if loadingSubstitution {
+                            ProgressView().frame(maxWidth: .infinity, alignment: .center)
+                        } else {
+                            Button(L("🔄 Tìm thay thế lành mạnh", "🔄 Find healthier swap")) {
+                                loadSubstitution()
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(food.name.trimmingCharacters(in: .whitespaces).isEmpty || food.kcal <= 0)
+                        }
+                    }
                 }
             }
             .navigationTitle(L("Món của tôi", "My food"))
@@ -375,6 +432,32 @@ struct FoodEditor: View {
             Text(label)
             Spacer()
             TextField("0", value: value, format: .number).keyboardType(.decimalPad).multilineTextAlignment(.trailing).frame(width: 100)
+        }
+    }
+
+    private func loadSubstitution() {
+        loadingSubstitution = true
+        Task {
+            do {
+                let detectedFood = DetectedFood(
+                    name: food.name,
+                    kcal: food.kcal,
+                    protein_g: food.protein,
+                    carbs_g: food.carbs,
+                    fat_g: food.fat,
+                    fiber_g: 0,
+                    tags: food.tags.map { $0 }
+                )
+                let result = try await API.shared.substitute(food: detectedFood)
+                await MainActor.run {
+                    substitution = result
+                    loadingSubstitution = false
+                }
+            } catch {
+                await MainActor.run {
+                    loadingSubstitution = false
+                }
+            }
         }
     }
 }

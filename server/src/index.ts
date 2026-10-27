@@ -5,6 +5,7 @@ import { activate, ProError, proUntil, type ProEnv } from "./pro";
 import { adminAsked, adminList, adminSave, changesSince, loadLibrary, nameKey, physicallyPossible, submitDish, type Dish, type Nutrition } from "./library";
 import { insights, type NutritionSummary } from "./insights";
 import { macroTargets, type UserMetrics } from "./macros";
+import { substitute, type DetectedFood } from "./substitute";
 
 /**
  * CaloCare AI gateway (Cloudflare Worker + D1).
@@ -636,6 +637,7 @@ export default {
         "/v1/breakdown": { kind: "chat", run: breakdown },
         "/v1/chat": { kind: "chat", run: chat },
         "/v1/report/insights": { kind: "chat", run: insights },
+        "/v1/substitute": { kind: "chat", run: substitute },
       };
       const handler = handlers[url.pathname];
       if (request.method !== "POST" || (!handler && url.pathname !== "/v1/correction" && url.pathname !== "/v1/dish")) throw new HttpError(404, "not_found", "Not found");

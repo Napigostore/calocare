@@ -128,6 +128,26 @@ struct UserMetrics: Encodable {
     var dietRestriction: String?
 }
 
+struct DetectedFood: Encodable {
+    var name: String
+    var kcal: Int
+    var protein_g: Double
+    var carbs_g: Double
+    var fat_g: Double
+    var fiber_g: Double?
+    var tags: [String]
+}
+
+struct Substitution: Decodable {
+    var name: String
+    var kcal: Int
+    var protein_g: Double
+    var carbs_g: Double
+    var fat_g: Double
+    var reason: String
+    var benefits: [String]
+}
+
 struct LibraryUpdate: Decodable {
     var version: Int
     var dishes: [RemoteDish]
@@ -305,6 +325,26 @@ final class API {
         let data = try await send("/v1/macros", body: body)
         if let envelope = try JSONDecoder().decode(Envelope<MacroTargets>?.self, from: data) {
             return envelope?.macros
+        }
+        return nil
+    }
+
+    /// Get a healthier food substitution suggestion.
+    func substitute(food: DetectedFood) async throws -> Substitution? {
+        let body: [String: Any] = [
+            "food": [
+                "name": food.name,
+                "kcal": food.kcal,
+                "protein_g": food.protein_g,
+                "carbs_g": food.carbs_g,
+                "fat_g": food.fat_g,
+                "fiber_g": food.fiber_g as Any,
+                "tags": food.tags,
+            ]
+        ]
+        let data = try await send("/v1/substitute", body: body)
+        if let envelope = try JSONDecoder().decode(Envelope<Substitution>?.self, from: data) {
+            return envelope?.result
         }
         return nil
     }
