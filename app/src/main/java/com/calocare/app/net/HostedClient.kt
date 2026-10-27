@@ -62,6 +62,36 @@ data class Quota(
     val free_chats_per_day: Int = 5,
 )
 
+/** Weekly/monthly nutrition summary for AI analysis. */
+@Serializable
+data class NutritionSummary(
+    val period: String, // "week" or "month"
+    val startDate: String, // yyyy-MM-dd
+    val endDate: String,
+    val daysCount: Int,
+    val totalDays: Int,
+    val totalKcal: Int,
+    val totalProtein: Float,
+    val totalCarbs: Float,
+    val totalFat: Float,
+    val avgKcal: Float,
+    val avgProtein: Float,
+    val avgCarbs: Float,
+    val avgFat: Float,
+    val mealsPerDay: Float,
+    val courseBreakdown: Map<String, Float>,
+)
+
+/** AI-generated nutrition coaching insights. */
+@Serializable
+data class InsightResult(
+    val title: String,
+    val patterns: List<String> = emptyList(),
+    val strengths: List<String> = emptyList(),
+    val improvements: List<String> = emptyList(),
+    val substitutionTip: String? = null,
+)
+
 /**
  * The built-in AI: talks to the CaloCare server (see /server), which holds the provider key and
  * enforces the per-device allowance. No key is stored in the app.
@@ -150,6 +180,33 @@ class HostedClient(
     /** Sends a Google Play purchase to the server, which checks it with Google and turns Pro on for this device. */
     suspend fun activatePro(purchaseToken: String): Boolean =
         runCatching { request("/v1/pro", buildJsonObject { put("platform", "android"); put("token", purchaseToken) }) }.isSuccess
+
+    /** Get AI coaching insights for a week/month of nutrition data. */
+    suspend fun reportInsights(summary: NutritionSummary): InsightResult? = runCatching {
+        val summaryJson = buildJsonObject {
+            put("period", summary.period)
+            put("startDate", summary.startDate)
+            put("endDate", summary.endDate)
+            put("daysCount", summary.daysCount)
+            put("totalDays", summary.totalDays)
+            put("totalKcal", summary.totalKcal)
+            put("totalProtein", summary.totalProtein)
+            put("totalCarbs", summary.totalCarbs)
+            put("totalFat", summary.totalFat)
+            put("avgKcal", summary.avgKcal)
+            put("avgProtein", summary.avgProtein)
+            put("avgCarbs", summary.avgCarbs)
+            put("avgFat", summary.avgFat)
+            put("mealsPerDay", summary.mealsPerDay)
+            putJsonArray("courseBreakdown") {
+                summary.courseBreakdown.forEach { (course, pct) ->
+                    add(buildJsonObject { put(course, pct) })
+                }
+            }
+        }
+        val result = post("/v1/report/insights", buildJsonObject { put("summary", summaryJson) })
+        json.decodeFromJsonElement<InsightResult>(result)
+    }.getOrNull()
 
     private fun analysis(result: JsonElement): MealAnalysis = try {
         json.decodeFromJsonElement<MealAnalysis>(result)
