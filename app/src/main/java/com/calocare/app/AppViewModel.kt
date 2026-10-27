@@ -140,6 +140,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         MessageDigest.getInstance("SHA-256").digest("calocare:$androidId".toByteArray()).joinToString("") { "%02x".format(it) }
     }
     private val hosted by lazy { HostedClient(BuildConfig.BACKEND_URL, BuildConfig.BACKEND_APP_KEY, deviceId, onQuota = { quota = it }, onProRequired = { paywall = true }) }
+    val api: HostedClient get() = hosted
 
     /** The CaloCare Pro offer is on screen: opened by the user, or when the free AI allowance runs out. */
     var paywall by mutableStateOf(false)

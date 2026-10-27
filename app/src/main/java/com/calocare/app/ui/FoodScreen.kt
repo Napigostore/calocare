@@ -91,6 +91,10 @@ import com.calocare.app.data.Region
 import com.calocare.app.data.Tag
 import com.calocare.app.data.entriesOn
 import com.calocare.app.data.totals
+import com.calocare.app.net.DetectedFood
+import com.calocare.app.net.Substitution
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import java.text.Normalizer
 import kotlin.math.roundToInt
 
@@ -430,6 +434,8 @@ fun EatingOrder(entries: List<LogEntry>, data: AppData) {
 private fun FoodDetailDialog(food: Food, vm: AppViewModel, data: AppData, onDismiss: () -> Unit, onEdit: () -> Unit) {
     val warnings = Nutrition.warnings(food.tags, data.profile)
     val mine = food.custom && data.customFoods.any { it.id == food.id }
+    var substitution by remember { mutableStateOf<Substitution?>(null) }
+    var loadingSubstitution by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -447,6 +453,54 @@ private fun FoodDetailDialog(food: Food, vm: AppViewModel, data: AppData, onDism
                 val allergens = food.tags.mapNotNull { Tag.allergens[it] }
                 if (allergens.isNotEmpty()) Text(L("Chất gây dị ứng: ${allergens.joinToString()}", "Allergens: ${allergens.joinToString()}"), style = MaterialTheme.typography.bodySmall)
                 warnings.forEach { WarningLine(it) }
+
+                // Substitution suggestion (only for built-in foods)
+                if (!food.custom) {
+                    if (loadingSubstitution) {
+                        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 1.5.dp)
+                            Text(L("  Tìm thay thế…", "  Finding swap…"), style = MaterialTheme.typography.bodySmall)
+                        }
+                    } else if (substitution != null) {
+                        Column(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.secondaryContainer).padding(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(L("💡 Thay thế khỏe hơn", "💡 Healthier swap"), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
+                            Text(substitution!!.name, fontWeight = FontWeight.SemiBold)
+                            Text(L("${substitution!!.kcal} kcal · Đạm ${substitution!!.protein_g.toInt()}g · Bột ${substitution!!.carbs_g.toInt()}g · Béo ${substitution!!.fat_g.toInt()}g",
+                                "${substitution!!.kcal} kcal · Protein ${substitution!!.protein_g.toInt()}g · Carbs ${substitution!!.carbs_g.toInt()}g · Fat ${substitution!!.fat_g.toInt()}g"),
+                                style = MaterialTheme.typography.labelSmall)
+                            if (substitution!!.benefits.isNotEmpty()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    substitution!!.benefits.forEach { benefit ->
+                                        Text("✓ $benefit", style = MaterialTheme.typography.labelSmall)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        FilledTonalButton(onClick = {
+                            loadingSubstitution = true
+                            vm.viewModelScope.launch {
+                                val detectedFood = DetectedFood(
+                                    name = food.name,
+                                    kcal = food.kcal,
+                                    protein_g = food.protein,
+                                    carbs_g = food.carbs,
+                                    fat_g = food.fat,
+                                    fiber_g = null,
+                                    tags = food.tags.toList(),
+                                )
+                                substitution = vm.api.substitute(detectedFood)
+                                loadingSubstitution = false
+                            }
+                        }, modifier = Modifier.fillMaxWidth()) {
+                            Text(L("💡 Thay thế khỏe hơn", "💡 Find healthier swap"))
+                        }
+                    }
+                }
+
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(0.5f, 1f, 2f).forEach { q ->
                         FilledTonalButton(onClick = { vm.addFood(food, q, warnings); onDismiss() }, contentPadding = PaddingValues(horizontal = 12.dp)) {

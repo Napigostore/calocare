@@ -2,6 +2,9 @@ package com.calocare.app.ui
 
 import com.calocare.app.L
 import android.content.Intent
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
@@ -21,6 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Slider
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
@@ -51,6 +58,14 @@ import com.calocare.app.data.AppData
 import com.calocare.app.data.FoodDb
 import com.calocare.app.data.Nutrition
 import com.calocare.app.data.exercisesOn
+import com.calocare.app.net.HabitScore
+import com.calocare.app.net.MacroTargets
+import com.calocare.app.net.InsightResult
+import com.calocare.app.net.NutritionSummary
+import com.calocare.app.net.UserGoal
+import com.calocare.app.net.UserMetrics
+import com.calocare.app.net.DayNutrition
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -61,6 +76,15 @@ fun ProgressScreen(vm: AppViewModel, data: AppData, padding: PaddingValues) {
     var picking by remember { mutableStateOf<FoodDb.Activity?>(null) }
     var weightDialog by remember { mutableStateOf(false) }
     var range by rememberSaveable { mutableIntStateOf(7) }
+    var habitScore by remember { mutableStateOf<HabitScore?>(null) }
+    var habitScoreLoading by remember { mutableStateOf(false) }
+    var insights by remember { mutableStateOf<InsightResult?>(null) }
+    var insightsLoading by remember { mutableStateOf(false) }
+    var customGoalExpanded by remember { mutableStateOf(false) }
+    var selectedGoal by remember { mutableStateOf("maintain") }
+    var weeklyRate by remember { mutableStateOf(0f) }
+    var customMacros by remember { mutableStateOf<MacroTargets?>(null) }
+    var customMacrosLoading by remember { mutableStateOf(false) }
 
     val requestPermissions = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
         if (granted.isNotEmpty()) vm.syncWearable(announce = true)
@@ -133,6 +157,68 @@ fun ProgressScreen(vm: AppViewModel, data: AppData, padding: PaddingValues) {
         }
 
         item {
+            habitScoreCard(habitScore, habitScoreLoading) {
+                habitScoreLoading = true
+                vm.viewModelScope.launch {
+                    val today = DayNutrition(
+                        date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(vm.date),
+                        foods = data.entriesOn(vm.date).map { it.label },
+                        kcal = Nutrition.kcalEaten(data, vm.date).toInt(),
+                        protein_g = Nutrition.proteinEaten(data, vm.date),
+                        carbs_g = Nutrition.carbsEaten(data, vm.date),
+                        fat_g = Nutrition.fatEaten(data, vm.date),
+                    )
+                    val target = UserGoal(
+                        kcal = 2000,
+                        protein_g = 150f,
+                        carbs_g = 200f,
+                        fat_g = 65f,
+                    )
+                    habitScore = vm.api.habitScore(today, target)
+                    habitScoreLoading = false
+                }
+            }
+        }
+
+        item {
+            customGoalsCard(
+                selectedGoal = selectedGoal,
+                onGoalChange = { selectedGoal = it },
+                weeklyRate = weeklyRate,
+                onRateChange = { weeklyRate = it },
+                customMacros = customMacros,
+                isLoading = customMacrosLoading,
+                data = data
+            ) {
+                customMacrosLoading = true
+                vm.viewModelScope.launch {
+                    val metrics = UserMetrics(
+                        weightKg = data.profile.weightKg,
+                        heightCm = data.profile.heightCm.toFloat(),
+                        age = Calendar.getInstance().get(Calendar.YEAR) - data.profile.birthYear,
+                        male = data.profile.male,
+                        activityLevel = 1.5f,
+                        goal = selectedGoal,
+                        weeklyRateKg = if (weeklyRate != 0f) weeklyRate else null,
+                    )
+                    customMacros = vm.api.macroTargets(metrics)
+                    customMacrosLoading = false
+                }
+            }
+        }
+
+        item {
+            insightsCard(insights, insightsLoading) {
+                insightsLoading = true
+                vm.viewModelScope.launch {
+                    val summary = buildWeeklySummary(data)
+                    insights = vm.api.reportInsights(summary)
+                    insightsLoading = false
+                }
+            }
+        }
+
+        item {
             SectionCard(title = L("Thêm vận động", "Add activity")) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     FoodDb.activities.forEach { a ->
@@ -199,4 +285,261 @@ private fun Line(label: String, value: String) {
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
         Text(value, fontWeight = FontWeight.SemiBold)
     }
+}
+
+@Composable
+private fun habitScoreCard(
+    habitScore: HabitScore?,
+    isLoading: Boolean,
+    onRefresh: () -> Unit,
+) {
+    SectionCard(title = L("🎯 Điểm ăn uống hôm nay", "🎯 Eating habit score")) {
+        if (isLoading) {
+            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+            }
+        } else if (habitScore != null) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Overall score with color bar
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text(L("Tổng điểm", "Overall score"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${habitScore.overall}/100", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            Modifier.size(80.dp).background(scoreColor(habitScore.overall), RoundedCornerShape(40.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("${habitScore.overall}", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+                }
+
+                // Streak
+                if (habitScore.streak > 0) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(L("🔥 Chuỗi ngày tốt", "🔥 Good day streak"), style = MaterialTheme.typography.labelMedium)
+                        Text("${habitScore.streak} ${L("ngày", "days")}", fontWeight = FontWeight.SemiBold)
+                    }
+                }
+
+                // Component scores
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    scoreBar(L("Đa dạng", "Diversity"), habitScore.diversity)
+                    scoreBar(L("Cân bằng macro", "Macro balance"), habitScore.macroBalance)
+                }
+
+                // Next badge
+                if (habitScore.nextBadge != null) {
+                    Text(L("Tiếp theo: ${badgeName(habitScore.nextBadge)}", "Next: ${badgeName(habitScore.nextBadge)}"),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                }
+
+                FilledTonalButton(onClick = onRefresh, modifier = Modifier.fillMaxWidth()) {
+                    Text(L("Tải lại", "Refresh"))
+                }
+            }
+        } else {
+            FilledTonalButton(onClick = onRefresh, modifier = Modifier.fillMaxWidth()) {
+                Text(L("Tính điểm", "Calculate score"))
+            }
+        }
+    }
+}
+
+@Composable
+private fun scoreBar(label: String, score: Int) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(label, Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
+            Text("$score/100", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
+        }
+        Box(
+            Modifier.fillMaxWidth().height(6.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(3.dp))
+                .clip(RoundedCornerShape(3.dp))
+        ) {
+            Box(Modifier.fillMaxWidth(score / 100f).height(6.dp).background(scoreColor(score)))
+        }
+    }
+}
+
+@Composable
+private fun scoreColor(score: Int): Color = when {
+    score >= 80 -> Color(0xFF4CAF50)
+    score >= 60 -> Color(0xFF8BC34A)
+    score >= 40 -> Color(0xFFFFB74D)
+    else -> Color(0xFFEF5350)
+}
+
+private fun badgeName(badge: String?): String = when (badge) {
+    "week_warrior" -> "🏆 Week Warrior"
+    "month_master" -> "👑 Month Master"
+    "food_explorer" -> "🌍 Food Explorer"
+    "macro_precision" -> "💯 Macro Precision"
+    else -> badge ?: ""
+}
+
+@Composable
+private fun customGoalsCard(
+    selectedGoal: String,
+    onGoalChange: (String) -> Unit,
+    weeklyRate: Float,
+    onRateChange: (Float) -> Unit,
+    customMacros: MacroTargets?,
+    isLoading: Boolean,
+    data: AppData,
+    onCalculate: () -> Unit,
+) {
+    SectionCard(title = L("🎯 Mục tiêu cá nhân", "🎯 Custom goals")) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Goal selector
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(L("Mục tiêu", "Goal"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    listOf(
+                        "maintain" to L("Duy trì", "Maintain"),
+                        "lose" to L("Giảm cân", "Lose weight"),
+                        "gain" to L("Tăng cân", "Gain weight"),
+                        "gym" to L("Tập gym", "Gym"),
+                        "run" to L("Chạy bộ", "Running"),
+                    ).forEach { (goal, label) ->
+                        FilterChip(
+                            selectedGoal == goal,
+                            { onGoalChange(goal) },
+                            label = { Text(label) }
+                        )
+                    }
+                }
+            }
+
+            // Weekly rate for weight goals
+            if (selectedGoal in listOf("lose", "gain")) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(L("Tốc độ", "Rate"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                        Text(L("${String.format("%.1f", weeklyRate)} kg/tuần", "${String.format("%.1f", weeklyRate)} kg/week"), style = MaterialTheme.typography.labelSmall)
+                    }
+                    Slider(
+                        weeklyRate,
+                        { onRateChange(it) },
+                        valueRange = 0.25f..1.0f,
+                        steps = 3
+                    )
+                }
+            }
+
+            // Calculate macros
+            if (isLoading) {
+                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                }
+            } else if (customMacros != null) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(customMacros.explanation, style = MaterialTheme.typography.bodySmall)
+                    Line(L("Protein", "Protein"), "${customMacros.proteinG}g")
+                    Line(L("Carbs", "Carbs"), "${customMacros.carbsG}g")
+                    Line(L("Fat", "Fat"), "${customMacros.fatG}g")
+                    Line(L("Kcal", "Kcal"), "${customMacros.kcal}")
+                }
+            }
+
+            FilledTonalButton(onClick = onCalculate, modifier = Modifier.fillMaxWidth()) {
+                Text(L("Tính toán", "Calculate"))
+            }
+        }
+    }
+}
+
+@Composable
+private fun insightsCard(
+    insights: InsightResult?,
+    isLoading: Boolean,
+    onRefresh: () -> Unit,
+) {
+    SectionCard(title = L("💡 Lời khuyên ăn uống", "💡 Eating insights")) {
+        if (isLoading) {
+            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+            }
+        } else if (insights != null) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (insights.patterns.isNotEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(L("Xu hướng", "Patterns"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                        insights.patterns.forEach { pattern ->
+                            Text("• $pattern", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+
+                if (insights.strengths.isNotEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(L("Điểm mạnh", "Strengths"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                        insights.strengths.forEach { strength ->
+                            Text("✓ $strength", style = MaterialTheme.typography.bodySmall, color = Color(0xFF4CAF50))
+                        }
+                    }
+                }
+
+                if (insights.improvements.isNotEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(L("Cải thiện", "Improvements"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                        insights.improvements.forEach { improve ->
+                            Text("• $improve", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+
+                FilledTonalButton(onClick = onRefresh, modifier = Modifier.fillMaxWidth()) {
+                    Text(L("Tải lại", "Refresh"))
+                }
+            }
+        } else {
+            FilledTonalButton(onClick = onRefresh, modifier = Modifier.fillMaxWidth()) {
+                Text(L("Phân tích", "Analyze"))
+            }
+        }
+    }
+}
+
+private fun buildWeeklySummary(data: AppData): NutritionSummary {
+    val calendar = Calendar.getInstance()
+    val endDate = calendar.time
+    calendar.add(Calendar.DAY_OF_YEAR, -7)
+    val startDate = calendar.time
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    var totalKcal = 0
+    var totalProtein = 0f
+    var totalCarbs = 0f
+    var totalFat = 0f
+
+    val cal = Calendar.getInstance()
+    cal.time = startDate
+    for (i in 0..6) {
+        totalKcal += Nutrition.kcalEaten(data, cal.time).toInt()
+        totalProtein += Nutrition.proteinEaten(data, cal.time)
+        totalCarbs += Nutrition.carbsEaten(data, cal.time)
+        totalFat += Nutrition.fatEaten(data, cal.time)
+        cal.add(Calendar.DAY_OF_YEAR, 1)
+    }
+
+    return NutritionSummary(
+        period = "week",
+        startDate = dateFormat.format(startDate),
+        endDate = dateFormat.format(endDate),
+        daysCount = 7,
+        totalDays = 7,
+        totalKcal = totalKcal,
+        totalProtein = totalProtein,
+        totalCarbs = totalCarbs,
+        totalFat = totalFat,
+        avgKcal = totalKcal.toFloat() / 7,
+        avgProtein = totalProtein / 7,
+        avgCarbs = totalCarbs / 7,
+        avgFat = totalFat / 7,
+        mealsPerDay = 3.0f,
+        courseBreakdown = mapOf("main" to 0.45f, "soup" to 0.20f, "side" to 0.15f, "dessert" to 0.10f),
+    )
 }
