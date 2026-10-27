@@ -14,6 +14,8 @@ struct ProgressScreen: View {
     @State private var customGoalExpanded = false
     @State private var customMacros: MacroTargets?
     @State private var customMacrosLoading = false
+    @State private var habitScore: HabitScore?
+    @State private var habitScoreLoading = false
 
     private struct DayPoint: Identifiable {
         var id: String { key }
@@ -97,6 +99,7 @@ struct ProgressScreen: View {
                     customGoalsCard(data)
 
                     if !logged.isEmpty {
+                        habitScoreCard(data, logged)
                         insightsCardView(data, logged)
                     }
                 }
@@ -277,6 +280,129 @@ struct ProgressScreen: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder private func habitScoreCard(_ data: AppData, _ logged: [DayPoint]) -> some View {
+        let p = data.profile
+        let macros = Nutrition.macroTargets(p)
+        let target = UserGoal(kcal: macros.kcal, protein_g: Double(macros.protein), carbs_g: Double(macros.carbs), fat_g: Double(macros.fat))
+
+        Card(L("🏆 Điểm ăn uống hôm nay", "🏆 Today's Eating Score")) {
+            if habitScoreLoading {
+                ProgressView().frame(maxWidth: .infinity, alignment: .center)
+            } else if let score = habitScore {
+                VStack(spacing: 12) {
+                    HStack(spacing: 16) {
+                        // Overall score
+                        VStack(alignment: .center, spacing: 4) {
+                            Text(L("Tổng điểm", "Overall")).font(.caption2).foregroundColor(.secondary)
+                            Text("\(score.overall)").font(.title2.weight(.bold)).foregroundColor(scoreColor(score.overall))
+                            Text("/ 100").font(.caption2).foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+
+                        Divider()
+
+                        // Streak
+                        VStack(alignment: .center, spacing: 4) {
+                            Text(L("Chuỗi liên tiếp", "Streak")).font(.caption2).foregroundColor(.secondary)
+                            Text("\(score.streak)").font(.title2.weight(.bold)).foregroundColor(Palette.green)
+                            Text(L("ngày", "days")).font(.caption2).foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .padding(.vertical, 8)
+
+                    Divider()
+
+                    // Component scores
+                    HStack(spacing: 12) {
+                        scoreBar(L("Đa dạng", "Variety"), score.diversity)
+                        scoreBar(L("Macro", "Macro"), score.macroBalance)
+                    }
+
+                    // Badge info
+                    if let badge = score.nextBadge {
+                        HStack {
+                            Image(systemName: "star.fill").foregroundColor(Palette.warn)
+                            Text(L("Bạn sắp nhận huy chương: ", "Next badge: ") + badgeName(badge)).font(.caption)
+                            Spacer()
+                        }
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background(Palette.warn.opacity(0.1))
+                        .cornerRadius(6)
+                    }
+                }
+            } else {
+                Button(L("Tính điểm hôm nay", "Calculate today's score")) {
+                    loadHabitScore(data, logged, target)
+                }
+                .buttonStyle(.bordered)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .onAppear { loadHabitScore(data, logged, target) }
+            }
+        }
+    }
+
+    private func scoreColor(_ score: Int) -> Color {
+        if score >= 80 { return Palette.green }
+        if score >= 60 { return Palette.orange }
+        return Palette.warn
+    }
+
+    private func scoreBar(_ label: String, _ value: Int) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(label).font(.caption2)
+                Spacer()
+                Text("\(value)%").font(.caption2.weight(.semibold))
+            }
+            GeometryReader { g in
+                ZStack(alignment: .leading) {
+                    Color(.systemGray5).frame(height: 6).cornerRadius(3)
+                    Color(scoreColor(value)).frame(width: g.size.width * CGFloat(value) / 100, height: 6).cornerRadius(3)
+                }
+            }
+            .frame(height: 6)
+        }
+    }
+
+    private func badgeName(_ badge: String) -> String {
+        switch badge {
+        case "week_warrior": return L("Chiến binh tuần", "Week Warrior")
+        case "month_master": return L("Thạc sĩ tháng", "Month Master")
+        case "food_explorer": return L("Khám phá ẩm thực", "Food Explorer")
+        case "macro_precision": return L("Độ chính xác macro", "Macro Precision")
+        default: return badge
+        }
+    }
+
+    private func loadHabitScore(_ data: AppData, _ logged: [DayPoint], _ target: UserGoal) {
+        habitScoreLoading = true
+        Task {
+            do {
+                let today = buildDayNutrition(data, logged.first(where: { dayKey($0.date) == dayKey(Date()) }))
+                let pastDays = logged.dropFirst().map { buildDayNutrition(data, $0) }
+                let result = try await API.shared.habitScore(today: today, target: target, pastDays: Array(pastDays))
+                await MainActor.run {
+                    habitScore = result
+                    habitScoreLoading = false
+                }
+            } catch {
+                await MainActor.run { habitScoreLoading = false }
+            }
+        }
+    }
+
+    private func buildDayNutrition(_ data: AppData, _ dayPoint: DayPoint?) -> DayNutrition {
+        guard let dayPoint = dayPoint else {
+            return DayNutrition(date: dayKey(Date()), foods: [], kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0)
+        }
+        let entries = Nutrition.entries(data, on: dayPoint.date)
+        let foods = entries.map { $0.name }
+        let totals = Nutrition.totals(entries)
+        return DayNutrition(date: dayPoint.key, foods: foods, kcal: Int(totals.kcal), protein_g: totals.protein, carbs_g: totals.carbs, fat_g: totals.fat)
     }
 
     private func buildNutritionSummary(_ data: AppData, _ logged: [DayPoint], _ days: Int) -> NutritionSummary {

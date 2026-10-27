@@ -6,6 +6,7 @@ import { adminAsked, adminList, adminSave, changesSince, loadLibrary, nameKey, p
 import { insights, type NutritionSummary } from "./insights";
 import { macroTargets, type UserMetrics } from "./macros";
 import { substitute, type DetectedFood } from "./substitute";
+import { computeHabitScore, type HabitScore, type DayNutrition, type UserGoal } from "./habits";
 
 /**
  * CaloCare AI gateway (Cloudflare Worker + D1).
@@ -611,6 +612,13 @@ export default {
         if (!body?.metrics) throw new HttpError(400, "bad_request", "Missing metrics");
         const targets = macroTargets(body.metrics as UserMetrics);
         return json({ macros: targets });
+      }
+      // Eating habit score for gamification.
+      if (request.method === "POST" && url.pathname === "/v1/habit-score") {
+        const body: any = await request.json().catch(() => null);
+        if (!body?.today || !body?.target) throw new HttpError(400, "bad_request", "Missing data");
+        const score = computeHabitScore(body.today as DayNutrition, body.target as UserGoal, body.pastDays as DayNutrition[]);
+        return json({ score });
       }
       // A purchase made in the app: checked with the store, then linked to this device.
       if (request.method === "POST" && url.pathname === "/v1/pro") {

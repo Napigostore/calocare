@@ -115,6 +115,37 @@ data class MacroTargets(
     val explanation: String,
 )
 
+/** Daily nutrition data for habit scoring. */
+@Serializable
+data class DayNutrition(
+    val date: String,
+    val foods: List<String>,
+    val kcal: Int,
+    val protein_g: Float,
+    val carbs_g: Float,
+    val fat_g: Float,
+)
+
+/** User nutrition goals for habit scoring. */
+@Serializable
+data class UserGoal(
+    val kcal: Int,
+    val protein_g: Float,
+    val carbs_g: Float,
+    val fat_g: Float,
+)
+
+/** Eating habit score for gamification. */
+@Serializable
+data class HabitScore(
+    val diversity: Int,
+    val timing: Int,
+    val macroBalance: Int,
+    val overall: Int,
+    val streak: Int,
+    val nextBadge: String? = null,
+)
+
 /**
  * The built-in AI: talks to the CaloCare server (see /server), which holds the provider key and
  * enforces the per-device allowance. No key is stored in the app.
@@ -245,6 +276,41 @@ class HostedClient(
         }
         val result = post("/v1/macros", buildJsonObject { put("metrics", metricsJson) })
         json.decodeFromJsonElement<MacroTargets>(result)
+    }.getOrNull()
+
+    /** Get eating habit score for gamification. */
+    suspend fun habitScore(today: DayNutrition, target: UserGoal, pastDays: List<DayNutrition> = emptyList()): HabitScore? = runCatching {
+        val todayJson = buildJsonObject {
+            put("date", today.date)
+            putJsonArray("foods") { today.foods.forEach { add(it) } }
+            put("kcal", today.kcal)
+            put("protein_g", today.protein_g)
+            put("carbs_g", today.carbs_g)
+            put("fat_g", today.fat_g)
+        }
+        val targetJson = buildJsonObject {
+            put("kcal", target.kcal)
+            put("protein_g", target.protein_g)
+            put("carbs_g", target.carbs_g)
+            put("fat_g", target.fat_g)
+        }
+        val result = post("/v1/habit-score", buildJsonObject {
+            put("today", todayJson)
+            put("target", targetJson)
+            putJsonArray("pastDays") {
+                pastDays.forEach { day ->
+                    add(buildJsonObject {
+                        put("date", day.date)
+                        putJsonArray("foods") { day.foods.forEach { add(it) } }
+                        put("kcal", day.kcal)
+                        put("protein_g", day.protein_g)
+                        put("carbs_g", day.carbs_g)
+                        put("fat_g", day.fat_g)
+                    })
+                }
+            }
+        })
+        json.decodeFromJsonElement<HabitScore>(result)
     }.getOrNull()
 
     private fun analysis(result: JsonElement): MealAnalysis = try {

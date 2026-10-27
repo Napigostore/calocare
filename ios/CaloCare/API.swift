@@ -148,6 +148,31 @@ struct Substitution: Decodable {
     var benefits: [String]
 }
 
+struct DayNutrition: Encodable {
+    var date: String
+    var foods: [String]
+    var kcal: Int
+    var protein_g: Double
+    var carbs_g: Double
+    var fat_g: Double
+}
+
+struct UserGoal: Encodable {
+    var kcal: Int
+    var protein_g: Double
+    var carbs_g: Double
+    var fat_g: Double
+}
+
+struct HabitScore: Decodable {
+    var diversity: Int // 0-100
+    var timing: Int // 0-100
+    var macroBalance: Int // 0-100
+    var overall: Int // 0-100
+    var streak: Int // consecutive days
+    var nextBadge: String? // badge earned
+}
+
 struct LibraryUpdate: Decodable {
     var version: Int
     var dishes: [RemoteDish]
@@ -345,6 +370,39 @@ final class API {
         let data = try await send("/v1/substitute", body: body)
         if let envelope = try JSONDecoder().decode(Envelope<Substitution>?.self, from: data) {
             return envelope?.result
+        }
+        return nil
+    }
+
+    /// Get eating habit score for gamification.
+    func habitScore(today: DayNutrition, target: UserGoal, pastDays: [DayNutrition] = []) async throws -> HabitScore? {
+        let body: [String: Any] = [
+            "today": [
+                "date": today.date,
+                "foods": today.foods,
+                "kcal": today.kcal,
+                "protein_g": today.protein_g,
+                "carbs_g": today.carbs_g,
+                "fat_g": today.fat_g,
+            ],
+            "target": [
+                "kcal": target.kcal,
+                "protein_g": target.protein_g,
+                "carbs_g": target.carbs_g,
+                "fat_g": target.fat_g,
+            ],
+            "pastDays": pastDays.map { [
+                "date": $0.date,
+                "foods": $0.foods,
+                "kcal": $0.kcal,
+                "protein_g": $0.protein_g,
+                "carbs_g": $0.carbs_g,
+                "fat_g": $0.fat_g,
+            ]},
+        ]
+        let data = try await send("/v1/habit-score", body: body)
+        if let envelope = try JSONDecoder().decode(Envelope<HabitScore>?.self, from: data) {
+            return envelope?.score
         }
         return nil
     }
