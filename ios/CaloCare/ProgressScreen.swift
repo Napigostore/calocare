@@ -8,6 +8,9 @@ struct ProgressScreen: View {
     @State private var range = 7
     @State private var weighing = false
     @State private var exercising = false
+    @State private var insights: InsightResult?
+    @State private var insightsLoading = false
+    @State private var insightsError: String?
 
     private struct DayPoint: Identifiable {
         var id: String { key }
@@ -87,6 +90,10 @@ struct ProgressScreen: View {
 
                     activityCard(data)
                     watchCard()
+
+                    if !logged.isEmpty {
+                        insightsCardView(data, logged)
+                    }
                 }
                 .padding(16)
             }
@@ -192,6 +199,131 @@ struct ProgressScreen: View {
     }
 
     private func signed(_ v: Double) -> String { (v > 0 ? "+" : "") + String(format: "%.2f", v) }
+
+    @ViewBuilder private func insightsCardView(_ data: AppData, _ logged: [DayPoint]) -> some View {
+        Card(L("💡 Nhận xét của Coach AI", "💡 AI Coach Insights")) {
+            if insightsLoading {
+                ProgressView().frame(maxWidth: .infinity, alignment: .center)
+            } else if let insights = insights {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(insights.title).font(.headline)
+
+                    if !insights.patterns.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(L("📊 Nhận xét", "📊 Observations")).font(.subheadline.weight(.semibold))
+                            ForEach(insights.patterns, id: \.self) { p in
+                                Text("• " + p).font(.caption).foregroundColor(.secondary)
+                            }
+                        }
+                    }
+
+                    if !insights.strengths.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(L("✅ Điểm mạnh", "✅ Strengths")).font(.subheadline.weight(.semibold))
+                            ForEach(insights.strengths, id: \.self) { s in
+                                Text("• " + s).font(.caption).foregroundColor(.secondary)
+                            }
+                        }
+                    }
+
+                    if !insights.improvements.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(L("🎯 Cải thiện", "🎯 Improvements")).font(.subheadline.weight(.semibold))
+                            ForEach(insights.improvements, id: \.self) { i in
+                                Text("• " + i).font(.caption).foregroundColor(.secondary)
+                            }
+                        }
+                    }
+
+                    if let tip = insights.substitutionTip {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(L("💭 Gợi ý thay thế", "💭 Food swap")).font(.subheadline.weight(.semibold))
+                            Text(tip).font(.caption).foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else if insightsError != nil {
+                Text(L("Không lấy được insights. Kiểm tra quota AI.", "Couldn't fetch insights. Check your AI quota.")).font(.caption).foregroundColor(Palette.warn)
+                Button(L("Thử lại", "Retry")) { loadInsights(data, logged) }.buttonStyle(.bordered)
+            } else {
+                Button(L("Tải nhận xét từ Coach", "Load Coach insights")) { loadInsights(data, logged) }.buttonStyle(.bordered)
+            }
+        }
+        .onAppear { loadInsights(data, logged) }
+    }
+
+    private func loadInsights(_ data: AppData, _ logged: [DayPoint]) {
+        insightsLoading = true
+        insightsError = nil
+
+        Task {
+            do {
+                let summary = buildNutritionSummary(data, logged, range)
+                let result = try await API.shared.reportInsights(summary: summary)
+                await MainActor.run {
+                    insights = result
+                    insightsLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    insightsError = error.localizedDescription
+                    insightsLoading = false
+                }
+            }
+        }
+    }
+
+    private func buildNutritionSummary(_ data: AppData, _ logged: [DayPoint], _ days: Int) -> NutritionSummary {
+        let endDate = Nutrition.day(0)
+        let startDate = Nutrition.day(days - 1)
+        let n = Double(logged.count)
+
+        let sums = logged.reduce((kcal: 0, protein: 0.0, carbs: 0.0, fat: 0.0, meals: 0)) { s, d in
+            let entries = Nutrition.entries(data, on: d.date)
+            let totals = Nutrition.totals(entries)
+            return (s.kcal + Int(totals.kcal), s.protein + totals.protein, s.carbs + totals.carbs, s.fat + totals.fat, s.meals + entries.count)
+        }
+
+        // Compute course breakdown from foods in library
+        var courseCounts: [String: Int] = [:]
+        for day in logged {
+            for entry in Nutrition.entries(data, on: day.date) {
+                // Try to find the food to get its course, otherwise default to "main"
+                let course = (data.customFoods.first { $0.id == entry.foodId }?.course ?? "main")
+                courseCounts[course, default: 0] += 1
+            }
+        }
+        let totalMeals = courseCounts.values.reduce(0, +)
+        var courseBreakdown: [String: Double] = [:]
+        if totalMeals > 0 {
+            for (course, count) in courseCounts {
+                courseBreakdown[course] = Double(count) / Double(totalMeals)
+            }
+        }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        return NutritionSummary(
+            period: days <= 7 ? "week" : "month",
+            startDate: formatter.string(from: startDate),
+            endDate: formatter.string(from: endDate),
+            daysCount: logged.count,
+            totalDays: days,
+            totalKcal: sums.kcal,
+            totalProtein: sums.protein,
+            totalCarbs: sums.carbs,
+            totalFat: sums.fat,
+            avgKcal: n > 0 ? Double(sums.kcal) / n : 0,
+            avgProtein: n > 0 ? sums.protein / n : 0,
+            avgCarbs: n > 0 ? sums.carbs / n : 0,
+            avgFat: n > 0 ? sums.fat / n : 0,
+            mealsPerDay: n > 0 ? Double(sums.meals) / n : 0,
+            courseBreakdown: courseBreakdown
+        )
+    }
 }
 
 private struct WeighIn: View {

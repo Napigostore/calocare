@@ -83,6 +83,32 @@ struct RemoteDish: Decodable {
     }
 }
 
+struct InsightResult: Decodable {
+    var title: String
+    var patterns: [String] = []
+    var strengths: [String] = []
+    var improvements: [String] = []
+    var substitutionTip: String?
+}
+
+struct NutritionSummary: Encodable {
+    var period: String // "week" or "month"
+    var startDate: String // yyyy-MM-dd
+    var endDate: String
+    var daysCount: Int
+    var totalDays: Int
+    var totalKcal: Int
+    var totalProtein: Double
+    var totalCarbs: Double
+    var totalFat: Double
+    var avgKcal: Double
+    var avgProtein: Double
+    var avgCarbs: Double
+    var avgFat: Double
+    var mealsPerDay: Double
+    var courseBreakdown: [String: Double] // e.g. { "main": 0.45, "soup": 0.20 }
+}
+
 struct LibraryUpdate: Decodable {
     var version: Int
     var dishes: [RemoteDish]
@@ -213,5 +239,33 @@ final class API {
             "name": food.name, "emoji": food.emoji, "serving": food.serving, "kcal": food.kcal,
             "protein_g": food.protein, "carbs_g": food.carbs, "fat_g": food.fat, "course": food.course, "tags": food.tags,
         ])
+    }
+
+    /// Get AI coaching insights for a week/month of nutrition data.
+    func reportInsights(summary: NutritionSummary) async throws -> InsightResult? {
+        let body: [String: Any] = [
+            "summary": [
+                "period": summary.period,
+                "startDate": summary.startDate,
+                "endDate": summary.endDate,
+                "daysCount": summary.daysCount,
+                "totalDays": summary.totalDays,
+                "totalKcal": summary.totalKcal,
+                "totalProtein": summary.totalProtein,
+                "totalCarbs": summary.totalCarbs,
+                "totalFat": summary.totalFat,
+                "avgKcal": summary.avgKcal,
+                "avgProtein": summary.avgProtein,
+                "avgCarbs": summary.avgCarbs,
+                "avgFat": summary.avgFat,
+                "mealsPerDay": summary.mealsPerDay,
+                "courseBreakdown": summary.courseBreakdown,
+            ]
+        ]
+        let data = try await send("/v1/report/insights", body: body)
+        if let envelope = try JSONDecoder().decode(Envelope<InsightResult>?.self, from: data) {
+            return envelope?.result
+        }
+        return nil
     }
 }

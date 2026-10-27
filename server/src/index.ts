@@ -3,6 +3,7 @@ import { ADMIN_PAGE } from "./admin";
 import { PRIVACY_PAGE, PRIVACY_PAGE_EN } from "./privacy";
 import { activate, ProError, proUntil, type ProEnv } from "./pro";
 import { adminAsked, adminList, adminSave, changesSince, loadLibrary, nameKey, physicallyPossible, submitDish, type Dish, type Nutrition } from "./library";
+import { insights, type NutritionSummary } from "./insights";
 
 /**
  * CaloCare AI gateway (Cloudflare Worker + D1).
@@ -262,7 +263,7 @@ async function refund(env: Env, device: string, kind: Kind, global = true): Prom
 }
 
 /** Token counts of the last provider call, reported back so cost can be measured per request. */
-interface Spend {
+export interface Spend {
   input_tokens: number;
   output_tokens: number;
   cache_read_tokens: number;
@@ -620,12 +621,13 @@ export default {
       // The app keeps its own copy of the library and asks only for what changed since its last sync.
       if (request.method === "GET" && url.pathname === "/v1/dishes") return json(await changesSince(env.DB, Number(url.searchParams.get("since")) || 0));
 
-      const handlers: Record<string, { kind: Kind; run: typeof photo }> = {
+      const handlers: Record<string, { kind: Kind; run: any }> = {
         "/v1/photo": { kind: "photo", run: photo },
         // Estimating a dish is a text question, so it draws on the chat allowance.
         "/v1/estimate": { kind: "chat", run: estimate },
         "/v1/breakdown": { kind: "chat", run: breakdown },
         "/v1/chat": { kind: "chat", run: chat },
+        "/v1/report/insights": { kind: "chat", run: insights },
       };
       const handler = handlers[url.pathname];
       if (request.method !== "POST" || (!handler && url.pathname !== "/v1/correction" && url.pathname !== "/v1/dish")) throw new HttpError(404, "not_found", "Not found");
