@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import com.calocare.app.AppViewModel
 import com.calocare.app.data.AppData
 import com.calocare.app.data.Condition
@@ -43,6 +45,8 @@ import com.calocare.app.data.Meal
 import com.calocare.app.data.MenuPlanner
 import com.calocare.app.data.Nutrition
 import com.calocare.app.data.Region
+import com.calocare.app.net.ShoppingList
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
@@ -51,6 +55,8 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
     var goal by rememberSaveable { mutableStateOf(profile.goal) }
     // A new menu every day; "Đổi thực đơn" reshuffles.
     var seed by rememberSaveable { mutableIntStateOf(LocalDate.now().dayOfYear) }
+    var shoppingList by remember { mutableStateOf<ShoppingList?>(null) }
+    var loadingShoppingList by remember { mutableStateOf(false) }
 
     // Preview another goal with that goal's calorie target, without changing the profile.
     val preview = profile.copy(goal = goal)
@@ -84,6 +90,26 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
                     (if (profile.allergies.isNotEmpty()) listOf(L("dị ứng", "allergies")) else emptyList()) +
                     (if (profile.diet != Diet.NONE) listOf(Diet.labels[profile.diet] ?: "") else emptyList())
                 if (filters.isNotEmpty()) Text(L("🛡️ Đã loại món không hợp: ${filters.joinToString()}", "🛡️ Excluded unsuitable dishes: ${filters.joinToString()}"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+                    FilledTonalButton(
+                        onClick = {
+                            loadingShoppingList = true
+                            vm.viewModelScope.launch {
+                                // Generate shopping list for all meals in the plan
+                                val recipeIds = plan.flatMap { it.items }.map { it.food.id }
+                                if (recipeIds.isNotEmpty()) {
+                                    shoppingList = vm.api.generateShoppingList(recipeIds)
+                                }
+                                loadingShoppingList = false
+                            }
+                        },
+                        enabled = !loadingShoppingList,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(L("🛒 Danh sách mua", "🛒 Shopping list"))
+                    }
+                }
             }
         }
 
@@ -127,5 +153,35 @@ fun MenuScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onCoach:
                 FilledTonalButton(onClick = onCoach) { Text(L("✨ Nhờ AI lập thực đơn riêng cho tôi", "✨ Ask AI for a menu just for me")) }
             }
         }
+    }
+
+    shoppingList?.let { list ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { shoppingList = null },
+            title = { Text(L("🛒 Danh sách mua sắm", "🛒 Shopping list")) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(L("Tổng ${list.items.size} mặt hàng", "Total ${list.items.size} items"), style = MaterialTheme.typography.bodySmall)
+                    list.items.forEach { item ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            androidx.compose.material3.Checkbox(
+                                checked = item.checked,
+                                onCheckedChange = {},
+                                enabled = false,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(item.name, style = MaterialTheme.typography.labelMedium)
+                                Text("${item.quantity.toInt()} ${item.unit}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.Button(onClick = { shoppingList = null }) { Text(L("Đóng", "Close")) }
+            },
+        )
     }
 }
