@@ -7,6 +7,7 @@ import { insights, type NutritionSummary } from "./insights";
 import { macroTargets, type UserMetrics } from "./macros";
 import { substitute, type DetectedFood } from "./substitute";
 import { computeHabitScore, type HabitScore, type DayNutrition, type UserGoal } from "./habits";
+import { generateShoppingList, recipeNutrition, type Recipe, type RecipeListItem, type ShoppingList } from "./recipes";
 
 /**
  * CaloCare AI gateway (Cloudflare Worker + D1).
@@ -637,6 +638,94 @@ export default {
       }
       // The app keeps its own copy of the library and asks only for what changed since its last sync.
       if (request.method === "GET" && url.pathname === "/v1/dishes") return json(await changesSince(env.DB, Number(url.searchParams.get("since")) || 0));
+
+      // Recipe management (Pro feature: save/load user recipes)
+      if (request.method === "GET" && url.pathname === "/v1/recipes") {
+        const recipes = await env.DB.prepare(
+          "SELECT id, name, kcal, servings, tags FROM recipes WHERE device = ?1 ORDER BY updatedAt DESC"
+        ).bind(device).all<RecipeListItem>();
+        return json({ recipes: recipes.results || [] });
+      }
+      if (request.method === "POST" && url.pathname === "/v1/recipes") {
+        const body: any = await request.json().catch(() => null);
+        if (!body?.recipe?.name || !Array.isArray(body.recipe.items)) throw new HttpError(400, "bad_request", "Invalid recipe");
+        const id = body.recipe.id || `recipe_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const recipe = body.recipe as Recipe;
+        await env.DB.prepare(
+          "INSERT INTO recipes (id, device, name, description, items, servings, prepTime, cookTime, tags, createdAt, updatedAt) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11) ON CONFLICT(id) DO UPDATE SET description = ?4, items = ?5, servings = ?6, prepTime = ?7, cookTime = ?8, tags = ?9, updatedAt = ?11"
+        ).bind(id, device, recipe.name, recipe.description || "", JSON.stringify(recipe.items), recipe.servings, recipe.prepTime || 0, recipe.cookTime || 0, JSON.stringify(recipe.tags), Date.now(), Date.now()).run();
+        return json({ ok: true, id });
+      }
+      if (request.method === "GET" && url.pathname.startsWith("/v1/recipes/")) {
+        const id = url.pathname.split("/").pop();
+        const recipe = await env.DB.prepare(
+          "SELECT id, name, description, items, servings, prepTime, cookTime, tags FROM recipes WHERE id = ?1 AND device = ?2"
+        ).bind(id, device).first<any>();
+        if (!recipe) throw new HttpError(404, "not_found", "Recipe not found");
+        return json({
+          recipe: {
+            ...recipe,
+            items: JSON.parse(recipe.items || "[]"),
+            tags: JSON.parse(recipe.tags || "[]"),
+          }
+        });
+      }
+      if (request.method === "DELETE" && url.pathname.startsWith("/v1/recipes/")) {
+        const id = url.pathname.split("/").pop();
+        await env.DB.prepare("DELETE FROM recipes WHERE id = ?1 AND device = ?2").bind(id, device).run();
+        return json({ ok: true });
+      }
+
+      // Shopping list generator (Pro feature)
+      if (request.method === "POST" && url.pathname === "/v1/shopping-list") {
+        const body: any = await request.json().catch(() => null);
+        if (!Array.isArray(body?.recipeIds)) throw new HttpError(400, "bad_request", "Missing recipe IDs");
+
+        const recipes = new Map<string, Recipe>();
+        for (const recipeId of body.recipeIds) {
+          const recipe = await env.DB.prepare(
+            "SELECT id, name, items FROM recipes WHERE id = ?1 AND device = ?2"
+          ).bind(recipeId, device).first<any>();
+          if (recipe) {
+            recipes.set(recipeId, { ...recipe, items: JSON.parse(recipe.items || "[]") });
+          }
+        }
+
+        const items = generateShoppingList(body.recipeIds, recipes);
+        const shoppingList: ShoppingList = {
+          recipes: body.recipeIds,
+          items,
+          generatedAt: Date.now(),
+        };
+        return json({ shoppingList });
+      }
+
+      // Nutrition report (Pro feature: detailed analytics)
+      if (request.method === "POST" && url.pathname === "/v1/report/nutrition") {
+        const body: any = await request.json().catch(() => null);
+        if (!Array.isArray(body?.entries) || !body?.period) throw new HttpError(400, "bad_request", "Missing data");
+
+        const period = body.period === "week" ? 7 : body.period === "month" ? 30 : 1;
+        const entries = body.entries as { date: string; kcal: number; protein_g: number; carbs_g: number; fat_g: number }[];
+
+        const report = {
+          period: body.period,
+          totalDays: entries.length,
+          avgKcal: entries.reduce((sum, e) => sum + e.kcal, 0) / entries.length || 0,
+          avgProtein: entries.reduce((sum, e) => sum + e.protein_g, 0) / entries.length || 0,
+          avgCarbs: entries.reduce((sum, e) => sum + e.carbs_g, 0) / entries.length || 0,
+          avgFat: entries.reduce((sum, e) => sum + e.fat_g, 0) / entries.length || 0,
+          maxKcal: Math.max(...entries.map(e => e.kcal), 0),
+          minKcal: Math.min(...entries.map(e => e.kcal), 0),
+          macroBreakdown: {
+            protein: entries.reduce((sum, e) => sum + e.protein_g * 4, 0) / (entries.reduce((sum, e) => sum + e.kcal, 0) || 1),
+            carbs: entries.reduce((sum, e) => sum + e.carbs_g * 4, 0) / (entries.reduce((sum, e) => sum + e.kcal, 0) || 1),
+            fat: entries.reduce((sum, e) => sum + e.fat_g * 9, 0) / (entries.reduce((sum, e) => sum + e.kcal, 0) || 1),
+          },
+          consistencyScore: 100 - (Math.sqrt(entries.map(e => (e.kcal - (entries.reduce((sum, en) => sum + en.kcal, 0) / entries.length || 0)) ** 2).reduce((a, b) => a + b, 0) / entries.length) / (entries.reduce((sum, e) => sum + e.kcal, 0) / entries.length || 1)) * 100,
+        };
+        return json({ report });
+      }
 
       const handlers: Record<string, { kind: Kind; run: any }> = {
         "/v1/photo": { kind: "photo", run: photo },

@@ -146,6 +146,76 @@ data class HabitScore(
     val nextBadge: String? = null,
 )
 
+/** Recipe item (food with quantity). */
+@Serializable
+data class RecipeItem(
+    val foodId: String,
+    val qty: Float,
+    val name: String? = null,
+    val kcal: Int? = null,
+    val protein_g: Float? = null,
+    val carbs_g: Float? = null,
+    val fat_g: Float? = null,
+)
+
+/** Saved recipe for meal planning. */
+@Serializable
+data class Recipe(
+    val id: String,
+    val name: String,
+    val description: String? = null,
+    val items: List<RecipeItem> = emptyList(),
+    val servings: Int = 1,
+    val prepTime: Int? = null,
+    val cookTime: Int? = null,
+    val tags: List<String> = emptyList(),
+    val createdAt: Long = 0,
+    val updatedAt: Long = 0,
+)
+
+/** Recipe list item for display. */
+@Serializable
+data class RecipeListItem(
+    val id: String,
+    val name: String,
+    val kcal: Int,
+    val servings: Int,
+    val tags: List<String> = emptyList(),
+)
+
+/** Shopping list item. */
+@Serializable
+data class ShoppingListItem(
+    val foodId: String? = null,
+    val name: String,
+    val unit: String = "g",
+    val quantity: Float,
+    val checked: Boolean = false,
+)
+
+/** Shopping list generated from recipes. */
+@Serializable
+data class ShoppingList(
+    val recipes: List<String> = emptyList(),
+    val items: List<ShoppingListItem> = emptyList(),
+    val generatedAt: Long = 0,
+)
+
+/** Nutrition report data. */
+@Serializable
+data class NutritionReport(
+    val period: String,
+    val totalDays: Int,
+    val avgKcal: Float,
+    val avgProtein: Float,
+    val avgCarbs: Float,
+    val avgFat: Float,
+    val maxKcal: Int,
+    val minKcal: Int,
+    val macroBreakdown: Map<String, Float> = emptyMap(),
+    val consistencyScore: Float,
+)
+
 /**
  * The built-in AI: talks to the CaloCare server (see /server), which holds the provider key and
  * enforces the per-device allowance. No key is stored in the app.
@@ -311,6 +381,80 @@ class HostedClient(
             }
         })
         json.decodeFromJsonElement<HabitScore>(result)
+    }.getOrNull()
+
+    /** Get user's saved recipes. */
+    suspend fun getRecipes(): List<RecipeListItem>? = runCatching {
+        val result = request("/v1/recipes", null)
+        json.decodeFromJsonElement<List<RecipeListItem>>(result.jsonObject["recipes"] ?: return@runCatching null)
+    }.getOrNull()
+
+    /** Save or update a recipe. */
+    suspend fun saveRecipe(recipe: Recipe): String? = runCatching {
+        val recipeJson = buildJsonObject {
+            put("id", recipe.id)
+            put("name", recipe.name)
+            put("description", recipe.description ?: "")
+            putJsonArray("items") {
+                recipe.items.forEach { item ->
+                    add(buildJsonObject {
+                        put("foodId", item.foodId)
+                        put("qty", item.qty)
+                        if (item.name != null) put("name", item.name)
+                        if (item.kcal != null) put("kcal", item.kcal)
+                        if (item.protein_g != null) put("protein_g", item.protein_g)
+                        if (item.carbs_g != null) put("carbs_g", item.carbs_g)
+                        if (item.fat_g != null) put("fat_g", item.fat_g)
+                    })
+                }
+            }
+            put("servings", recipe.servings)
+            if (recipe.prepTime != null) put("prepTime", recipe.prepTime)
+            if (recipe.cookTime != null) put("cookTime", recipe.cookTime)
+            putJsonArray("tags") { recipe.tags.forEach { add(it) } }
+        }
+        val result = post("/v1/recipes", buildJsonObject { put("recipe", recipeJson) })
+        result.jsonObject["id"]?.jsonPrimitive?.contentOrNull
+    }.getOrNull()
+
+    /** Get a single recipe. */
+    suspend fun getRecipe(id: String): Recipe? = runCatching {
+        val result = request("/v1/recipes/$id", null)
+        json.decodeFromJsonElement<Recipe>(result.jsonObject["recipe"] ?: return@runCatching null)
+    }.getOrNull()
+
+    /** Delete a recipe. */
+    suspend fun deleteRecipe(id: String): Boolean = runCatching {
+        request("/v1/recipes/$id", buildJsonObject {})
+        true
+    }.getOrDefault(false)
+
+    /** Generate shopping list from recipes. */
+    suspend fun generateShoppingList(recipeIds: List<String>): ShoppingList? = runCatching {
+        val result = post("/v1/shopping-list", buildJsonObject {
+            putJsonArray("recipeIds") { recipeIds.forEach { add(it) } }
+        })
+        json.decodeFromJsonElement<ShoppingList>(result)
+    }.getOrNull()
+
+    /** Get nutrition report. */
+    suspend fun nutritionReport(entries: List<DayNutrition>, period: String): NutritionReport? = runCatching {
+        val entriesJson = buildJsonObject {
+            putJsonArray("entries") {
+                entries.forEach { day ->
+                    add(buildJsonObject {
+                        put("date", day.date)
+                        put("kcal", day.kcal)
+                        put("protein_g", day.protein_g)
+                        put("carbs_g", day.carbs_g)
+                        put("fat_g", day.fat_g)
+                    })
+                }
+            }
+            put("period", period)
+        }
+        val result = post("/v1/report/nutrition", entriesJson)
+        json.decodeFromJsonElement<NutritionReport>(result)
     }.getOrNull()
 
     private fun analysis(result: JsonElement): MealAnalysis = try {
