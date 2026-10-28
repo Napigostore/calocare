@@ -111,7 +111,7 @@ fastlane match appstore --force_for_new_devices
 
 ## Version Info
 - **Current Version**: 1.4.0
-- **Build Number**: 4
+- **Build Number**: 50 (Apple already has 1.0.0 build 49; a new build must be higher)
 - **Features**: Recipe Builder, Shopping Lists, Analytics, Pro Features
 
 ## Support

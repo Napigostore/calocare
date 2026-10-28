@@ -4,7 +4,7 @@ platform :ios do
   desc "Build and upload to TestFlight"
   lane :testflight do |options|
     # Generate project from yml
-    sh("cd ../.. && xcodegen generate")
+    sh("cd .. && xcodegen generate")
 
     # Build settings
     version = options[:version] || get_version_number(xcodeproj: "CaloCare.xcodeproj")
@@ -14,7 +14,7 @@ platform :ios do
 
     # Build the app
     build_app(
-      workspace: "CaloCare.xcworkspace",
+      project: "CaloCare.xcodeproj",
       scheme: "CaloCare",
       configuration: "Release",
       output_directory: "build",
