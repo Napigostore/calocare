@@ -187,6 +187,14 @@ private struct QuotaEnvelope: Decodable {
     var quota: Quota?
 }
 
+private struct MacrosEnvelope: Decodable {
+    var macros: MacroTargets
+}
+
+private struct ScoreEnvelope: Decodable {
+    var score: HabitScore
+}
+
 private struct BreakdownResult: Decodable {
     var ingredients: [Ingredient]
 }
@@ -327,10 +335,7 @@ final class API {
             ]
         ]
         let data = try await send("/v1/report/insights", body: body)
-        if let envelope = try JSONDecoder().decode(Envelope<InsightResult>?.self, from: data) {
-            return envelope?.result
-        }
-        return nil
+        return try decode(Envelope<InsightResult>.self, from: data).result
     }
 
     /// Get personalized macro targets based on user metrics and goal.
@@ -348,10 +353,7 @@ final class API {
             ]
         ]
         let data = try await send("/v1/macros", body: body)
-        if let envelope = try JSONDecoder().decode(Envelope<MacroTargets>?.self, from: data) {
-            return envelope?.macros
-        }
-        return nil
+        return try decode(MacrosEnvelope.self, from: data).macros
     }
 
     /// Get a healthier food substitution suggestion.
@@ -368,10 +370,7 @@ final class API {
             ]
         ]
         let data = try await send("/v1/substitute", body: body)
-        if let envelope = try JSONDecoder().decode(Envelope<Substitution>?.self, from: data) {
-            return envelope?.result
-        }
-        return nil
+        return try decode(Envelope<Substitution>.self, from: data).result
     }
 
     /// Get eating habit score for gamification.
@@ -401,9 +400,6 @@ final class API {
             ]},
         ]
         let data = try await send("/v1/habit-score", body: body)
-        if let envelope = try JSONDecoder().decode(Envelope<HabitScore>?.self, from: data) {
-            return envelope?.score
-        }
-        return nil
+        return try decode(ScoreEnvelope.self, from: data).score
     }
 }
