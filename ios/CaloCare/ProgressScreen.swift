@@ -285,7 +285,7 @@ struct ProgressScreen: View {
     @ViewBuilder private func habitScoreCard(_ data: AppData, _ logged: [DayPoint]) -> some View {
         let p = data.profile
         let macros = Nutrition.macroTargets(p)
-        let target = UserGoal(kcal: macros.kcal, protein_g: Double(macros.protein), carbs_g: Double(macros.carbs), fat_g: Double(macros.fat))
+        let target = UserGoal(kcal: Nutrition.targetKcal(p), protein_g: Double(macros.protein), carbs_g: Double(macros.carbs), fat_g: Double(macros.fat))
 
         Card(L("🏆 Điểm ăn uống hôm nay", "🏆 Today's Eating Score")) {
             if habitScoreLoading {
@@ -361,7 +361,7 @@ struct ProgressScreen: View {
             GeometryReader { g in
                 ZStack(alignment: .leading) {
                     Color(.systemGray5).frame(height: 6).cornerRadius(3)
-                    Color(scoreColor(value)).frame(width: g.size.width * CGFloat(value) / 100, height: 6).cornerRadius(3)
+                    scoreColor(value).frame(width: g.size.width * CGFloat(value) / 100, height: 6).cornerRadius(3)
                 }
             }
             .frame(height: 6)
