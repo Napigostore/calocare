@@ -1,0 +1,81 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :testflight do |options|
+    # Generate project from yml
+    sh("cd ../.. && xcodegen generate")
+
+    # Build settings
+    version = options[:version] || get_version_number(xcodeproj: "CaloCare.xcodeproj")
+    build = options[:build] || get_build_number(xcodeproj: "CaloCare.xcodeproj")
+
+    UI.message("Building CaloCare v#{version} (#{build})")
+
+    # Build the app
+    build_app(
+      workspace: "CaloCare.xcworkspace",
+      scheme: "CaloCare",
+      configuration: "Release",
+      output_directory: "build",
+      output_name: "CaloCare.ipa",
+      export_method: "app-store",
+      skip_package_ipa: false,
+      destination: "generic/platform=iOS",
+      derived_data_path: "build/derivedData",
+      disable_package_automatic_updates: true,
+      skip_waiting_for_build_processing: false
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      ipa: "build/CaloCare.ipa",
+      skip_waiting_for_build_processing: false,
+      skip_submission: false,
+      distribute_external: false,
+      notify_external_testers: true,
+      changelog: testflight_changelog(),
+      demo_account_required: false,
+      beta_app_description: "CaloCare - AI Nutrition Coach with Vietnamese Food Library",
+      beta_app_feedback_email: "support@calocare.app"
+    )
+
+    UI.success("✅ Uploaded to TestFlight successfully!")
+  end
+
+  desc "Get TestFlight changelog"
+  private_lane :testflight_changelog do
+    begin
+      # Read git log since last tag
+      last_tag = sh("git describe --tags --abbrev=0 2>/dev/null || echo ''", log: false).strip
+
+      if last_tag.empty?
+        changelog = sh("git log --oneline -10 --pretty=format:'%s'", log: false).strip
+      else
+        changelog = sh("git log #{last_tag}..HEAD --oneline --pretty=format:'%s'", log: false).strip
+      end
+
+      return changelog
+    rescue
+      return "New build with latest features and fixes"
+    end
+  end
+
+  desc "Check TestFlight review status"
+  lane :testflight_status do
+    UI.message("📊 Checking TestFlight build status...")
+
+    # This requires App Store Connect API - run on Mac with proper authentication
+    # For now, just show instructions
+    UI.important("✓ To check review status:")
+    UI.message("1. Open App Store Connect: https://appstoreconnect.apple.com")
+    UI.message("2. Go to MyApps > CaloCare > TestFlight > Builds")
+    UI.message("3. Check the status of your builds")
+  end
+end
+
+# Helper to get current git info
+private_lane :git_log do |options|
+  count = options[:count] || 5
+  sh("git log --oneline -#{count}", log: false).strip
+end

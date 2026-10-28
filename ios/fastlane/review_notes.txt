@@ -1,6 +1,15 @@
 PURPOSE AND AUDIENCE
 CaloCare is a calorie and nutrition tracker for adults who want to lose, maintain or gain weight, build muscle or train for running. Mainstream trackers rarely know Vietnamese dishes and make logging tedious. CaloCare has a built-in table of 240+ Vietnamese and international foods logged with one tap, estimates a meal's calories from a photo, gives health warnings for declared conditions and allergies (diabetes, high blood pressure, gout, high cholesterol, food allergies, vegetarian/keto/halal diets), and offers an AI nutrition coach. It gives general wellness estimates only; it is not a medical device and does not diagnose or treat anything.
 
+v1.4 UPDATES (Pro Features)
+- Recipe Builder: Save and organize favorite recipes with ingredients and nutrition
+- Shopping List Generator: Auto-generate shopping lists from meal plans
+- Advanced Analytics: Weekly/monthly nutrition reports with consistency scoring
+- Custom Goals: Personalized macro targets based on user metrics
+- Eating Insights: AI-powered nutrition pattern analysis and recommendations
+- Food Substitution: Suggests healthier alternatives for logged foods
+- Habit Scoring: Daily eating habit scores with gamification badges
+
 HOW TO USE (no account, no login, no sample files needed)
 1. First launch: fill in the short profile (name optional, sex, birth year, height, weight, activity, goal) and tap "Get started".
 2. Today tab: calories eaten vs target and burned, macros, 7-day chart.
