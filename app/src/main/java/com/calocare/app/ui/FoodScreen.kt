@@ -87,6 +87,7 @@ import com.calocare.app.data.FoodMatcher
 import com.calocare.app.data.LogEntry
 import com.calocare.app.data.Meal
 import com.calocare.app.data.Nutrition
+import com.calocare.app.data.Profile
 import com.calocare.app.data.Region
 import com.calocare.app.data.Tag
 import com.calocare.app.data.entriesOn
@@ -136,9 +137,9 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
     }
 
     val profile = data.profile
-    val todays = data.entriesOn(vm.date)
-    val mealEntries = todays.filter { it.meal == vm.meal }
-    val counts = mealEntries.groupBy { it.foodId }.mapValues { (_, list) -> list.sumOf { it.qty.toDouble() }.toFloat() }
+    val todays = remember(data.entries, vm.date) { data.entriesOn(vm.date) }
+    val mealEntries = remember(todays, vm.meal) { todays.filter { it.meal == vm.meal } }
+    val counts = remember(mealEntries) { mealEntries.groupBy { it.foodId }.mapValues { (_, list) -> list.sumOf { it.qty.toDouble() }.toFloat() } }
 
     // Local dishes first, then the ones shared by every region, then the rest.
     val allFoods = remember(data.customFoods, profile.region, vm.library) {
@@ -149,11 +150,16 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
         )
     }
     val searching = query.isNotBlank()
-    val shown = if (searching) fold(query).let { q -> allFoods.filter { fold(it.name).contains(q) || fold(it.label).contains(q) } } else allFoods.filter { inCategory(it, category) }
-    val frequent = if (searching) emptyList() else vm.frequentFoods(data, vm.meal)
+    val shown = remember(allFoods, query, category) {
+        if (searching) fold(query).let { q -> allFoods.filter { fold(it.name).contains(q) || fold(it.label).contains(q) } } else allFoods.filter { inCategory(it, category) }
+    }
+    val frequent = remember(data.entries, vm.meal, searching) { if (searching) emptyList() else vm.frequentFoods(data, vm.meal) }
+    val warningFlags = remember(allFoods, profile) { allFoods.associate { f -> f.id to flagOf(f.tags, profile) } }
     // Dishes that share words with the query without containing it: "bún bò" finds "Bún bò Huế" above, "Bò kho" here.
-    val similar = if (!searching) emptyList() else shown.map { it.id }.toSet().let { found ->
-        FoodMatcher.ranked(query, allFoods).filter { it.second >= 0.3f && it.first.id !in found }.take(6).map { it.first }
+    val similar = remember(query, shown, allFoods) {
+        if (!searching) emptyList() else shown.map { it.id }.toSet().let { found ->
+            FoodMatcher.ranked(query, allFoods).filter { it.second >= 0.3f && it.first.id !in found }.take(6).map { it.first }
+        }
     }
 
     Column(Modifier.padding(top = padding.calculateTopPadding())) {
@@ -219,7 +225,7 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
             fun tiles(foods: List<Food>, keyPrefix: String) = items(foods, key = { keyPrefix + it.id }) { food ->
                 FoodTile(
                     food = food, count = counts[food.id] ?: 0f,
-                    flagged = Nutrition.warnings(food.tags, profile).let { w -> if (w.any { it.danger }) 2 else if (w.isNotEmpty()) 1 else 0 },
+                    flagged = warningFlags[food.id] ?: flagOf(food.tags, profile),
                     onTap = { vm.tapFood(food) }, onLongPress = { detail = food },
                 )
             }
@@ -298,6 +304,9 @@ fun FoodScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onNeedAi
         )
     }
 }
+
+private fun flagOf(tags: Set<String>, profile: Profile): Int =
+    Nutrition.warnings(tags, profile).let { w -> if (w.any { it.danger }) 2 else if (w.isNotEmpty()) 1 else 0 }
 
 private fun blankFood(vm: AppViewModel, name: String) =
     Food(id = vm.newCustomId(), name = name, kcal = 0, serving = L("1 phần", "1 serving"), region = Region.ALL, custom = true)
@@ -461,19 +470,19 @@ private fun FoodDetailDialog(food: Food, vm: AppViewModel, data: AppData, onDism
                             CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 1.5.dp)
                             Text(L("  Tìm thay thế…", "  Finding swap…"), style = MaterialTheme.typography.bodySmall)
                         }
-                    } else if (substitution != null) {
+                    } else if (substitution != null) substitution?.let { s ->
                         Column(
                             Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.secondaryContainer).padding(10.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             Text(L("💡 Thay thế khỏe hơn", "💡 Healthier swap"), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
-                            Text(substitution!!.name, fontWeight = FontWeight.SemiBold)
-                            Text(L("${substitution!!.kcal} kcal · Đạm ${substitution!!.protein_g.toInt()}g · Bột ${substitution!!.carbs_g.toInt()}g · Béo ${substitution!!.fat_g.toInt()}g",
-                                "${substitution!!.kcal} kcal · Protein ${substitution!!.protein_g.toInt()}g · Carbs ${substitution!!.carbs_g.toInt()}g · Fat ${substitution!!.fat_g.toInt()}g"),
+                            Text(s.name, fontWeight = FontWeight.SemiBold)
+                            Text(L("${s.kcal} kcal · Đạm ${s.protein_g.toInt()}g · Bột ${s.carbs_g.toInt()}g · Béo ${s.fat_g.toInt()}g",
+                                "${s.kcal} kcal · Protein ${s.protein_g.toInt()}g · Carbs ${s.carbs_g.toInt()}g · Fat ${s.fat_g.toInt()}g"),
                                 style = MaterialTheme.typography.labelSmall)
-                            if (substitution!!.benefits.isNotEmpty()) {
+                            if (s.benefits.isNotEmpty()) {
                                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    substitution!!.benefits.forEach { benefit ->
+                                    s.benefits.forEach { benefit ->
                                         Text("✓ $benefit", style = MaterialTheme.typography.labelSmall)
                                     }
                                 }

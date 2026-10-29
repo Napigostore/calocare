@@ -2,15 +2,16 @@ package com.calocare.app.ui
 
 import com.calocare.app.L
 import android.content.Intent
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.lifecycle.viewModelScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -85,6 +86,7 @@ fun ProgressScreen(vm: AppViewModel, data: AppData, padding: PaddingValues) {
     var weeklyRate by remember { mutableStateOf(0f) }
     var customMacros by remember { mutableStateOf<MacroTargets?>(null) }
     var customMacrosLoading by remember { mutableStateOf(false) }
+    val healthStatus = remember { vm.health.status() }
 
     val requestPermissions = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
         if (granted.isNotEmpty()) vm.syncWearable(announce = true)
@@ -125,7 +127,7 @@ fun ProgressScreen(vm: AppViewModel, data: AppData, padding: PaddingValues) {
 
         item {
             SectionCard(title = L("⌚ Đồng hồ & vòng tay thông minh", "⌚ Smartwatches & fitness bands")) {
-                when (vm.health.status()) {
+                when (healthStatus) {
                     HealthConnectClient.SDK_AVAILABLE -> {
                         Text(
                             if (data.profile.wearableLinked) L("Đang lấy calo vận động, số bước, giấc ngủ, cân nặng, chiều cao từ Health Connect.", "Reading active calories, steps, sleep, weight and height from Health Connect.")
@@ -160,14 +162,7 @@ fun ProgressScreen(vm: AppViewModel, data: AppData, padding: PaddingValues) {
             habitScoreCard(habitScore, habitScoreLoading) {
                 habitScoreLoading = true
                 vm.viewModelScope.launch {
-                    val today = DayNutrition(
-                        date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(vm.date),
-                        foods = data.entriesOn(vm.date).map { it.label },
-                        kcal = Nutrition.kcalEaten(data, vm.date).toInt(),
-                        protein_g = Nutrition.proteinEaten(data, vm.date),
-                        carbs_g = Nutrition.carbsEaten(data, vm.date),
-                        fat_g = Nutrition.fatEaten(data, vm.date),
-                    )
+                    val today = data.dayNutrition(vm.date)
                     val target = UserGoal(
                         kcal = 2000,
                         protein_g = 150f,
@@ -195,7 +190,7 @@ fun ProgressScreen(vm: AppViewModel, data: AppData, padding: PaddingValues) {
                     val metrics = UserMetrics(
                         weightKg = data.profile.weightKg,
                         heightCm = data.profile.heightCm.toFloat(),
-                        age = Calendar.getInstance().get(Calendar.YEAR) - data.profile.birthYear,
+                        age = java.time.Year.now().value - data.profile.birthYear,
                         male = data.profile.male,
                         activityLevel = 1.5f,
                         goal = selectedGoal,
@@ -211,7 +206,7 @@ fun ProgressScreen(vm: AppViewModel, data: AppData, padding: PaddingValues) {
             insightsCard(insights, insightsLoading) {
                 insightsLoading = true
                 vm.viewModelScope.launch {
-                    val summary = buildWeeklySummary(data)
+                    val summary = data.nutritionSummary("week", 7)
                     insights = vm.api.reportInsights(summary)
                     insightsLoading = false
                 }
@@ -280,7 +275,7 @@ fun ProgressScreen(vm: AppViewModel, data: AppData, padding: PaddingValues) {
 }
 
 @Composable
-private fun Line(label: String, value: String) {
+internal fun Line(label: String, value: String) {
     Row {
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
         Text(value, fontWeight = FontWeight.SemiBold)
@@ -501,45 +496,4 @@ private fun insightsCard(
             }
         }
     }
-}
-
-private fun buildWeeklySummary(data: AppData): NutritionSummary {
-    val calendar = Calendar.getInstance()
-    val endDate = calendar.time
-    calendar.add(Calendar.DAY_OF_YEAR, -7)
-    val startDate = calendar.time
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-    var totalKcal = 0
-    var totalProtein = 0f
-    var totalCarbs = 0f
-    var totalFat = 0f
-
-    val cal = Calendar.getInstance()
-    cal.time = startDate
-    for (i in 0..6) {
-        totalKcal += Nutrition.kcalEaten(data, cal.time).toInt()
-        totalProtein += Nutrition.proteinEaten(data, cal.time)
-        totalCarbs += Nutrition.carbsEaten(data, cal.time)
-        totalFat += Nutrition.fatEaten(data, cal.time)
-        cal.add(Calendar.DAY_OF_YEAR, 1)
-    }
-
-    return NutritionSummary(
-        period = "week",
-        startDate = dateFormat.format(startDate),
-        endDate = dateFormat.format(endDate),
-        daysCount = 7,
-        totalDays = 7,
-        totalKcal = totalKcal,
-        totalProtein = totalProtein,
-        totalCarbs = totalCarbs,
-        totalFat = totalFat,
-        avgKcal = totalKcal.toFloat() / 7,
-        avgProtein = totalProtein / 7,
-        avgCarbs = totalCarbs / 7,
-        avgFat = totalFat / 7,
-        mealsPerDay = 3.0f,
-        courseBreakdown = mapOf("main" to 0.45f, "soup" to 0.20f, "side" to 0.15f, "dessert" to 0.10f),
-    )
 }

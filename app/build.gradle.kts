@@ -112,6 +112,7 @@ dependencies {
     // CaloCare Pro subscription.
     implementation("com.android.billingclient:billing-ktx:7.1.1")
     implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("androidx.security:security-crypto:1.0.0")
 
     // In-app camera with the guide circle
     val camerax = "1.4.1"

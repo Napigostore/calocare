@@ -333,8 +333,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var wearableBusy by mutableStateOf(false)
     var wearableNote by mutableStateOf("")
 
+    private var lastWearableSync = 0L
+
     fun syncWearable(announce: Boolean = false) {
         if (!health.available || wearableBusy) return
+        val now = System.currentTimeMillis()
+        if (!announce && now - lastWearableSync < WEARABLE_SYNC_INTERVAL_MS) return
+        lastWearableSync = now
         viewModelScope.launch {
             wearableBusy = true
             try {
@@ -622,7 +627,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }
         } else {
-            resolver.openInputStream(uri).use { BitmapFactory.decodeStream(it) } ?: error("decode failed")
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            resolver.openInputStream(uri).use { BitmapFactory.decodeStream(it, null, bounds) }
+            var sample = 1
+            while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= maxSide) sample *= 2
+            resolver.openInputStream(uri).use { BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = sample }) } ?: error("decode failed")
         }
         val longest = max(raw.width, raw.height)
         if (longest <= maxSide) return raw
@@ -711,6 +720,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         private const val CAPTURE_SIDE = 768
         private const val GALLERY_MAX_SIDE = 768
         private const val MAX_CHAT_TURNS = 10
+        private const val WEARABLE_SYNC_INTERVAL_MS = 15 * 60_000L
 
         fun fmtQty(q: Float): String = if (q % 1f == 0f) q.toInt().toString() else "%.2f".format(q).trimEnd('0').trimEnd('.', ',')
     }

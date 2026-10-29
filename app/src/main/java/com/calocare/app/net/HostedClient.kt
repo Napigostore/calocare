@@ -146,6 +146,30 @@ data class HabitScore(
     val nextBadge: String? = null,
 )
 
+/** A logged food sent to the server for a healthier swap. */
+@Serializable
+data class DetectedFood(
+    val name: String,
+    val kcal: Int,
+    val protein_g: Float,
+    val carbs_g: Float,
+    val fat_g: Float,
+    val fiber_g: Float? = null,
+    val tags: List<String> = emptyList(),
+)
+
+/** A healthier alternative to a logged food. */
+@Serializable
+data class Substitution(
+    val name: String,
+    val kcal: Int,
+    val protein_g: Float,
+    val carbs_g: Float,
+    val fat_g: Float,
+    val reason: String = "",
+    val benefits: List<String> = emptyList(),
+)
+
 /** Recipe item (food with quantity). */
 @Serializable
 data class RecipeItem(
@@ -344,15 +368,15 @@ class HostedClient(
             if (metrics.weeklyRateKg != null) put("weeklyRateKg", metrics.weeklyRateKg)
             if (metrics.dietRestriction != null) put("dietRestriction", metrics.dietRestriction)
         }
-        val result = post("/v1/macros", buildJsonObject { put("metrics", metricsJson) })
-        json.decodeFromJsonElement<MacroTargets>(result)
+        val result = request("/v1/macros", buildJsonObject { put("metrics", metricsJson) })
+        json.decodeFromJsonElement<MacroTargets>(result.getValue("macros"))
     }.getOrNull()
 
     /** Get eating habit score for gamification. */
     suspend fun habitScore(today: DayNutrition, target: UserGoal, pastDays: List<DayNutrition> = emptyList()): HabitScore? = runCatching {
         val todayJson = buildJsonObject {
             put("date", today.date)
-            putJsonArray("foods") { today.foods.forEach { add(it) } }
+            putJsonArray("foods") { today.foods.forEach { add(JsonPrimitive(it)) } }
             put("kcal", today.kcal)
             put("protein_g", today.protein_g)
             put("carbs_g", today.carbs_g)
@@ -364,14 +388,14 @@ class HostedClient(
             put("carbs_g", target.carbs_g)
             put("fat_g", target.fat_g)
         }
-        val result = post("/v1/habit-score", buildJsonObject {
+        val result = request("/v1/habit-score", buildJsonObject {
             put("today", todayJson)
             put("target", targetJson)
             putJsonArray("pastDays") {
                 pastDays.forEach { day ->
                     add(buildJsonObject {
                         put("date", day.date)
-                        putJsonArray("foods") { day.foods.forEach { add(it) } }
+                        putJsonArray("foods") { day.foods.forEach { add(JsonPrimitive(it)) } }
                         put("kcal", day.kcal)
                         put("protein_g", day.protein_g)
                         put("carbs_g", day.carbs_g)
@@ -380,7 +404,23 @@ class HostedClient(
                 }
             }
         })
-        json.decodeFromJsonElement<HabitScore>(result)
+        json.decodeFromJsonElement<HabitScore>(result.getValue("score"))
+    }.getOrNull()
+
+    /** A healthier swap for a logged food; null when the server cannot offer one. */
+    suspend fun substitute(food: DetectedFood): Substitution? = runCatching {
+        val result = post("/v1/substitute", buildJsonObject {
+            put("food", buildJsonObject {
+                put("name", food.name)
+                put("kcal", food.kcal)
+                put("protein_g", food.protein_g)
+                put("carbs_g", food.carbs_g)
+                put("fat_g", food.fat_g)
+                food.fiber_g?.let { put("fiber_g", it) }
+                putJsonArray("tags") { food.tags.forEach { add(JsonPrimitive(it)) } }
+            })
+        })
+        json.decodeFromJsonElement<Substitution>(result)
     }.getOrNull()
 
     /** Get user's saved recipes. */
@@ -411,10 +451,10 @@ class HostedClient(
             put("servings", recipe.servings)
             if (recipe.prepTime != null) put("prepTime", recipe.prepTime)
             if (recipe.cookTime != null) put("cookTime", recipe.cookTime)
-            putJsonArray("tags") { recipe.tags.forEach { add(it) } }
+            putJsonArray("tags") { recipe.tags.forEach { add(JsonPrimitive(it)) } }
         }
-        val result = post("/v1/recipes", buildJsonObject { put("recipe", recipeJson) })
-        result.jsonObject["id"]?.jsonPrimitive?.contentOrNull
+        val result = request("/v1/recipes", buildJsonObject { put("recipe", recipeJson) })
+        result["id"]?.jsonPrimitive?.contentOrNull
     }.getOrNull()
 
     /** Get a single recipe. */
@@ -425,16 +465,16 @@ class HostedClient(
 
     /** Delete a recipe. */
     suspend fun deleteRecipe(id: String): Boolean = runCatching {
-        request("/v1/recipes/$id", buildJsonObject {})
+        request("/v1/recipes/$id", null, delete = true)
         true
     }.getOrDefault(false)
 
     /** Generate shopping list from recipes. */
     suspend fun generateShoppingList(recipeIds: List<String>): ShoppingList? = runCatching {
-        val result = post("/v1/shopping-list", buildJsonObject {
-            putJsonArray("recipeIds") { recipeIds.forEach { add(it) } }
+        val result = request("/v1/shopping-list", buildJsonObject {
+            putJsonArray("recipeIds") { recipeIds.forEach { add(JsonPrimitive(it)) } }
         })
-        json.decodeFromJsonElement<ShoppingList>(result)
+        json.decodeFromJsonElement<ShoppingList>(result.getValue("shoppingList"))
     }.getOrNull()
 
     /** Get nutrition report. */
@@ -453,8 +493,8 @@ class HostedClient(
             }
             put("period", period)
         }
-        val result = post("/v1/report/nutrition", entriesJson)
-        json.decodeFromJsonElement<NutritionReport>(result)
+        val result = request("/v1/report/nutrition", entriesJson)
+        json.decodeFromJsonElement<NutritionReport>(result.getValue("report"))
     }.getOrNull()
 
     private fun analysis(result: JsonElement): MealAnalysis = try {
@@ -466,9 +506,12 @@ class HostedClient(
     private suspend fun post(path: String, body: JsonObject): JsonElement =
         request(path, body)["result"] ?: throw AiException(L("AI không trả về nội dung. Hãy thử lại.", "The AI returned nothing. Please try again."))
 
-    private suspend fun request(path: String, body: JsonObject?): JsonObject = withContext(Dispatchers.IO) {
+    private suspend fun request(path: String, body: JsonObject?, delete: Boolean = false): JsonObject = withContext(Dispatchers.IO) {
         val builder = Request.Builder().url(baseUrl.trimEnd('/') + path).header("X-App-Key", appKey).header("X-Device", deviceId).header("X-Lang", com.calocare.app.Lang.code)
-        if (body != null) builder.post(body.toString().toRequestBody("application/json".toMediaType()))
+        when {
+            delete -> builder.delete()
+            body != null -> builder.post(body.toString().toRequestBody("application/json".toMediaType()))
+        }
         try {
             http.newCall(builder.build()).execute().use { response ->
                 val parsed = runCatching { json.parseToJsonElement(response.body?.string().orEmpty()).jsonObject }.getOrNull()
