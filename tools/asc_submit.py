@@ -101,6 +101,21 @@ def reset():
         print('::notice title=TestFlight::No draft submissions to empty')
 
 
+def draft_version(kind, parent_id):
+    """The version App Review takes for a subscription ('subscriptions') or subscription group ('subscriptionGroups')."""
+    versions = call('GET', f'/v1/{kind}/{parent_id}/versions?limit=10')['data']
+    if not versions:
+        fail(f'No {kind} version for {parent_id}: add its metadata in App Store Connect first')
+    return versions[0]['id']
+
+
+def add_item(submission_id, relation, kind, version_id):
+    """Adds one subscription or group version as an item of the review submission."""
+    call('POST', '/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {
+        'reviewSubmission': {'data': {'type': 'reviewSubmissions', 'id': submission_id}},
+        relation: {'data': {'type': kind, 'id': version_id}}}}})
+
+
 def main(version_string):
     app_id = call('GET', f'/v1/apps?filter[bundleId]={asc.BUNDLE_ID}')['data'][0]['id']
     version = call('GET', f'/v1/apps/{app_id}/appStoreVersions?filter[platform]=IOS&filter[versionString]={version_string}')['data'][0]
@@ -156,7 +171,9 @@ def main(version_string):
     print('review submission', submission['id'], 'holds the version')
 
 
-    # Then the subscription group and its subscriptions, which join the submission that holds the version.
+    # Then each subscription group and its subscriptions, as versions in the same submission. The per-item endpoints
+    # (subscriptionSubmissions, subscriptionGroupSubmissions) are deprecated and fail while no version is pending.
+    subscriptions_added = 0
     for group in call('GET', f'/v1/apps/{app_id}/subscriptionGroups')['data']:
         subs = call('GET', f'/v1/subscriptionGroups/{group["id"]}/subscriptions')['data']
         for sub in subs:
@@ -171,18 +188,17 @@ def main(version_string):
                 call_ok('POST', '/v1/subscriptionGroupLocalizations', {'data': {'type': 'subscriptionGroupLocalizations',
                         'attributes': {'locale': locale, 'name': 'CaloCare Pro'},
                         'relationships': {'subscriptionGroup': {'data': {'type': 'subscriptionGroups', 'id': group['id']}}}}}, allow=(409,))
-        result = call_ok('POST', '/v1/subscriptionGroupSubmissions',
-                         {'data': {'type': 'subscriptionGroupSubmissions', 'relationships': {'subscriptionGroup': {'data': {'type': 'subscriptionGroups', 'id': group['id']}}}}},
-                         allow=(409,))
-        print('subscription group', group['attributes'].get('referenceName'), 'added' if result is not None else 'already added')
+        add_item(submission['id'], 'subscriptionGroupVersion', 'subscriptionGroupVersions', draft_version('subscriptionGroups', group['id']))
         for sub in subs:
-            if sub['attributes'].get('state') in ('READY_TO_SUBMIT', 'DEVELOPER_ACTION_NEEDED', 'REJECTED'):
-                call_ok('POST', '/v1/subscriptionSubmissions',
-                        {'data': {'type': 'subscriptionSubmissions', 'relationships': {'subscription': {'data': {'type': 'subscriptions', 'id': sub['id']}}}}},
-                        allow=(409,))
+            add_item(submission['id'], 'subscriptionVersion', 'subscriptionVersions', draft_version('subscriptions', sub['id']))
+            subscriptions_added += 1
+        print('subscription group', group['attributes'].get('referenceName'), 'added with', len(subs), 'subscription(s)')
 
+    # Any failed add has already stopped the run above, so the submission only goes out with its subscriptions.
+    if not subscriptions_added:
+        fail('No subscriptions found in the group: nothing to submit with the app version')
     call('PATCH', f'/v1/reviewSubmissions/{submission["id"]}', {'data': {'type': 'reviewSubmissions', 'id': submission['id'], 'attributes': {'submitted': True}}})
-    print('::notice title=TestFlight::Submitted CaloCare ' + version_string + ' (build ' + build['attributes']['version'] + ') with CaloCare Pro for App Review.')
+    print('::notice title=TestFlight::Submitted CaloCare ' + version_string + ' (build ' + build['attributes']['version'] + ') with ' + str(subscriptions_added) + ' CaloCare Pro subscription(s) for App Review.')
 
 
 if __name__ == '__main__':
