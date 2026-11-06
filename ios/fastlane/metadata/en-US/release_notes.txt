@@ -1,1 +1,1 @@
-First App Store release: meal photos to calories, over 240 international and Vietnamese foods, an AI coach, Apple Health and CaloGold Pro.
+CaloGold 1.4: a dark gold design, four tabs (Today, Coach, Progress, Me), mascot and today's meals with photos, a shared tray to split a dish between up to four people, a weekly card to share, a progress achievements row, more international dishes, and distance and heart rate from Apple Health.

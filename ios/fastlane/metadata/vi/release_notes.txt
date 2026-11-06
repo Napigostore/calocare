@@ -1,1 +1,1 @@
-Phiên bản đầu tiên trên App Store: chụp ảnh tính calo, hơn 240 món Việt và quốc tế, coach AI, kết nối Apple Health và gói CaloGold Pro.
+CaloGold 1.4: giao diện vàng đen mới, bốn tab (Hôm nay, Coach, Tiến độ, Cá nhân), linh vật và bữa ăn trong ngày có ảnh, mâm chung để chia một món cho tối đa bốn người, thẻ tuần để chia sẻ, dòng thành tích trong Tiến độ, thêm nhiều món quốc tế, và quãng đường cùng nhịp tim từ Apple Health.
