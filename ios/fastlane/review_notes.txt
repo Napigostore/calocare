@@ -1,15 +1,15 @@
 PURPOSE AND AUDIENCE
-CaloCare is a calorie and nutrition tracker for adults who want to lose, maintain or gain weight, build muscle or train for running. Mainstream trackers rarely know Vietnamese dishes and make logging tedious. CaloCare has a built-in table of 240+ Vietnamese and international foods logged with one tap, estimates a meal's calories from a photo, gives health warnings for declared conditions and allergies (diabetes, high blood pressure, gout, high cholesterol, food allergies, vegetarian/keto/halal diets), and offers an AI nutrition coach. It gives general wellness estimates only; it is not a medical device and does not diagnose or treat anything.
+CaloGold is a calorie and nutrition tracker for adults who want to lose, maintain or gain weight, build muscle or train for running. Mainstream trackers rarely know Vietnamese dishes and make logging tedious. CaloCare has a built-in table of 240+ Vietnamese and international foods logged with one tap, estimates a meal's calories from a photo, gives health warnings for declared conditions and allergies (diabetes, high blood pressure, gout, high cholesterol, food allergies, vegetarian/keto/halal diets), and offers an AI nutrition coach. It gives general wellness estimates only; it is not a medical device and does not diagnose or treat anything.
 
 SCREEN RECORDING (physical iPhone)
 The attached video was recorded on a physical iPhone. It starts at app launch and shows the main flow: profile setup, dashboard, meal photo analysis, food logging, AI coach, optional Apple Health, and CaloCare Pro. AI waiting time is shortened in the video and marked on screen.
 
 HOW TO USE (no account, no login, no sample files needed)
 1. First launch: fill in the short profile (name optional, sex, birth year, height, weight, activity, goal) and tap "Get started".
-2. Today tab: calories eaten vs target and burned, macros, 7-day chart.
-3. Food tab: tap any food to add a serving to the selected meal; search by name; the camera button photographs a meal and the AI lists the dishes with calories, which can be adjusted before adding them.
-4. Coach tab: ask nutrition or training questions; answers use the profile and the last 7 days of logs.
-5. Profile: tap the person icon at the top right of the Today screen. In the profile, "Connect Apple Health" is optional and read-only (active energy, steps, exercise minutes, sleep, weight, height; the data stays on the device).
+2. Today tab: calories eaten vs target and burned, the day's meals with photos, the mascot's encouragement and a 7-day chart. Tap a meal tile or "Add a meal" to log food.
+3. Log a meal: tap any food to add a serving to the selected meal; search by name; the camera button photographs a meal and the AI lists the dishes with calories, which can be adjusted before adding them.
+4. Coach tab: ask nutrition or training questions; answers use the profile and the last 7 days of logs. Progress tab: weight, calories, macros, steps, workouts and sleep over 7 or 30 days.
+5. Me tab: suggested menu, meal logging, profile and goals ("Profile and goals"), and photo and data credits. In the profile, "Connect Apple Health" is optional and read-only (active energy, steps, exercise minutes, sleep, weight, height; the data stays on the device).
 6. CaloCare Pro (In-App Purchases): in the same profile sheet, tap "Upgrade to Pro". The paywall lists CaloCare Pro Monthly (com.napigo.calocare.pro.Monthly, $1.99 per month) and CaloCare Pro Yearly (com.napigo.calocare.pro.yearly, $17.99 per year, 7-day free trial). "Restore purchase" is on the same screen. The paywall also opens automatically when the free allowance of AI photos or questions runs out. Purchases are not restricted by storefront or device.
 Free use includes the first 30 AI photos and 50 coach questions, then 2 photos and 5 questions a day. CaloCare Pro (auto-renewable subscriptions com.napigo.calocare.pro.Monthly and com.napigo.calocare.pro.yearly, yearly with a 7-day free trial) raises this to 40 photos and 100 questions a day. Manual logging, menus, charts and Apple Health are always free.
 
@@ -23,4 +23,4 @@ REGIONS
 The app works the same in every region. Its interface is in English or Vietnamese following the device language; English-speaking users see international foods first, Vietnamese users see Vietnamese dishes first.
 
 REGULATION AND THIRD-PARTY MATERIAL
-The app is not in a regulated industry and is not a medical device. It contains no protected third-party material; nutrition values are our own estimates based on public nutrition tables. Photos analysed are taken by the user.
+The app is not in a regulated industry and is not a medical device. It contains no protected third-party material; the app's illustrations and mascot are original artwork by the developer, and dish photos are credited inside the app; nutrition values are our own estimates based on public nutrition tables. Photos analysed are taken by the user.

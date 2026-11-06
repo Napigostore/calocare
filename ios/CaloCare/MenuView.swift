@@ -35,7 +35,7 @@ struct MenuView: View {
                     ForEach(plan.indices, id: \.self) { i in mealCard(plan[i]) }
                     Card(L("Nguyên tắc cho mục tiêu của bạn", "Rules for your goal") + " · " + Goal.label(p.goal)) {
                         ForEach(Nutrition.goalGuides(p.goal), id: \.self) { Text("• " + $0).font(.subheadline) }
-                        Button(L("Nhờ AI lập thực đơn riêng cho tôi", "Ask AI for a menu just for me")) { store.tab = 4 }.buttonStyle(.borderedProminent)
+                        Button(L("Nhờ AI lập thực đơn riêng cho tôi", "Ask AI for a menu just for me")) { store.tab = 1 }.buttonStyle(.borderedProminent)
                     }
                     NavigationLink { CreditsView() } label: {
                         Text(L("Nguồn ảnh và dữ liệu", "Photo and data credits")).font(.caption).foregroundColor(.secondary)

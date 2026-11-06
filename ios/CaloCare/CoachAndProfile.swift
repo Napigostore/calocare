@@ -11,6 +11,16 @@ struct CoachView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                ZStack(alignment: .bottomLeading) {
+                    Image("female_fitness_coach").resizable().scaledToFill().frame(height: 210).clipped()
+                    LinearGradient(colors: [.clear, Palette.paper], startPoint: .center, endPoint: .bottom).frame(height: 210)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Coach").font(.title2.bold())
+                        Text(L("Huấn luyện viên AI của bạn", "Your AI coach")).font(.subheadline).foregroundColor(.secondary)
+                    }
+                    .padding(16)
+                }
+                .frame(height: 210)
                 ScrollViewReader { proxy in
                     ScrollView {
                         VStack(alignment: .leading, spacing: 10) {

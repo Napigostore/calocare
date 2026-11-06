@@ -9,10 +9,10 @@ enum Demo {
 
     static var tab: Int {
         switch screen {
-        case "food", "scan": return 1
-        case "menu": return 2
-        case "progress": return 3
-        case "coach": return 4
+        case "food", "scan": return 0
+        case "menu": return 3
+        case "progress": return 2
+        case "coach": return 1
         default: return 0
         }
     }

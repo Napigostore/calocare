@@ -11,26 +11,28 @@ struct CaloCareApp: App {
             RootView()
                 .environmentObject(store)
                 .environmentObject(pro)
-                .tint(Palette.red)
+                .tint(Palette.gold)
+                .preferredColorScheme(.dark)
                 .task { await store.syncLibrary() }
                 .task { if !Demo.active { await pro.refresh() } }
         }
     }
 }
 
-/// A guide-book palette: deep red and black ink on ivory paper, with a muted gold accent. Dark mode keeps the same roles.
+/// CaloGold's palette: a dark screen with a warm gold accent, as in the app's design set.
+/// The app always uses the dark appearance, so these colours are fixed rather than adaptive.
 enum Palette {
-    static let red = Color(red: 0.72, green: 0.07, blue: 0.13)
-    static let ink = Color(red: 0.10, green: 0.10, blue: 0.10)
-    static let gold = Color(red: 0.72, green: 0.58, blue: 0.33)
-    static let paper = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.07, alpha: 1) : UIColor(red: 0.97, green: 0.95, blue: 0.91, alpha: 1) })
-    static let surface = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.13, alpha: 1) : UIColor.white })
-    static let green = Color(red: 0.14, green: 0.40, blue: 0.27)
+    static let gold = Color(red: 0.84, green: 0.66, blue: 0.33)
+    static let red = gold
+    static let ink = Color.white
+    static let paper = Color(red: 0.04, green: 0.04, blue: 0.05)
+    static let surface = Color(red: 0.11, green: 0.11, blue: 0.12)
+    static let green = Color(red: 0.38, green: 0.80, blue: 0.52)
     static let orange = gold
-    static let protein = red
+    static let protein = Color(red: 0.93, green: 0.45, blue: 0.42)
     static let carbs = gold
-    static let fat = Color(red: 0.33, green: 0.36, blue: 0.42)
-    static let warn = Color(red: 0.62, green: 0.32, blue: 0.05)
+    static let fat = Color(red: 0.45, green: 0.62, blue: 0.90)
+    static let warn = Color(red: 0.96, green: 0.70, blue: 0.30)
 }
 
 struct RootView: View {
@@ -40,18 +42,17 @@ struct RootView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             if store.data.profile.onboarded {
-                // Same five tabs as the Android app; the profile opens from the Today screen.
+                // Four tabs, as in the CaloGold design. Logging a meal opens from the Today screen.
                 TabView(selection: $store.tab) {
                     HomeView().tabItem { Label(L("Hôm nay", "Today"), systemImage: "house.fill") }.tag(0)
-                    FoodView().tabItem { Label(L("Ăn uống", "Food"), systemImage: "fork.knife") }.tag(1)
-                    MenuView().tabItem { Label(L("Thực đơn", "Menu"), systemImage: "menucard.fill") }.tag(2)
-                    ProgressScreen().tabItem { Label(L("Tiến độ", "Progress"), systemImage: "chart.xyaxis.line") }.tag(3)
-                    CoachView().tabItem { Label("Coach", systemImage: "bubble.left.and.bubble.right.fill") }.tag(4)
+                    CoachView().tabItem { Label("Coach", systemImage: "bubble.left.and.bubble.right.fill") }.tag(1)
+                    ProgressScreen().tabItem { Label(L("Tiến độ", "Progress"), systemImage: "chart.xyaxis.line") }.tag(2)
+                    MoreView().tabItem { Label(L("Cá nhân", "Me"), systemImage: "person.crop.circle.fill") }.tag(3)
                 }
                 .sheet(isPresented: $store.showProfile) { ProfileView() }
             } else {
                 NavigationStack {
-                    ProfileForm(title: "🥗 CaloCare", saveLabel: L("Bắt đầu", "Get started"))
+                    ProfileForm(title: "CaloGold", saveLabel: L("Bắt đầu", "Get started"))
                 }
             }
             if let toast = store.toast {
@@ -75,12 +76,12 @@ extension RootView {
     @MainActor func tour() async {
         func wait(_ seconds: Double) async { try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000)) }
         await wait(4)
-        store.tab = 1; await wait(4)
+        store.tab = 0; await wait(4)
         store.demoScan = true; await wait(7)
         store.demoScan = false; await wait(1.5)
         store.tab = 2; await wait(5)
+        store.tab = 1; await wait(5)
         store.tab = 3; await wait(5)
-        store.tab = 4; await wait(5)
         store.tab = 0; store.showProfile = true; await wait(5)
         store.showProfile = false; await wait(1.5)
         pro.showPaywall = true; await wait(6)
@@ -100,13 +101,12 @@ struct Card<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if let title { Text(title).font(.system(.headline, design: .serif)) }
+            if let title { Text(title).font(.headline) }
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 6))
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Palette.ink.opacity(0.12), lineWidth: 0.5))
+        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 18))
     }
 }
 

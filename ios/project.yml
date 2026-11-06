@@ -34,7 +34,7 @@ targets:
     info:
       path: CaloCare/Info.plist
       properties:
-        CFBundleDisplayName: CaloCare
+        CFBundleDisplayName: CaloGold
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, vi]
         CFBundleShortVersionString: $(MARKETING_VERSION)

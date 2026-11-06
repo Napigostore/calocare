@@ -585,7 +585,11 @@ private struct ExercisePicker: View {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 90))], spacing: 10) {
                         ForEach(activities.indices, id: \.self) { i in
                             VStack(spacing: 4) {
-                                Text(activities[i].emoji).font(.title2)
+                                if let icon = ExerciseIcons.image(for: i) {
+                                    Image(icon).resizable().scaledToFit().frame(height: 40)
+                                } else {
+                                    Text(activities[i].emoji).font(.title2)
+                                }
                                 Text(activities[i].name).font(.caption).lineLimit(1)
                             }
                             .frame(maxWidth: .infinity).padding(.vertical, 8)
