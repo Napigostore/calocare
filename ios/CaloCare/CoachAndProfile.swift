@@ -25,6 +25,29 @@ struct CoachView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 10) {
                             if turns.isEmpty {
+                                // The dashboard above the chat: the streak, two suggestions, and the last workout.
+                                Card {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "flame.fill").font(.title2).foregroundColor(Palette.gold)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(L("Chuỗi \(Nutrition.streak(store.data)) ngày", "\(Nutrition.streak(store.data))-day streak")).font(.headline)
+                                            Text(L("Bạn đang duy trì thói quen ghi nhật ký.", "You are keeping up the habit of logging.")).font(.subheadline).foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
+                                Text(L("Gợi ý hôm nay", "Today's suggestions")).font(.headline).padding(.top, 4)
+                                SuggestionCard(image: "food_michelin_salmon", title: L("Ăn đủ protein", "Get enough protein"), detail: L("Cá, trứng và ức gà giúp giữ cơ khi giảm cân.", "Fish, eggs and chicken breast help keep muscle while you lose weight."))
+                                SuggestionCard(image: "gym_training_dumbbells", title: L("Tập luyện 30 phút", "Train for 30 minutes"), detail: L("Một buổi tạ nhẹ đủ để tăng nhịp tim.", "A light weights session is enough to raise your heart rate."))
+                                if let last = store.data.exercises.last {
+                                    Card(L("Nhật ký bài tập", "Workout log")) {
+                                        HStack {
+                                            Text(last.emoji)
+                                            Text("\(last.name) · \(last.minutes) " + L("phút", "min")).font(.subheadline)
+                                            Spacer()
+                                            Text("\(last.kcal) kcal").font(.caption).foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
                                 Text(L("Mình đã xem hồ sơ, mục tiêu và nhật ký 7 ngày của bạn. Hỏi bất cứ điều gì về ăn uống và tập luyện nhé.", "I've looked at your profile, goal and last 7 days of logs. Ask me anything about food and training."))
                                     .foregroundColor(.secondary)
                                 ForEach(starters, id: \.self) { s in Button(s) { send(s) }.buttonStyle(.bordered) }

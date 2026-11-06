@@ -156,7 +156,7 @@ fun OnboardingScreen(vm: AppViewModel, data: AppData) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
-            Text("🥗 CaloCare", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text("🥗 CaloGold", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             Text(L("Chuyên gia dinh dưỡng và thể thao trong túi bạn. Cho mình biết vài thông tin để tính mục tiêu calo phù hợp.", "A dietitian and sports coach in your pocket. Tell me a little about you to work out your calorie target."), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         item {
@@ -244,7 +244,7 @@ fun ProfileScreen(vm: AppViewModel, data: AppData, padding: PaddingValues, onPri
 
         item {
             Text(
-                L("CaloCare đưa ra ước tính và gợi ý tham khảo, không thay thế chẩn đoán hay chỉ định của bác sĩ. Nếu bạn có bệnh nền, đang mang thai hoặc dùng thuốc, hãy hỏi ý kiến bác sĩ trước khi thay đổi chế độ ăn.", "CaloCare gives estimates and general suggestions; it does not replace your doctor's diagnosis or advice. If you have a medical condition, are pregnant or take medication, talk to your doctor before changing your diet."),
+                L("CaloGold đưa ra ước tính và gợi ý tham khảo, không thay thế chẩn đoán hay chỉ định của bác sĩ. Nếu bạn có bệnh nền, đang mang thai hoặc dùng thuốc, hãy hỏi ý kiến bác sĩ trước khi thay đổi chế độ ăn.", "CaloGold gives estimates and general suggestions; it does not replace your doctor's diagnosis or advice. If you have a medical condition, are pregnant or take medication, talk to your doctor before changing your diet."),
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

@@ -41,6 +41,16 @@ struct ProgressScreen: View {
                 VStack(spacing: 12) {
                     Picker("", selection: $range) { Text(L("7 ngày", "7 days")).tag(7); Text(L("30 ngày", "30 days")).tag(30) }.pickerStyle(.segmented)
 
+                    Card(L("Thành tích", "Achievements")) {
+                        let keys = Set(points.map { dayKey($0.date) })
+                        HStack(alignment: .top) {
+                            AchievementBadge(symbol: "flame.fill", value: "\(Nutrition.streak(data))", label: L("ngày liên tiếp", "day streak"))
+                            AchievementBadge(symbol: "bolt.fill", value: "\(points.reduce(0) { $0 + $1.burned })", label: L("kcal đã đốt", "kcal burned"))
+                            AchievementBadge(symbol: "figure.run", value: "\(data.exercises.filter { keys.contains($0.date) }.count)", label: L("buổi tập", "workouts"))
+                            AchievementBadge(symbol: "trophy.fill", value: "\(logged.count)", label: L("ngày có ghi", "days logged"))
+                        }
+                    }
+
                     if let a = Nutrition.adaptive(data) {
                         Card(L("🧠 Mục tiêu calo thích nghi", "🧠 Adaptive calorie target")) {
                             Text(L("Trong \(a.days) ngày qua cân nặng của bạn thay đổi \(signed(a.actualPerWeek)) kg/tuần, trong khi kế hoạch là \(signed(a.plannedPerWeek)) kg/tuần.",

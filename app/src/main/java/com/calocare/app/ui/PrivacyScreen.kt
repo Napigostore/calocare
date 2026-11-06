@@ -19,7 +19,7 @@ object Privacy {
 
     val sections: List<Pair<String, String>> = listOf(
         "Tóm tắt" to
-            "CaloCare lưu hồ sơ và nhật ký của bạn ngay trên điện thoại. Ứng dụng không yêu cầu tài khoản, không quảng cáo và không bán dữ liệu. " +
+            "CaloGold lưu hồ sơ và nhật ký của bạn ngay trên điện thoại. Ứng dụng không yêu cầu tài khoản, không quảng cáo và không bán dữ liệu. " +
             "Dữ liệu chỉ rời khỏi thiết bị khi bạn chủ động dùng tính năng AI hoặc tìm món trên mạng, như mô tả bên dưới.",
         "Dữ liệu ứng dụng lưu trên máy" to
             "• Hồ sơ: tên gọi, giới tính, năm sinh, chiều cao, cân nặng, mức vận động, mục tiêu.\n" +
@@ -27,41 +27,41 @@ object Privacy {
             "• Nhật ký ăn uống, buổi tập, lịch sử cân nặng, món ăn bạn tự tạo.\n" +
             "Dữ liệu này nằm trong bộ nhớ riêng của ứng dụng và không được sao lưu ra ngoài.",
         "Dữ liệu từ đồng hồ, vòng tay (Health Connect, Apple Health)" to
-            "Khi bạn bấm kết nối và cấp quyền, CaloCare chỉ ĐỌC: calo vận động, tổng calo tiêu hao, số bước, giấc ngủ, cân nặng và chiều cao. " +
+            "Khi bạn bấm kết nối và cấp quyền, CaloGold chỉ ĐỌC: calo vận động, tổng calo tiêu hao, số bước, giấc ngủ, cân nặng và chiều cao. " +
             "Dữ liệu này chỉ dùng để tính calo tiêu hao, vẽ biểu đồ tiến độ và đưa ra lời khuyên trong ứng dụng. " +
-            "CaloCare không ghi vào Health Connect hay Apple Health, không gửi dữ liệu này ra khỏi thiết bị, không dùng cho quảng cáo. " +
+            "CaloGold không ghi vào Health Connect hay Apple Health, không gửi dữ liệu này ra khỏi thiết bị, không dùng cho quảng cáo. " +
             "Bạn có thể thu hồi quyền bất cứ lúc nào trong Health Connect (Android) hoặc Cài đặt → Sức khỏe (iPhone).",
         "Tính năng AI" to
-            "Khi bạn dùng tính năng AI, dữ liệu sau được gửi qua máy chủ của CaloCare tới nhà cung cấp AI Anthropic để xử lý:\n" +
+            "Khi bạn dùng tính năng AI, dữ liệu sau được gửi qua máy chủ của CaloGold tới nhà cung cấp AI Anthropic để xử lý:\n" +
             "• Chụp ảnh bữa ăn: ảnh và tóm tắt hồ sơ (giới tính, tuổi, chiều cao, cân nặng, mục tiêu, bệnh lý, dị ứng, chế độ ăn).\n" +
             "• Chat với coach: nội dung trò chuyện, tóm tắt hồ sơ và nhật ký 7 ngày gần nhất.\n" +
             "• Ước tính món ăn: tên món bạn nhập.\n" +
-            "Máy chủ CaloCare chỉ chuyển tiếp yêu cầu và không lưu ảnh, nội dung trò chuyện hay hồ sơ của bạn. " +
+            "Máy chủ CaloGold chỉ chuyển tiếp yêu cầu và không lưu ảnh, nội dung trò chuyện hay hồ sơ của bạn. " +
             "Để tính số lượt dùng, máy chủ lưu một mã thiết bị ẩn danh (mã băm, không chứa tên, số điện thoại hay email) cùng số lượt đã dùng.\n" +
-            "Khi bạn sửa tên một món AI nhận nhầm, hai cái tên (tên AI đưa ra và tên bạn chọn) được gửi về máy chủ CaloCare, không kèm ảnh hay hồ sơ, " +
+            "Khi bạn sửa tên một món AI nhận nhầm, hai cái tên (tên AI đưa ra và tên bạn chọn) được gửi về máy chủ CaloGold, không kèm ảnh hay hồ sơ, " +
             "để lần sau AI nhận đúng món đó cho mọi người dùng.\n" +
             "Khi bạn tự tạo một món mới, hoặc chỉnh một món theo từng thành phần, tên món và số liệu dinh dưỡng của món đó (không kèm ảnh, hồ sơ hay nhật ký của bạn) " +
-            "được gửi về máy chủ CaloCare làm đề xuất cho thư viện món ăn chung. Món chỉ đến với người dùng khác sau khi được đội ngũ CaloCare kiểm duyệt.\n" +
+            "được gửi về máy chủ CaloGold làm đề xuất cho thư viện món ăn chung. Món chỉ đến với người dùng khác sau khi được đội ngũ CaloGold kiểm duyệt.\n" +
             "Nếu bạn nhập API key riêng (Anthropic hoặc DeepSeek) trong phần Nâng cao, dữ liệu được gửi thẳng tới nhà cung cấp đó và xử lý theo chính sách của họ.",
         "Tìm món ăn trên mạng" to
             "Khi bạn bấm “Tìm trên mạng”, từ khóa tìm kiếm được gửi tới Open Food Facts (openfoodfacts.org). Không kèm thông tin cá nhân nào.",
         "Camera và ảnh" to
             "Ứng dụng chỉ dùng camera (quyền Camera) hoặc thư viện ảnh khi bạn chủ động chọn chụp bữa ăn. Chỉ phần ảnh trong vòng tròn hướng dẫn được gửi đi phân tích; ảnh không được lưu vào nhật ký hay thư viện của bạn.",
-        "Gói CaloCare Pro" to
-            "Khi bạn đăng ký Pro, Google Play hoặc App Store xử lý thanh toán; CaloCare không bao giờ thấy thông tin thẻ của bạn. " +
-            "Ứng dụng gửi biên nhận giao dịch của cửa hàng tới máy chủ CaloCare, máy chủ kiểm tra với cửa hàng rồi lưu, cùng mã thiết bị ẩn danh, gói bạn dùng và ngày hết hạn. " +
+        "Gói CaloGold Pro" to
+            "Khi bạn đăng ký Pro, Google Play hoặc App Store xử lý thanh toán; CaloGold không bao giờ thấy thông tin thẻ của bạn. " +
+            "Ứng dụng gửi biên nhận giao dịch của cửa hàng tới máy chủ CaloGold, máy chủ kiểm tra với cửa hàng rồi lưu, cùng mã thiết bị ẩn danh, gói bạn dùng và ngày hết hạn. " +
             "Hủy gói trong Google Play hoặc Cài đặt → Apple ID → Đăng ký.",
         "Xóa dữ liệu" to
             "Vào Hồ sơ → “Xóa toàn bộ dữ liệu” để xóa hồ sơ, nhật ký và API key khỏi thiết bị. Gỡ ứng dụng cũng xóa toàn bộ dữ liệu.",
         "Trẻ em" to
-            "CaloCare không dành cho người dưới 13 tuổi. Mục tiêu calo trong ứng dụng được tính cho người trưởng thành.",
+            "CaloGold không dành cho người dưới 13 tuổi. Mục tiêu calo trong ứng dụng được tính cho người trưởng thành.",
         "Không phải tư vấn y khoa" to
-            "CaloCare cung cấp ước tính và gợi ý tham khảo về dinh dưỡng và vận động. Ứng dụng không chẩn đoán, điều trị hay thay thế ý kiến của bác sĩ.",
+            "CaloGold cung cấp ước tính và gợi ý tham khảo về dinh dưỡng và vận động. Ứng dụng không chẩn đoán, điều trị hay thay thế ý kiến của bác sĩ.",
     )
 
     val sectionsEn: List<Pair<String, String>> = listOf(
         "Summary" to
-            "CaloCare keeps your profile and log on your phone. The app needs no account, shows no ads and sells no data. " +
+            "CaloGold keeps your profile and log on your phone. The app needs no account, shows no ads and sells no data. " +
             "Data leaves the device only when you choose to use an AI feature or search for food online, as described below.",
         "Data the app stores on your phone" to
             "• Profile: name, sex, birth year, height, weight, activity level, goal.\n" +
@@ -69,36 +69,36 @@ object Privacy {
             "• Food log, workouts, weight history and foods you create.\n" +
             "This data sits in the app's private storage and is not backed up anywhere else.",
         "Data from watches and fitness bands (Health Connect, Apple Health)" to
-            "When you connect and grant permission, CaloCare only READS: active calories, total calories burned, steps, sleep, weight and height. " +
+            "When you connect and grant permission, CaloGold only READS: active calories, total calories burned, steps, sleep, weight and height. " +
             "This data is used only to work out calories burned, draw progress charts and give advice inside the app. " +
-            "CaloCare never writes to Health Connect or Apple Health, never sends this data off the device and never uses it for advertising. " +
+            "CaloGold never writes to Health Connect or Apple Health, never sends this data off the device and never uses it for advertising. " +
             "You can withdraw permission at any time in Health Connect (Android) or Settings → Health (iPhone).",
         "AI features" to
-            "When you use an AI feature, the following is sent through CaloCare's server to the AI provider Anthropic for processing:\n" +
+            "When you use an AI feature, the following is sent through CaloGold's server to the AI provider Anthropic for processing:\n" +
             "• Meal photos: the photo and a profile summary (sex, age, height, weight, goal, conditions, allergies, diet).\n" +
             "• Coach chat: the conversation, a profile summary and your log for the last 7 days.\n" +
             "• Food estimates: the food name you typed.\n" +
-            "CaloCare's server only forwards these requests and does not store your photos, conversations or profile. " +
+            "CaloGold's server only forwards these requests and does not store your photos, conversations or profile. " +
             "To count usage, the server keeps an anonymous device code (a hash containing no name, phone number or email) with the number of requests used.\n" +
-            "When you correct a dish the AI got wrong, the two names (the AI's and the one you chose) are sent to CaloCare's server, without the photo or your profile, " +
+            "When you correct a dish the AI got wrong, the two names (the AI's and the one you chose) are sent to CaloGold's server, without the photo or your profile, " +
             "so the AI recognises that dish correctly for everyone next time.\n" +
             "When you create a new food, or adjust one by its ingredients, its name and nutrition figures (without photos, your profile or your log) " +
-            "are sent to CaloCare's server as a suggestion for the shared food library. A food reaches other users only after the CaloCare team has reviewed it.\n" +
+            "are sent to CaloGold's server as a suggestion for the shared food library. A food reaches other users only after the CaloGold team has reviewed it.\n" +
             "If you enter your own API key (Anthropic or DeepSeek) under Advanced, data goes straight to that provider and is handled under its policy.",
         "Searching for food online" to
             "When you tap “Find product”, your search words are sent to Open Food Facts (openfoodfacts.org), with no personal information.",
         "Camera and photos" to
             "The app uses the camera (Camera permission) or your photo library only when you choose to photograph a meal. Only the part of the picture inside the guide circle is sent for analysis; the photo is not saved to your log or gallery.",
-        "CaloCare Pro" to
-            "When you subscribe to Pro, Google Play or the App Store handles the payment; CaloCare never sees your card details. " +
-            "The app sends the store's purchase receipt to CaloCare's server, which checks it with the store and keeps, with the anonymous device code, your plan and its end date. " +
+        "CaloGold Pro" to
+            "When you subscribe to Pro, Google Play or the App Store handles the payment; CaloGold never sees your card details. " +
+            "The app sends the store's purchase receipt to CaloGold's server, which checks it with the store and keeps, with the anonymous device code, your plan and its end date. " +
             "Cancel in Google Play or in Settings → Apple ID → Subscriptions.",
         "Deleting your data" to
             "Go to Profile → “Delete all data” to remove your profile, log and API key from the device. Uninstalling the app also deletes all its data.",
         "Children" to
-            "CaloCare is not meant for children under 13. Its calorie targets are calculated for adults.",
+            "CaloGold is not meant for children under 13. Its calorie targets are calculated for adults.",
         "Not medical advice" to
-            "CaloCare provides estimates and general suggestions about nutrition and exercise. It does not diagnose or treat any condition, and it does not replace your doctor's advice.",
+            "CaloGold provides estimates and general suggestions about nutrition and exercise. It does not diagnose or treat any condition, and it does not replace your doctor's advice.",
     )
 
     /** The policy in the app's language. */

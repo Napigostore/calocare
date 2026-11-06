@@ -1,4 +1,4 @@
-CaloCare giúp bạn biết mình ăn bao nhiêu, tiêu hao bao nhiêu và nên ăn gì tiếp theo, lấy món ăn Việt Nam làm trung tâm.
+CaloGold giúp bạn biết mình ăn bao nhiêu, tiêu hao bao nhiêu và nên ăn gì tiếp theo, lấy món ăn Việt Nam làm trung tâm.
 
 ● Ghi bữa ăn bằng một chạm
 Hơn 240 món quen thuộc: phở, cơm tấm, bún chả, bánh mì, trà sữa… cùng các món quốc tế. Chạm một lần là thêm một phần. Tìm kiếm không cần gõ dấu, tự tạo món riêng.
@@ -18,10 +18,10 @@ Khai báo tiểu đường, cao huyết áp, gout, mỡ máu, dị ứng hoặc 
 ● Riêng tư
 Không cần tài khoản. Dữ liệu nằm trên iPhone của bạn, dữ liệu Apple Health không rời khỏi máy. Không quảng cáo.
 
-● CaloCare Pro
-Miễn phí: 30 ảnh AI và 50 câu hỏi đầu tiên, sau đó mỗi ngày 2 ảnh và 5 câu hỏi. CaloCare Pro (theo tháng hoặc theo năm, gói năm có 7 ngày dùng thử) cho phép tới 40 ảnh và 100 câu hỏi mỗi ngày. Gói tự gia hạn qua Apple ID cho tới khi bạn hủy trong Cài đặt, ít nhất 24 giờ trước kỳ gia hạn.
+● CaloGold Pro
+Miễn phí: 30 ảnh AI và 50 câu hỏi đầu tiên, sau đó mỗi ngày 2 ảnh và 5 câu hỏi. CaloGold Pro (theo tháng hoặc theo năm, gói năm có 7 ngày dùng thử) cho phép tới 40 ảnh và 100 câu hỏi mỗi ngày. Gói tự gia hạn qua Apple ID cho tới khi bạn hủy trong Cài đặt, ít nhất 24 giờ trước kỳ gia hạn.
 
-Lưu ý: CaloCare cung cấp ước tính và gợi ý tham khảo, không thay thế chẩn đoán hay chỉ định của bác sĩ.
+Lưu ý: CaloGold cung cấp ước tính và gợi ý tham khảo, không thay thế chẩn đoán hay chỉ định của bác sĩ.
 
 Điều khoản sử dụng: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Chính sách quyền riêng tư: https://calocare-api.calocare-api.workers.dev/privacy

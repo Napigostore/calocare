@@ -142,7 +142,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val hosted by lazy { HostedClient(BuildConfig.BACKEND_URL, BuildConfig.BACKEND_APP_KEY, deviceId, onQuota = { quota = it }, onProRequired = { paywall = true }) }
     val api: HostedClient get() = hosted
 
-    /** The CaloCare Pro offer is on screen: opened by the user, or when the free AI allowance runs out. */
+    /** The CaloGold Pro offer is on screen: opened by the user, or when the free AI allowance runs out. */
     var paywall by mutableStateOf(false)
     val isPro get() = quota?.pro == true
     val billing by lazy { ProBilling(getApplication(), viewModelScope) { token -> hosted.activatePro(token) } }
@@ -677,7 +677,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private fun coachPersona(d: AppData): String {
         val p = d.profile
         return listOf(
-            "You are the in-app coach of CaloCare, acting as both a registered dietitian and a sports coach.",
+            "You are the in-app coach of CaloGold, acting as both a registered dietitian and a sports coach.",
             "Reply in ${if (com.calocare.app.Lang.en) "English" else "Vietnamese"}, warm and concrete, in short paragraphs or brief lists that read well on a phone. Give specific dishes, portions and numbers rather than general principles.",
             "You are not a substitute for their doctor: for medication, blood-sugar targets or symptoms, give general guidance and tell them to check with their clinician. Never suggest eating below ${if (p.male) 1500 else 1200} kcal a day.",
             "Respect their conditions, allergies and diet in every suggestion, and point out conflicts in what they have eaten.",

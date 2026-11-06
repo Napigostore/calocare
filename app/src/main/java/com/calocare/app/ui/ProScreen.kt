@@ -39,7 +39,7 @@ import java.text.DateFormat
 import java.util.Date
 import kotlin.math.roundToInt
 
-/** What CaloCare Pro adds, the two plans with Google Play's prices, and the purchase button. */
+/** What CaloGold Pro adds, the two plans with Google Play's prices, and the purchase button. */
 @Composable
 fun ProDialog(vm: AppViewModel, onClose: () -> Unit) {
     val billing = vm.billing
@@ -47,10 +47,10 @@ fun ProDialog(vm: AppViewModel, onClose: () -> Unit) {
     val q = vm.quota
     LaunchedEffect(Unit) { billing.refresh() }
 
-    FullScreenDialog("✨ CaloCare Pro", onClose = onClose) {
+    FullScreenDialog("✨ CaloGold Pro", onClose = onClose) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             if (q?.pro == true) {
-                Text(L("Bạn đang dùng CaloCare Pro 🎉", "You're on CaloCare Pro 🎉"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(L("Bạn đang dùng CaloGold Pro 🎉", "You're on CaloGold Pro 🎉"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 if (q.pro_until > 0) Text(L("Gia hạn hoặc hết hạn: ", "Renews or ends: ") + DateFormat.getDateInstance().format(Date(q.pro_until)))
                 Text(L("📷 Còn ${q.photos_left_today} ảnh · 💬 ${q.chats_left_today} câu hỏi hôm nay", "📷 ${q.photos_left_today} photos · 💬 ${q.chats_left_today} questions left today"))
                 TextButton(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(MANAGE_URL))) }) { Text(L("Quản lý gói trên Google Play", "Manage subscription on Google Play")) }
