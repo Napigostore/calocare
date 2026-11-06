@@ -37,11 +37,15 @@ struct HomeView: View {
 
                     Card {
                         HStack(spacing: 20) {
-                            CalorieRing(eaten: eaten.kcal, target: target).frame(width: 150, height: 150)
+                            VStack(spacing: 8) {
+                                CalorieRing(eaten: eaten.kcal, burned: Double(out.total), target: target).frame(width: 150, height: 150)
+                                Text(out.measured ? L("Tiêu hao (đồng hồ)", "Burned (watch)") : L("Tiêu hao ước tính", "Burned (estimate)"))
+                                    .font(.caption).foregroundColor(.secondary)
+                                Text("\(out.total) kcal").font(.headline).foregroundColor(Palette.gold)
+                            }
                             VStack(alignment: .leading, spacing: 10) {
-                                Stat(label: L("Nạp vào", "Eaten"), value: Int(eaten.kcal), color: Palette.green)
                                 Stat(label: L("Mục tiêu", "Target"), value: Int(target), color: .secondary)
-                                Stat(label: out.measured ? L("Tiêu hao (đồng hồ)", "Burned (watch)") : L("Tiêu hao ước tính", "Burned (estimate)"), value: out.total, color: Palette.orange)
+                                Stat(label: L("Còn lại", "Left"), value: max(0, Int(target - eaten.kcal)), color: Palette.green)
                             }
                         }
                     }
@@ -219,30 +223,32 @@ struct DayPicker: View {
     }
 }
 
+/// Two rings: the inner green ring is what was eaten against the target, the thin outer gold ring is what was burned.
+/// The centre shows the eaten calories.
 struct CalorieRing: View {
     var eaten: Double
+    var burned: Double
     var target: Double
 
     var body: some View {
         let ratio = target > 0 ? eaten / target : 0
-        let left = Int((target - eaten).rounded())
+        let burnRatio = target > 0 ? burned / target : 0
         ZStack {
-            Circle().stroke(Color(.systemGray5), lineWidth: 14)
-            Circle().trim(from: 0, to: min(ratio, 1))
-                .stroke(Palette.green, style: StrokeStyle(lineWidth: 14, lineCap: .round))
+            Circle().stroke(Color(.systemGray5), lineWidth: 6)
+            Circle().trim(from: 0, to: min(burnRatio, 1))
+                .stroke(Palette.gold, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-            // A second, red lap shows how far past the target the day went.
-            if ratio > 1 {
-                Circle().trim(from: 0, to: min(ratio - 1, 1))
-                    .stroke(Color.red, style: StrokeStyle(lineWidth: 14, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-            }
+            Circle().stroke(Color(.systemGray5), lineWidth: 12).padding(16)
+            Circle().trim(from: 0, to: min(ratio, 1))
+                .stroke(ratio > 1 ? Color.red : Palette.green, style: StrokeStyle(lineWidth: 12, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .padding(16)
             VStack(spacing: 2) {
-                Text("\(abs(left))").font(.system(size: 30, weight: .bold)).foregroundColor(left < 0 ? .red : .primary)
-                Text(left >= 0 ? L("kcal còn lại", "kcal left") : L("kcal vượt", "kcal over")).font(.caption).foregroundColor(.secondary)
+                Text("\(Int(eaten))").font(.system(size: 28, weight: .bold)).monospacedDigit()
+                Text(L("Nạp vào", "Eaten")).font(.caption).foregroundColor(.secondary)
             }
         }
-        .padding(8)
+        .padding(4)
         .animation(.easeOut(duration: 0.6), value: eaten)
     }
 }
