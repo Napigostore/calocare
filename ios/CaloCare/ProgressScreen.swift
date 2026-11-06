@@ -46,7 +46,7 @@ struct ProgressScreen: View {
                         HStack(alignment: .top) {
                             AchievementBadge(symbol: "flame.fill", value: "\(Nutrition.streak(data))", label: L("ngày liên tiếp", "day streak"))
                             AchievementBadge(symbol: "bolt.fill", value: "\(points.reduce(0) { $0 + $1.burned })", label: L("kcal đã đốt", "kcal burned"))
-                            AchievementBadge(symbol: "figure.run", value: "\(data.exercises.filter { keys.contains($0.date) }.count)", label: L("buổi tập", "workouts"))
+                            AchievementBadge(symbol: "figure.run", value: "\((data.exercises ?? []).filter { keys.contains($0.date) }.count)", label: L("buổi tập", "workouts"))
                             AchievementBadge(symbol: "trophy.fill", value: "\(logged.count)", label: L("ngày có ghi", "days logged"))
                         }
                     }
