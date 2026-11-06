@@ -272,6 +272,14 @@ private struct MealLog: View {
                         Text("\(Int(entry.totalKcal)) kcal · \(entry.servingLabel)").font(.caption).foregroundColor(.secondary).lineLimit(1)
                     }
                     Spacer()
+                    // A shared tray: this person counts only their share. Tap to cycle 1, 2, 3, 4 people.
+                    Button { store.changeSharing(entry) } label: {
+                        Text("÷\(Int(entry.share))").font(.caption.bold()).foregroundColor(entry.share > 1 ? Palette.gold : .secondary)
+                            .padding(.horizontal, 8).padding(.vertical, 4)
+                            .overlay(Capsule().stroke(Palette.gold.opacity(entry.share > 1 ? 1 : 0.3), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(L("Chia cho \(Int(entry.share)) người", "Shared by \(Int(entry.share)) people"))
                     Button { store.changeQty(entry, by: -0.5) } label: { Image(systemName: "minus.circle.fill") }.buttonStyle(.plain)
                     Text(formatQty(entry.qty)).bold().frame(width: 36)
                     Button { store.changeQty(entry, by: 0.5) } label: { Image(systemName: "plus.circle.fill") }.buttonStyle(.plain)

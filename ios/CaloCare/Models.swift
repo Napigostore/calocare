@@ -31,8 +31,11 @@ struct LogEntry: Codable, Identifiable, Hashable {
     var fat: Double
     var tags: [String]
     var qty: Double
+    /// How many people share this dish (a shared tray). Nil means one person.
+    var people: Int?
 
-    var totalKcal: Double { Double(kcal) * qty }
+    var share: Double { Double(max(people ?? 1, 1)) }
+    var totalKcal: Double { Double(kcal) * qty / share }
 }
 
 struct Profile: Codable, Hashable {

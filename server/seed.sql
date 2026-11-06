@@ -243,3 +243,27 @@ INSERT OR IGNORE INTO dishes (id, name, emoji, serving, kcal, protein_g, carbs_g
 ('whisky', 'Whisky / rượu mạnh', '🥃', '1 ly 45ml', 100, 0.0, 0.0, 0.0, 'drink', 'alcohol', 'intl', 'published', 'seed', 0, 1792134557197),
 ('cocktail', 'Cocktail', '🍹', '1 ly', 220, 0.0, 20.0, 0.0, 'drink', 'alcohol high_sugar', 'intl', 'published', 'seed', 0, 1792134557197),
 ('sua_hanh_nhan', 'Sữa hạnh nhân', '🥛', '1 ly 250ml', 40, 1.5, 1.5, 2.5, 'drink', 'nuts', 'intl', 'published', 'seed', 0, 1792134557197);
+
+-- Dishes added with the international expansion (INSERT OR IGNORE: safe to run again).
+INSERT OR IGNORE INTO dishes (id, name, emoji, serving, kcal, protein_g, carbs_g, fat_g, course, tags, region, status, source, devices, updated) VALUES
+('sushi_cuon', 'Sushi cuộn', '🍣', '6 miếng', 300, 12, 45, 8, 'main', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('salad_caesar', 'Salad Caesar', '🥗', '1 đĩa', 330, 12, 13, 26, 'veg', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('salad_hy_lap', 'Salad Hy Lạp', '🥗', '1 đĩa', 250, 7, 12, 19, 'veg', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('banh_kep', 'Bánh kếp', '🥞', '3 cái', 350, 8, 55, 11, 'dessert', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('taco_bo', 'Taco bò', '🌮', '2 cái', 360, 20, 32, 17, 'main', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('paella', 'Paella hải sản', '🥘', '1 đĩa', 420, 25, 52, 12, 'main', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('sup_bi_do', 'Súp bí đỏ', '🥣', '1 tô', 200, 4, 25, 9, 'soup', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('sup_miso', 'Súp miso', '🥣', '1 tô', 90, 6, 10, 3, 'soup', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('ga_teriyaki', 'Gà teriyaki', '🍗', '1 đĩa', 420, 35, 30, 15, 'protein', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('bo_bit_tet', 'Bò bít tết', '🥩', '200g', 500, 45, 0, 35, 'protein', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('dui_ga_nuong', 'Đùi gà nướng không da', '🍗', '150g', 240, 40, 0, 8, 'protein', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('ca_hoi_nuong', 'Cá hồi nướng', '🐟', '150g', 310, 34, 0, 18, 'protein', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('hat_hon_hop', 'Hạt hỗn hợp', '🥜', '30g', 180, 5, 6, 16, 'snack', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('uc_ga_luoc', 'Ức gà luộc', '🍗', '150g', 250, 48, 0, 5, 'protein', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('tiramisu', 'Bánh tiramisu', '🍰', '1 miếng', 400, 7, 40, 24, 'dessert', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('kem_vani', 'Kem vani', '🍦', '1 cốc', 200, 4, 24, 11, 'dessert', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('baguette', 'Bánh mì baguette', '🥖', '1 ổ nhỏ', 250, 9, 50, 1, 'snack', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('mi_y_sot_ca_chua', 'Mì Ý sốt cà chua', '🍝', '1 đĩa', 360, 12, 70, 5, 'main', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('dimsum_hap', 'Dimsum hấp', '🥟', '3 viên', 180, 9, 22, 6, 'snack', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('kimbap', 'Kimbap', '🍙', '1 cuộn', 320, 9, 50, 9, 'main', '', 'intl', 'published', 'seed', 0, 1792134557197),
+('dal', 'Dal đậu lăng', '🥣', '1 tô', 250, 14, 38, 5, 'soup', '', 'intl', 'published', 'seed', 0, 1792134557197);

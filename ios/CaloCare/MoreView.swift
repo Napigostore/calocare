@@ -9,6 +9,11 @@ struct MoreView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section(L("Điểm khác biệt của CaloGold", "What sets CaloGold apart")) {
+                    Label(L("Món Việt đi đầu, có khẩu phần và calo", "Vietnamese dishes first, with servings and calories"), systemImage: "fork.knife.circle")
+                    Label(L("Mâm chung: chia một món cho 1 đến 4 người", "Shared tray: split a dish between 1 to 4 people"), systemImage: "person.3.fill")
+                    Label(L("Thẻ tuần để chia sẻ với bạn bè", "A weekly card to share with friends"), systemImage: "rectangle.stack.person.crop")
+                }
                 Section {
                     Button { showMenu = true } label: { Label(L("Thực đơn gợi ý", "Suggested menu"), systemImage: "list.bullet.rectangle") }
                     Button { showFood = true } label: { Label(L("Ghi bữa ăn", "Log a meal"), systemImage: "fork.knife") }

@@ -197,7 +197,7 @@ final class AppStore: ObservableObject {
     }
 
     func totals(_ entries: [LogEntry]) -> (kcal: Double, protein: Double, carbs: Double, fat: Double) {
-        entries.reduce((0.0, 0.0, 0.0, 0.0)) { sum, e in (sum.0 + e.totalKcal, sum.1 + e.protein * e.qty, sum.2 + e.carbs * e.qty, sum.3 + e.fat * e.qty) }
+        entries.reduce((0.0, 0.0, 0.0, 0.0)) { sum, e in (sum.0 + e.totalKcal, sum.1 + e.protein * e.qty / e.share, sum.2 + e.carbs * e.qty / e.share, sum.3 + e.fat * e.qty / e.share) }
     }
 
     /// Tapping the same food again in the same meal raises its quantity instead of adding a new line.
@@ -253,6 +253,15 @@ final class AppStore: ObservableObject {
             guard let index = d.entries.firstIndex(where: { $0.id == entry.id }) else { return }
             let next = d.entries[index].qty + delta
             if next <= 0.01 { d.entries.remove(at: index) } else { d.entries[index].qty = next }
+        }
+    }
+
+    /// Splits a dish between one to four people: the calories and macros of this person's share are counted.
+    func changeSharing(_ entry: LogEntry) {
+        update { d in
+            guard let index = d.entries.firstIndex(where: { $0.id == entry.id }) else { return }
+            let next = (d.entries[index].people ?? 1) % 4 + 1
+            d.entries[index].people = next == 1 ? nil : next
         }
     }
 
