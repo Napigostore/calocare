@@ -1,4 +1,4 @@
 "NSCameraUsageDescription" = "CaloGold uses the camera to photograph your meals and work out their calories.";
 "NSPhotoLibraryUsageDescription" = "CaloGold reads the meal photos you choose to work out their calories.";
-"NSHealthShareUsageDescription" = "CaloGold reads active calories, steps, exercise minutes, sleep, weight and height from Apple Health to work out the calories you burn and tailor its food advice.";
+"NSHealthShareUsageDescription" = "CaloGold reads active calories, steps, distance, heart rate, exercise minutes, sleep, weight and height from Apple Health to work out the calories you burn and tailor its food advice.";
 "NSHealthUpdateUsageDescription" = "CaloGold does not write any data to Apple Health.";

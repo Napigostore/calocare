@@ -1,4 +1,4 @@
 "NSCameraUsageDescription" = "CaloGold dùng camera để chụp bữa ăn và tính calo.";
 "NSPhotoLibraryUsageDescription" = "CaloGold đọc ảnh bữa ăn bạn chọn để tính calo.";
-"NSHealthShareUsageDescription" = "CaloGold đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng và chiều cao từ Apple Health để tính calo tiêu hao và gợi ý ăn uống phù hợp.";
+"NSHealthShareUsageDescription" = "CaloGold đọc calo vận động, bước chân, quãng đường, nhịp tim, phút tập, giấc ngủ, cân nặng và chiều cao từ Apple Health để tính calo tiêu hao và gợi ý ăn uống phù hợp.";
 "NSHealthUpdateUsageDescription" = "CaloGold không ghi dữ liệu vào Apple Health.";

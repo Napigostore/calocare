@@ -170,6 +170,11 @@ private struct ActivityCard: View {
                     tile("⏱️", "\(a.exerciseMinutes)", L("phút tập", "exercise min"))
                     tile("😴", a.sleepHours.map { String(format: "%.1f", $0) } ?? "–", L("giờ ngủ", "hours slept"))
                 }
+                HStack(spacing: 0) {
+                    tile("📏", a.distanceKm > 0 ? String(format: "%.1f", a.distanceKm) : "–", L("km đi bộ/chạy", "km walked/run"))
+                    tile("❤️", a.averageHeartRate.map { "\(Int($0))" } ?? "–", L("nhịp tim TB", "avg heart rate"))
+                    tile("💓", a.restingHeartRate.map { "\(Int($0))" } ?? "–", L("nhịp tim nghỉ", "resting heart rate"))
+                }
                 Text(balance <= 0 ? L("Cân bằng: thâm hụt \(-balance) kcal so với tiêu hao", "Balance: \(-balance) kcal deficit") : L("Cân bằng: dư \(balance) kcal so với tiêu hao", "Balance: \(balance) kcal surplus"))
                     .font(.subheadline.weight(.medium)).foregroundColor(balance <= 0 ? Palette.green : Palette.orange)
                 if let sleep = a.sleepHours, sleep < 6 {

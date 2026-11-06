@@ -7,6 +7,9 @@ struct DayActivity: Equatable {
     var steps: Int = 0
     var sleepHours: Double?
     var exerciseMinutes: Int = 0
+    var distanceKm: Double = 0
+    var averageHeartRate: Double?
+    var restingHeartRate: Double?
 }
 
 /// Read-only access to Apple Health. Apple Watch writes there directly; Garmin Connect, Mi Fitness, Zepp,
@@ -18,7 +21,7 @@ final class HealthService {
     var available: Bool { HKHealthStore.isHealthDataAvailable() }
 
     private var readTypes: Set<HKObjectType> {
-        let quantities: [HKQuantityTypeIdentifier] = [.activeEnergyBurned, .stepCount, .appleExerciseTime, .bodyMass, .height]
+        let quantities: [HKQuantityTypeIdentifier] = [.activeEnergyBurned, .stepCount, .appleExerciseTime, .distanceWalkingRunning, .heartRate, .restingHeartRate, .bodyMass, .height]
         var types = Set<HKObjectType>(quantities.compactMap { HKObjectType.quantityType(forIdentifier: $0) })
         if let sleep = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { types.insert(sleep) }
         return types
@@ -42,9 +45,13 @@ final class HealthService {
         async let active = sum(.activeEnergyBurned, .kilocalorie(), start, end)
         async let steps = sum(.stepCount, .count(), start, end)
         async let exercise = sum(.appleExerciseTime, .minute(), start, end)
+        async let distance = sum(.distanceWalkingRunning, .meterUnit(with: .kilo), start, end)
+        async let heart = average(.heartRate, HKUnit.count().unitDivided(by: .minute()), start, end)
+        async let resting = latest(.restingHeartRate, HKUnit.count().unitDivided(by: .minute()))
         // Last night's sleep: from 18:00 the evening before until noon.
         async let sleep = sleepHours(from: start.addingTimeInterval(-6 * 3600), to: start.addingTimeInterval(12 * 3600))
-        return DayActivity(activeKcal: await active, steps: Int(await steps), sleepHours: await sleep, exerciseMinutes: Int(await exercise))
+        return DayActivity(activeKcal: await active, steps: Int(await steps), sleepHours: await sleep, exerciseMinutes: Int(await exercise),
+                           distanceKm: await distance, averageHeartRate: await heart, restingHeartRate: await resting)
     }
 
     /// The last `days` days, keyed by yyyy-MM-dd.
@@ -74,6 +81,18 @@ final class HealthService {
             // Statistics merge overlapping samples, so steps counted by both the phone and the watch are not doubled.
             let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, _ in
                 done.resume(returning: result?.sumQuantity()?.doubleValue(for: unit) ?? 0)
+            }
+            store.execute(query)
+        }
+    }
+
+    /// The average of a heart-rate reading over the day, for devices that report it.
+    private func average(_ id: HKQuantityTypeIdentifier, _ unit: HKUnit, _ start: Date, _ end: Date) async -> Double? {
+        guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return nil }
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+        return await withCheckedContinuation { done in
+            let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .discreteAverage) { _, result, _ in
+                done.resume(returning: result?.averageQuantity()?.doubleValue(for: unit))
             }
             store.execute(query)
         }
