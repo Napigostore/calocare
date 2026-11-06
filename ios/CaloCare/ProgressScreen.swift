@@ -51,6 +51,17 @@ struct ProgressScreen: View {
                         }
                     }
 
+                    // The week as a card that can be sent to friends.
+                    VStack(alignment: .leading, spacing: 10) {
+                        WeeklyRecapCard(data: data)
+                        if let picture = WeeklyRecapCard.image(for: data) {
+                            ShareLink(item: picture, preview: SharePreview(L("Tuần của tôi trên CaloGold", "My week on CaloGold"), image: picture)) {
+                                Label(L("Chia sẻ thẻ tuần", "Share my week"), systemImage: "square.and.arrow.up")
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+
                     if let a = Nutrition.adaptive(data) {
                         Card(L("🧠 Mục tiêu calo thích nghi", "🧠 Adaptive calorie target")) {
                             Text(L("Trong \(a.days) ngày qua cân nặng của bạn thay đổi \(signed(a.actualPerWeek)) kg/tuần, trong khi kế hoạch là \(signed(a.plannedPerWeek)) kg/tuần.",
