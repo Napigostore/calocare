@@ -13,5 +13,15 @@ enum ExerciseIcons {
         8: "activity_basketball",    // football
     ]
 
+    /// Activities without artwork get a gold system symbol instead of an emoji.
+    private static let symbols: [Int: String] = [
+        5: "bolt.fill",              // HIIT
+        9: "figure.jumprope",
+        10: "figure.stairs",
+        11: "house.fill",            // housework
+    ]
+
     static func image(for index: Int) -> String? { names[index] }
+
+    static func symbol(for index: Int) -> String? { symbols[index] }
 }

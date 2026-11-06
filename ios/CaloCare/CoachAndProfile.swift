@@ -38,6 +38,15 @@ struct CoachView: View {
                                 Text(L("Gợi ý hôm nay", "Today's suggestions")).font(.headline).padding(.top, 4)
                                 SuggestionCard(image: "food_michelin_salmon", title: L("Ăn đủ protein", "Get enough protein"), detail: L("Cá, trứng và ức gà giúp giữ cơ khi giảm cân.", "Fish, eggs and chicken breast help keep muscle while you lose weight."))
                                 SuggestionCard(image: "gym_training_dumbbells", title: L("Tập luyện 30 phút", "Train for 30 minutes"), detail: L("Một buổi tạ nhẹ đủ để tăng nhịp tim.", "A light weights session is enough to raise your heart rate."))
+                                Card {
+                                    HStack(spacing: 12) {
+                                        Image("mascot_thu_gian").resizable().scaledToFit().frame(width: 72, height: 72)
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(L("Mẹo dinh dưỡng", "Nutrition tip")).font(.headline)
+                                            Text(L("Ưu tiên protein chất lượng cao như cá, trứng, ức gà.", "Favour high-quality protein such as fish, eggs and chicken breast.")).font(.subheadline).foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
                                 if let last = (store.data.exercises ?? []).last {
                                     Card(L("Nhật ký bài tập", "Workout log")) {
                                         HStack {

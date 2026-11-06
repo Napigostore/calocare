@@ -39,7 +39,7 @@ struct ProgressScreen: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
-                    Picker("", selection: $range) { Text(L("7 ngày", "7 days")).tag(7); Text(L("30 ngày", "30 days")).tag(30) }.pickerStyle(.segmented)
+                    Picker("", selection: $range) { Text(L("7 ngày", "7 days")).tag(7); Text(L("30 ngày", "30 days")).tag(30); Text(L("90 ngày", "90 days")).tag(90) }.pickerStyle(.segmented)
 
                     Card(L("Thành tích", "Achievements")) {
                         let keys = Set(points.map { dayKey($0.date) })
@@ -597,6 +597,8 @@ private struct ExercisePicker: View {
                             VStack(spacing: 4) {
                                 if let icon = ExerciseIcons.image(for: i) {
                                     Image(icon).resizable().scaledToFit().frame(height: 40)
+                                } else if let symbol = ExerciseIcons.symbol(for: i) {
+                                    Image(systemName: symbol).font(.title).foregroundColor(Palette.gold).frame(height: 40)
                                 } else {
                                     Text(activities[i].emoji).font(.title2)
                                 }
