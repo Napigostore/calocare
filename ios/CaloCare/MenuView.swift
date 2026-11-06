@@ -16,26 +16,36 @@ struct MenuView: View {
 
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text((Region.all.first { $0.id == p.cuisine }?.label ?? "") + L(" · đã lọc theo sức khỏe của bạn", " · filtered for your health"))
-                        .font(.subheadline).foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(L("Thực đơn hôm nay", "Today's menu"))
+                            .font(.system(.largeTitle, design: .serif).weight(.semibold))
+                        Rectangle().fill(Palette.red).frame(width: 48, height: 2)
+                        Text((Region.all.first { $0.id == p.cuisine }?.label ?? "") + L(" · đã lọc theo sức khỏe của bạn", " · filtered for your health"))
+                            .font(.subheadline).foregroundColor(.secondary)
+                    }
                     Card(L("≈ \(total) kcal · mục tiêu \(Nutrition.targetKcal(p))", "≈ \(total) kcal · target \(Nutrition.targetKcal(p))")) {
                         Text(L("Đạm \(macros.protein)g · Tinh bột \(macros.carbs)g · Béo \(macros.fat)g mỗi ngày", "Protein \(macros.protein)g · Carbs \(macros.carbs)g · Fat \(macros.fat)g a day"))
                             .font(.subheadline)
                         if !filters.isEmpty {
-                            Text(L("🛡️ Đã loại món không hợp: ", "🛡️ Excluded unsuitable dishes: ") + filters.joined(separator: ", ")).font(.caption).foregroundColor(Palette.green)
+                            Text(L("Đã loại món không hợp: ", "Excluded unsuitable dishes: ") + filters.joined(separator: ", ")).font(.caption).foregroundColor(Palette.green)
                         }
                         Button { seed += 1 } label: { Label(L("Đổi thực đơn", "New menu"), systemImage: "arrow.clockwise") }.buttonStyle(.bordered)
                     }
                     ForEach(plan.indices, id: \.self) { i in mealCard(plan[i]) }
                     Card(L("Nguyên tắc cho mục tiêu của bạn", "Rules for your goal") + " · " + Goal.label(p.goal)) {
                         ForEach(Nutrition.goalGuides(p.goal), id: \.self) { Text("• " + $0).font(.subheadline) }
-                        Button(L("✨ Nhờ AI lập thực đơn riêng cho tôi", "✨ Ask AI for a menu just for me")) { store.tab = 4 }.buttonStyle(.borderedProminent)
+                        Button(L("Nhờ AI lập thực đơn riêng cho tôi", "Ask AI for a menu just for me")) { store.tab = 4 }.buttonStyle(.borderedProminent)
                     }
+                    NavigationLink { CreditsView() } label: {
+                        Text(L("Nguồn ảnh và dữ liệu", "Photo and data credits")).font(.caption).foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
                 }
                 .padding(16)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Palette.paper)
+            .navigationBarTitleDisplayMode(.inline)
             .navigationTitle(L("Thực đơn gợi ý", "Suggested menu"))
         }
     }
@@ -47,10 +57,10 @@ struct MenuView: View {
                     .font(.subheadline).foregroundColor(.secondary)
             }
             ForEach(meal.items, id: \.self) { item in
-                HStack {
-                    Text(item.food.emoji)
-                    VStack(alignment: .leading) {
-                        Text("\(item.food.label) × \(formatQty(item.qty))").font(.subheadline.weight(.medium))
+                HStack(spacing: 12) {
+                    FoodPhoto(id: item.food.id, name: item.food.label, size: 56)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(item.food.label) × \(formatQty(item.qty))").font(.system(.body, design: .serif))
                         Text(item.food.servingLabel).font(.caption).foregroundColor(.secondary)
                     }
                     Spacer()
@@ -58,7 +68,7 @@ struct MenuView: View {
                 }
             }
             if !meal.items.isEmpty {
-                Button(L("＋ Ghi vào nhật ký", "＋ Add to log")) { store.addPlanned(meal) }.buttonStyle(.bordered)
+                Button(L("Ghi vào nhật ký", "Add to log")) { store.addPlanned(meal) }.buttonStyle(.bordered)
             }
         }
     }

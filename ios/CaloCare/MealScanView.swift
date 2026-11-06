@@ -191,7 +191,7 @@ struct MealScanView: View {
         return Card {
             HStack(alignment: .top) {
                 Toggle("", isOn: $scan.dishes[index].checked).labelsHidden()
-                Text(dish.item.emoji ?? "🍽️").font(.title)
+                FoodPhoto(id: dish.item.name, name: dish.item.name, size: 44)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(dish.item.name).font(.headline)
                     Text("\(dish.item.kcal) kcal / \(dish.item.portion ?? L("1 phần", "1 serving"))" + ((dish.item.grams ?? 0) > 0 ? L(" · trong ảnh ≈ \(dish.item.grams ?? 0)g", " · in photo ≈ \(dish.item.grams ?? 0)g") : ""))
@@ -302,7 +302,7 @@ struct DishEditor: View {
                         ForEach(matches) { food in
                             Button { choose(food) } label: {
                                 HStack {
-                                    Text(food.emoji)
+                                    FoodPhoto(id: food.id, name: food.label, size: 36)
                                     VStack(alignment: .leading) {
                                         Text(food.label).foregroundColor(.primary)
                                         Text("\(food.kcal) kcal / \(food.servingLabel)").font(.caption).foregroundColor(.secondary)

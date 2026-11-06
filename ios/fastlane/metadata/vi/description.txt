@@ -13,7 +13,7 @@ Gợi ý bữa tiếp theo dựa trên lượng calo còn lại, theo mục tiê
 Khai báo tiểu đường, cao huyết áp, gout, mỡ máu, dị ứng hoặc ăn chay, keto. App cảnh báo khi món ăn không phù hợp.
 
 ● Kết nối Apple Watch và đồng hồ thông minh
-Đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng từ Apple Health (Apple Watch, Garmin, Mi Fitness, Zepp…), so calo nạp vào với calo tiêu hao mỗi ngày.
+Đọc calo vận động, bước chân, phút tập, giấc ngủ, cân nặng từ Apple Health, gồm dữ liệu Apple Watch và các thiết bị khác ghi vào Apple Health, so calo nạp vào với calo tiêu hao mỗi ngày.
 
 ● Riêng tư
 Không cần tài khoản. Dữ liệu nằm trên iPhone của bạn, dữ liệu Apple Health không rời khỏi máy. Không quảng cáo.

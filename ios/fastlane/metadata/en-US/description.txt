@@ -13,7 +13,7 @@ Ask what to eat tonight, get a menu for tomorrow or a review of your week. Sugge
 Tell the app about diabetes, high blood pressure, gout, high cholesterol, food allergies or a vegetarian, vegan, keto or halal diet. It warns you about foods that don't suit you.
 
 ● Apple Watch and smartwatches
-Reads active calories, steps, exercise minutes, sleep and weight from Apple Health (Apple Watch, Garmin, Fitbit, Mi Fitness, Zepp…) and compares calories in with calories out every day.
+Reads active calories, steps, exercise minutes, sleep and weight from Apple Health, including data from Apple Watch and other devices that write to it, and compares calories in with calories out every day.
 
 ● Private
 No account needed. Your data stays on your iPhone, and Apple Health data never leaves it. No ads.

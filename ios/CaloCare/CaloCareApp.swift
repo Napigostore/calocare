@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 @main
 struct CaloCareApp: App {
@@ -10,20 +11,26 @@ struct CaloCareApp: App {
             RootView()
                 .environmentObject(store)
                 .environmentObject(pro)
-                .tint(Palette.green)
+                .tint(Palette.red)
                 .task { await store.syncLibrary() }
                 .task { if !Demo.active { await pro.refresh() } }
         }
     }
 }
 
+/// A guide-book palette: deep red and black ink on ivory paper, with a muted gold accent. Dark mode keeps the same roles.
 enum Palette {
-    static let green = Color(red: 0.12, green: 0.62, blue: 0.38)
-    static let orange = Color(red: 0.95, green: 0.55, blue: 0.22)
-    static let protein = Color(red: 0.88, green: 0.36, blue: 0.44)
-    static let carbs = Color(red: 0.90, green: 0.65, blue: 0.0)
-    static let fat = Color(red: 0.23, green: 0.51, blue: 0.77)
-    static let warn = Color(red: 0.70, green: 0.42, blue: 0.0)
+    static let red = Color(red: 0.72, green: 0.07, blue: 0.13)
+    static let ink = Color(red: 0.10, green: 0.10, blue: 0.10)
+    static let gold = Color(red: 0.72, green: 0.58, blue: 0.33)
+    static let paper = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.07, alpha: 1) : UIColor(red: 0.97, green: 0.95, blue: 0.91, alpha: 1) })
+    static let surface = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.13, alpha: 1) : UIColor.white })
+    static let green = Color(red: 0.14, green: 0.40, blue: 0.27)
+    static let orange = gold
+    static let protein = red
+    static let carbs = gold
+    static let fat = Color(red: 0.33, green: 0.36, blue: 0.42)
+    static let warn = Color(red: 0.62, green: 0.32, blue: 0.05)
 }
 
 struct RootView: View {
@@ -93,12 +100,13 @@ struct Card<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if let title { Text(title).font(.headline) }
+            if let title { Text(title).font(.system(.headline, design: .serif)) }
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Palette.ink.opacity(0.12), lineWidth: 0.5))
     }
 }
 

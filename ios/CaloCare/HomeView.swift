@@ -88,11 +88,12 @@ private struct NextMealCard: View {
 
     var body: some View {
         let next = MenuPlanner.nextMeal(store.data, foods: store.foods, seed: seed + Calendar.current.component(.hour, from: Date()))
-        Card(L("🍽️ Bữa tiếp theo nên ăn · ", "🍽️ What to eat next · ") + Meal.label(next.meal.meal)) {
+        Card(L("Bữa tiếp theo nên ăn · ", "What to eat next · ") + Meal.label(next.meal.meal)) {
             Text(next.note).font(.caption).foregroundColor(.secondary)
             ForEach(next.meal.items, id: \.self) { item in
-                HStack {
-                    Text("\(item.food.emoji) \(item.food.label) × \(formatQty(item.qty))").font(.subheadline)
+                HStack(spacing: 10) {
+                    FoodPhoto(id: item.food.id, name: item.food.label, size: 40)
+                    Text("\(item.food.label) × \(formatQty(item.qty))").font(.subheadline)
                     Spacer()
                     Text("\(Int((Double(item.food.kcal) * item.qty).rounded())) kcal").font(.caption).foregroundColor(.secondary)
                 }

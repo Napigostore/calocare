@@ -134,7 +134,7 @@ struct FoodView: View {
             Button(L("Vẫn thêm", "Add anyway"), role: .destructive) { store.add(food); store.pendingDanger = nil }
             Button(L("Không thêm", "Don't add"), role: .cancel) { store.pendingDanger = nil }
         } message: { food in
-            Text("\(food.emoji) \(food.label)\n" + Nutrition.warnings(tags: food.tags, profile: store.data.profile).filter { $0.danger }.map { $0.text }.joined(separator: "\n"))
+            Text("\(food.label)\n" + Nutrition.warnings(tags: food.tags, profile: store.data.profile).filter { $0.danger }.map { $0.text }.joined(separator: "\n"))
         }
     }
 
@@ -155,7 +155,7 @@ struct FoodView: View {
             Button(L("🌐 Tìm sản phẩm đóng gói", "🌐 Find packaged product")) { searchOnline() }.buttonStyle(.bordered).disabled(onlineBusy)
             if let food = suggestion {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("\(food.emoji) \(food.label)").font(.headline)
+                    Text(food.label).font(.system(.headline, design: .serif))
                     Text("\(food.kcal) kcal / \(food.servingLabel)").bold()
                     Text(L("Đạm \(Int(food.protein))g · Tinh bột \(Int(food.carbs))g · Béo \(Int(food.fat))g · AI ước tính", "Protein \(Int(food.protein))g · Carbs \(Int(food.carbs))g · Fat \(Int(food.fat))g · AI estimate")).font(.caption)
                     ForEach(Nutrition.warnings(tags: food.tags, profile: store.data.profile), id: \.self) { WarningLine(warning: $0) }
@@ -231,7 +231,7 @@ private struct FoodTile: View {
     var body: some View {
         Button { store.tap(food) } label: {
             VStack(spacing: 4) {
-                FoodPhoto(id: food.id, emoji: food.emoji, size: 64)
+                FoodPhoto(id: food.id, name: food.label, size: 64)
                 Text(food.label).font(.caption.weight(.medium)).multilineTextAlignment(.center).lineLimit(2, reservesSpace: true)
                 Text("\(food.kcal) kcal").font(.caption2.weight(.semibold)).foregroundColor(Palette.green)
                 Text(food.servingLabel).font(.caption2).foregroundColor(.secondary).lineLimit(1)
@@ -266,7 +266,7 @@ private struct MealLog: View {
         Card(L("Bữa \(Meal.label(store.meal).lowercased()) · \(Int(store.totals(entries).kcal)) kcal", "\(Meal.label(store.meal)) · \(Int(store.totals(entries).kcal)) kcal")) {
             ForEach(entries) { entry in
                 HStack {
-                    FoodPhoto(id: entry.foodId, emoji: entry.emoji, size: 40)
+                    FoodPhoto(id: entry.foodId, name: entry.label, size: 40)
                     VStack(alignment: .leading) {
                         Text(entry.label).font(.subheadline.weight(.medium)).lineLimit(1)
                         Text("\(Int(entry.totalKcal)) kcal · \(entry.servingLabel)").font(.caption).foregroundColor(.secondary).lineLimit(1)
@@ -279,12 +279,12 @@ private struct MealLog: View {
                 .foregroundColor(.primary)
             }
             if entries.count >= 2 {
-                Button(showOrder ? L("Ẩn thứ tự", "Hide order") : L("🍽️ Nên ăn theo thứ tự", "🍽️ Best eating order")) { showOrder.toggle() }.font(.subheadline)
+                Button(showOrder ? L("Ẩn thứ tự", "Hide order") : L("Nên ăn theo thứ tự", "Best eating order")) { showOrder.toggle() }.font(.subheadline)
                 if showOrder {
                     let steps = Nutrition.eatingOrder(entries, courseOf: store.course(of:), profile: store.data.profile)
                     ForEach(steps.indices, id: \.self) { i in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("\(i + 1). \(steps[i].emoji) \(steps[i].name)").font(.subheadline.weight(.medium))
+                            Text("\(i + 1). \(steps[i].name)").font(.subheadline.weight(.medium))
                             Text(steps[i].why).font(.caption).foregroundColor(.secondary)
                         }
                     }
@@ -534,10 +534,11 @@ struct CameraPicker: UIViewControllerRepresentable {
     }
 }
 
-/// A real photo of the dish when the app ships one (FoodPhotos, with credits in CREDITS.tsv), else its emoji.
+/// A real photo of the dish (FoodPhotos, credited on the Credits screen). A dish without a photo gets a plain plate
+/// with its initial, not an emoji.
 struct FoodPhoto: View {
     var id: String
-    var emoji: String
+    var name: String
     var size: CGFloat
 
     var body: some View {
@@ -550,7 +551,12 @@ struct FoodPhoto: View {
                 .frame(width: size, height: size)
                 .clipShape(RoundedRectangle(cornerRadius: size / 4))
         } else {
-            Text(emoji).font(.system(size: size * 0.55)).frame(width: size, height: size)
+            Text(String(name.prefix(1)).uppercased())
+                .font(.system(size: size * 0.42, design: .serif))
+                .foregroundColor(Palette.red)
+                .frame(width: size, height: size)
+                .background(Palette.paper, in: RoundedRectangle(cornerRadius: size / 4))
+                .overlay(RoundedRectangle(cornerRadius: size / 4).stroke(Palette.ink.opacity(0.12), lineWidth: 0.5))
         }
     }
 }
