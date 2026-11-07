@@ -45,6 +45,8 @@ targets:
         NSPhotoLibraryUsageDescription: CaloCare đọc ảnh bữa ăn bạn chọn để tính calo.
         NSHealthShareUsageDescription: CaloCare đọc calo vận động, bước chân, quãng đường, nhịp tim, phút tập, giấc ngủ, cân nặng và chiều cao từ Apple Health để tính calo tiêu hao và gợi ý ăn uống phù hợp.
         NSHealthUpdateUsageDescription: CaloCare không ghi dữ liệu vào Apple Health.
+        NSMicrophoneUsageDescription: CaloGold dùng micro chỉ khi bạn bấm nút micro, để nghe tên món bạn nói. Ứng dụng không ghi âm lại.
+        NSSpeechRecognitionUsageDescription: CaloGold chuyển lời nói tên món thành chữ để tìm món. Nhận dạng giọng nói do dịch vụ của Apple thực hiện.
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:

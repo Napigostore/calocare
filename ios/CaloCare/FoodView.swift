@@ -4,6 +4,7 @@ import SwiftUI
 struct FoodView: View {
     @EnvironmentObject var store: AppStore
     @State private var query = ""
+    @StateObject private var dictation = DishDictation()
     @State private var suggestion: Food?
     @State private var busy = false
     @State private var note = ""
@@ -57,6 +58,11 @@ struct FoodView: View {
                         TextField(L("Tìm hoặc nói tên món…", "Search or dictate a food…"), text: $query)
                             .textFieldStyle(.roundedBorder)
                             .onChange(of: query) { _ in suggestion = nil; note = "" }
+                        // Speak a dish name: the words heard fill the search.
+                        Button { dictation.toggle { query = $0 } } label: { Image(systemName: dictation.listening ? "mic.fill" : "mic").font(.title2) }
+                            .buttonStyle(.bordered)
+                            .foregroundColor(dictation.listening ? .red : Palette.gold)
+                            .accessibilityLabel(L("Nói tên món", "Say a dish name"))
                         Button { showCamera = true } label: { Image(systemName: "camera.fill").font(.title2) }
                             .buttonStyle(.borderedProminent)
                         PhotosPicker(selection: $pickedPhoto, matching: .images) { Image(systemName: "photo.on.rectangle").font(.title2) }

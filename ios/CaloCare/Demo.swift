@@ -3,6 +3,12 @@ import UIKit
 /// Sample data for the App Store screenshots, taken on the simulator by the cloud build:
 ///   launch arguments `-demo home|food|scan|coach|profile`, plus `-demoPhoto <path>` for the scan screen.
 /// Nothing is read from or written to the user's files while it is on, and nothing is sent to the server.
+extension Notification.Name {
+    /// The walkthrough video opens and closes the food log from the Today screen.
+    static let demoOpenFood = Notification.Name("CaloGoldDemoOpenFood")
+    static let demoCloseFood = Notification.Name("CaloGoldDemoCloseFood")
+}
+
 enum Demo {
     static let screen = UserDefaults.standard.string(forKey: "demo")
     static var active: Bool { screen != nil }
@@ -64,6 +70,8 @@ enum Demo {
                 guard let f = byId[id] else { continue }
                 d.entries.append(LogEntry(id: UUID(), date: key, meal: meal, foodId: f.id, name: f.name, emoji: f.emoji, serving: f.serving,
                                           kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat, tags: f.tags, qty: qty))
+                // Today's first lunch is a shared tray for two people, so the split control shows.
+                if back == 0 && meal == "lunch", let last = d.entries.indices.last, d.entries[last].meal == "lunch" { d.entries[last].people = 2 }
             }
         }
         // A month of weigh-ins trending down, and a workout today, for the Progress screen.

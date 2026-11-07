@@ -96,6 +96,8 @@ struct HomeView: View {
             .navigationTitle(profile.name.isEmpty ? L("Xin chào 👋", "Hi 👋") : L("Xin chào, \(profile.name) 👋", "Hi, \(profile.name) 👋"))
             .toolbar { Button { store.showProfile = true } label: { Image(systemName: "person.crop.circle").font(.title3) }.accessibilityLabel(L("Hồ sơ", "Profile")) }
             .sheet(isPresented: $showFood) { FoodView() }
+            .onReceive(NotificationCenter.default.publisher(for: .demoOpenFood)) { _ in showFood = true }
+            .onReceive(NotificationCenter.default.publisher(for: .demoCloseFood)) { _ in showFood = false }
         }
     }
 }

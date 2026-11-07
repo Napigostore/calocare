@@ -77,6 +77,9 @@ extension RootView {
         func wait(_ seconds: Double) async { try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000)) }
         await wait(4)
         store.tab = 0; await wait(4)
+        // The food log with a shared tray, then back to the Today screen.
+        NotificationCenter.default.post(name: .demoOpenFood, object: nil); await wait(6)
+        NotificationCenter.default.post(name: .demoCloseFood, object: nil); await wait(1.5)
         store.demoScan = true; await wait(7)
         store.demoScan = false; await wait(1.5)
         store.tab = 2; await wait(5)

@@ -2,3 +2,5 @@
 "NSPhotoLibraryUsageDescription" = "CaloGold reads the meal photos you choose to work out their calories.";
 "NSHealthShareUsageDescription" = "CaloGold reads active calories, steps, distance, heart rate, exercise minutes, sleep, weight and height from Apple Health to work out the calories you burn and tailor its food advice.";
 "NSHealthUpdateUsageDescription" = "CaloGold does not write any data to Apple Health.";
+"NSMicrophoneUsageDescription" = "CaloGold uses the microphone only while you press the microphone button, to hear a dish name. The app does not record audio.";
+"NSSpeechRecognitionUsageDescription" = "CaloGold turns a spoken dish name into text to find the dish. Speech recognition is done by Apple's service.";
